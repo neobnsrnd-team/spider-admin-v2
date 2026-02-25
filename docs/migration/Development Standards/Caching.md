@@ -280,7 +280,8 @@ Spring AOP 프록시 방식이므로 **같은 클래스 내부 호출은 캐시�
 
 ```java
 @Service
-public class CodeServiceImpl implements CodeService {
+@RequiredArgsConstructor
+public class CodeService {
 
     // ❌ 내부 호출: 캐시 미작동
     public void doSomething() {

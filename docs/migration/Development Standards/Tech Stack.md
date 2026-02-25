@@ -83,10 +83,11 @@
 | Spring Security Test | Spring Boot 관리 | 보안 테스트 |
 | MyBatis Starter Test | 3.0.3 | Mapper 테스트 |
 | ArchUnit | 1.3.0 | 아키텍처 규칙 테스트 |
+| Node.js | 20.x | ESLint, Playwright, Newman 런타임 |
 | Playwright | 1.50.x | E2E UI 테스트 |
 | Newman | 6.2.x | Postman API 테스트 |
 | GitHub Actions | — | CI 파이프라인 |
-| CodeQL | — | SAST 보안 분석 |
+| SonarCloud | — | 코드 품질 + SAST 보안 분석 |
 
 ---
 

@@ -162,7 +162,8 @@ public interface UserMapper {
 
 // Service - DB에 무관하게 동일
 @Service
-public class UserServiceImpl implements UserService {
+@RequiredArgsConstructor
+public class UserService {
     private final UserMapper userMapper;
 }
 ```

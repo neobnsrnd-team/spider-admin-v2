@@ -55,7 +55,7 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | 빌드 | Maven | 3.x |
 | CSS | Tailwind CSS | 3.4.x |
 | JS 유틸 | jQuery | 3.7.x |
-| 코드 품질 | ESLint / HTMLHint / Husky | 9.x / 1.x / 9.x |
+| 코드 품질 | SonarCloud / ESLint / HTMLHint / Husky | — / 9.x / 1.x / 9.x |
 
 전체 의존성 목록과 버전 관리 원칙은 Tech Stack 문서를 참고한다.
 
@@ -505,6 +505,7 @@ GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된�
 | ESLint | JS 코드 품질 (`static/js/**`) | PR 블로킹 |
 | HTMLHint | HTML 구조 (`templates/**`) | PR 블로킹 |
 | Newman | API 동작, 응답 구조 (Oracle + MySQL) | PR 블로킹 |
+| SonarCloud | 코드 품질 + SAST 보안 분석 | PR 블로킹 (Quality Gate) |
 | Dependabot | 의존성 보안 취약점 | PR 자동 생성 |
 
 코드 스타일과 아키텍처 규칙은 리뷰어가 지적하는 것이 아니라, CI가 자동으로 차단한다.
