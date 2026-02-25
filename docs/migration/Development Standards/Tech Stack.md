@@ -25,7 +25,6 @@
 | Oracle | 19c+ | 주 데이터베이스, ojdbc11 |
 | MySQL | 8.0+ | 대체 데이터베이스 (Multi-DB 참고) |
 | MyBatis Spring Boot Starter | 3.0.3 | SQL 매핑 |
-| PageHelper Spring Boot Starter | 2.1.0 | MyBatis 페이징 |
 | Caffeine | Spring Boot 관리 | 인메모리 캐시 (Caching 참고) |
 | H2 | Spring Boot 관리 | DBAppender 로그 저장 |
 | PostgreSQL | Spring Boot 관리 | RAG 전용 |
@@ -45,8 +44,8 @@
 
 | 기술 | 버전 | 비고 |
 |------|------|------|
-| Tailwind CSS | 3.4.x | 유틸리티 클래스 기반 스타일링, UI Design §12.1 참고 |
-| jQuery | 3.7.x | DOM 조작, AJAX (`fetch` 대신 `$.ajax` 사용), UI Design §12.2 참고 |
+| Tailwind CSS | 3.4.x | 유틸리티 클래스 기반 스타일링, Frontend Code Convention §2 참고 |
+| jQuery | 3.7.x | DOM 조작, AJAX (`fetch` 대신 `$.ajax` 사용), Frontend Code Convention §3 참고 |
 
 > 프론트엔드 빌드: `tailwindcss` CLI (PostCSS). 전 환경에서 PostCSS 빌드 사용. CDN은 CSP(`style-src 'self'`) 정책으로 차단되므로 사용하지 않는다.
 
@@ -68,10 +67,10 @@
 |------|------|------|
 | Maven | 3.x | Java 빌드 도구 |
 | Maven Compiler Plugin | 3.11.0 | `release=17` |
-| Spotless | 2.44.0 | Google Java Format (AOSP), Java 코드 포맷 강제 |
-| ESLint | 9.x | JavaScript 코드 품질 강제, UI Design §12.3 참고 |
+| Spotless | 2.44.0 | Palantir Java Format, Java 코드 포맷 강제 |
+| ESLint | 9.x | JavaScript 코드 품질 강제, Frontend Code Convention §4 참고 |
 | HTMLHint | 1.x | HTML 구조 검사, Thymeleaf 템플릿 오용 탐지 보조 |
-| Husky | 9.x | Pre-commit 훅, 금지 패턴 커밋 시점 차단, UI Design §12.4 참고 |
+| Husky | 9.x | Pre-commit 훅, 금지 패턴 커밋 시점 차단, Frontend Code Convention §5 참고 |
 
 ---
 
@@ -82,6 +81,7 @@
 | JUnit 5 | Spring Boot 관리 | 유닛 테스트 |
 | Spring Security Test | Spring Boot 관리 | 보안 테스트 |
 | MyBatis Starter Test | 3.0.3 | Mapper 테스트 |
+| Testcontainers | Spring Boot 관리 | DB 통합 테스트 (Oracle/MySQL 컨테이너) |
 | ArchUnit | 1.3.0 | 아키텍처 규칙 테스트 |
 | Node.js | 20.x | ESLint, Playwright, Newman 런타임 |
 | Playwright | 1.50.x | E2E UI 테스트 |
@@ -101,4 +101,4 @@
 
 ---
 
-*Last updated: 2026-02-25*
+*Last updated: 2026-02-26*

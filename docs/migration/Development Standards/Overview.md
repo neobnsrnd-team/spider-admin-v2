@@ -34,8 +34,10 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | §13 | Configuration | 12-Factor, 프로파일, 환경 변수 |
 | §14 | Postman | Newman 컬렉션, API 자동 검증 |
 | §15 | CI Strategy | GitHub Actions, 멀티 DB 테스트, 자동 강제 |
-| §16 | UI Design | Thymeleaf 레이아웃, Tailwind CSS, 프론트엔드 규칙 |
-| §17 | Document Structure | 문서 작성 형식 규칙 |
+| §16 | Design Principle | Apple HIG 기반 디자인 원칙 |
+| §17 | Design System | IBM Carbon Design System 기반 시각 체계 |
+| §18 | Frontend Code Convention | ESLint, Tailwind CSS, 프론트엔드 규칙 |
+| §19 | Document Structure | 문서 작성 형식 규칙 |
 
 ---
 
@@ -47,7 +49,6 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | 프레임워크 | Spring Boot | 3.2.1 |
 | 보안 | Spring Security | 6.2.x |
 | SQL 매핑 | MyBatis Spring Boot Starter | 3.0.3 |
-| 페이징 | PageHelper Spring Boot Starter | 2.1.0 |
 | 뷰 | Thymeleaf | 3.1.x |
 | API 문서 | SpringDoc OpenAPI | 2.3.0 |
 | DB | Oracle 19c+ / MySQL 8.0+ | — |
@@ -132,7 +133,7 @@ src/main/java/{base-package}/
 
 ### 4.1 자동 포맷팅
 
-Spotless + Google Java Format (AOSP 변형)으로 포맷을 강제한다. 4칸 스페이스, 100자 줄 길이, import 자동 정리. CI에서 `mvn spotless:check`가 실패하면 PR이 블로킹된다.
+Spotless + Palantir Java Format으로 포맷을 강제한다. 4칸 스페이스, 120자 줄 길이, import 자동 정리. CI에서 `mvn spotless:check`가 실패하면 PR이 블로킹된다.
 
 ```bash
 mvn spotless:apply    # 로컬에서 자동 포맷 적용
@@ -327,16 +328,6 @@ Mapper interface와 XML이 1:1로 대응한다. SQL 결과는 `resultType`으로
 
 ### 6.2 페이징
 
-Service에서 `PageHelper.startPage()`를 호출하면 **직후 쿼리 한 건**에 페이징이 자동 적용된다. 별도 COUNT 쿼리를 작성할 필요가 없다.
-
-```java
-public PageResponse<UserResponseDTO> findAll(PageRequest request) {
-    PageHelper.startPage(request.getPage(), request.getSize());
-    List<UserResponseDTO> list = userMapper.findAllWithSearch(params);
-    return PageResponse.from(list);   // PageInfo에서 총 건수·페이지 자동 추출
-}
-```
-
 클라이언트는 `page`, `size` 쿼리 파라미터로 요청하고, `PageResponse<T>`(content, page, size, totalElements, totalPages)를 응답받는다.
 
 > 상세: SQL
@@ -357,7 +348,7 @@ public PageResponse<UserResponseDTO> findAll(PageRequest request) {
 </select>
 ```
 
-PageHelper의 `autoDialect`가 DB를 자동 감지하므로, 페이징 SQL 분기는 별도로 작성하지 않는다.
+페이징 SQL은 `databaseId`로 분기하여 MyBatis XML에서 직접 처리한다.
 
 > 상세: Multi-DB
 
@@ -500,7 +491,7 @@ GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된�
 
 | 도구 | 검증 대상 | 실패 시 |
 |------|-----------|---------|
-| Spotless | 코드 포맷 (AOSP, 100자) | PR 블로킹 |
+| Spotless | 코드 포맷 (Palantir, 120자) | PR 블로킹 |
 | ArchUnit | 레이어 의존성, 금지 클래스, DI 규칙 | PR 블로킹 |
 | ESLint | JS 코드 품질 (`static/js/**`) | PR 블로킹 |
 | HTMLHint | HTML 구조 (`templates/**`) | PR 블로킹 |
@@ -514,52 +505,36 @@ GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된�
 
 ---
 
-## 16. UI 설계
+## 16. 디자인 원칙
 
-### 16.1 Thymeleaf 템플릿 구조
+Apple Human Interface Guidelines (HIG)를 기반으로 명확성·존중·깊이를 핵심 테마로 한다. 일관성, 직접 조작, 피드백, 메타포, 사용자 제어의 5대 원칙을 따른다.
+
+> 상세: Design Principle
+
+---
+
+## 17. 디자인 시스템
+
+IBM Carbon Design System을 기반으로 레이아웃(8pt 그리드), 색상(시맨틱 토큰), 타이포그래피(역할 기반), 컴포넌트, 접근성 규칙을 통일한다.
+
+> 상세: Design System
+
+---
+
+## 18. 프론트엔드 코드 규칙
+
+### 18.1 Thymeleaf 템플릿 구조
 
 모든 페이지는 `fragments/layout.html`을 베이스 레이아웃으로 사용한다. 페이지 콘텐츠는 `pages/*-content.html`에 `<div class="content-inner">`로 시작하는 fragment로 작성하며, `th:replace`로 조립한다. `th:insert`는 금지다.
 
-```html
-<html th:replace="~{fragments/layout :: layout(~{::head}, ~{::main})}">
-```
+### 18.2 핵심 규칙
 
-### 16.2 Tailwind CSS 규칙
+- 스타일은 Tailwind 유틸리티 클래스만 사용한다. Inline `style=""`, Raw hex 직접 기재 금지.
+- `window.{Domain}Page` 네임스페이스 패턴으로 전역 오염을 방지한다.
+- AJAX는 `$.ajax()`를 사용하며 `fetch()`는 금지다.
+- `var`, `==` 비교, 직접 `addEventListener` 사용도 금지한다.
 
-스타일은 Tailwind 유틸리티 클래스만 사용한다. Inline `style=""` 속성, Raw hex 직접 기재(`bg-[#3b2e5a]`)는 금지이며, `tailwind.config.js`에 선언한 색상 토큰을 사용한다.
-
-```html
-<!-- ❌ 금지 -->
-<div style="background: #3b2e5a">
-
-<!-- ✅ 올바른 예시 -->
-<div class="bg-sidebar">
-```
-
-전 환경에서 PostCSS 빌드를 사용한다. CDN은 CSP(`style-src 'self'`) 정책으로 차단된다(`npm run css:watch` — 로컬, `npm run css:build` — CI·운영).
-
-### 16.3 JavaScript 규칙
-
-`window.{Domain}Page` 네임스페이스 패턴으로 전역 오염을 방지한다. AJAX는 `$.ajax()`를 사용하며 `fetch()`는 금지다. `var`, `==` 비교, 직접 `addEventListener` 사용도 금지한다.
-
-```javascript
-// ✅ 올바른 예시
-window.UserPage = {
-  init() {
-    $('#saveBtn').off('click').on('click', () => {
-      $.ajax({ url: '/api/users', method: 'POST', ... });
-    });
-  }
-};
-
-// ❌ 금지 예시
-var count = 0;                            // var 금지
-const MyPage = { init() {} };            // window 미명시
-if (status == '1') { ... }               // == 금지
-fetch('/api/users');                      // fetch 금지
-```
-
-### 16.4 자동 강제
+### 18.3 자동 강제
 
 | 도구 | 대상 | 강제 수준 |
 |------|------|-----------|
@@ -567,11 +542,11 @@ fetch('/api/users');                      // fetch 금지
 | HTMLHint | `templates/**/*.html` | CI 빌드 실패 |
 | Husky pre-commit | HTML 금지 패턴 | 커밋 차단 |
 
-> 상세: UI Design
+> 상세: Frontend Code Convention
 
 ---
 
-## 17. 문서 체계
+## 19. 문서 체계
 
 이 폴더의 모든 문서는 동일한 구조를 따른다.
 
@@ -590,4 +565,4 @@ fetch('/api/users');                      // fetch 금지
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

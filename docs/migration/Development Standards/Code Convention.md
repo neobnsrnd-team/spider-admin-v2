@@ -2,13 +2,17 @@
 
 ## 1. 개요
 
-코드 스타일, 네이밍 규칙, 클래스 구조 패턴, Enum 매핑을 정의한다. Spotless + Google Java Format (AOSP 변형)으로 포맷팅을 자동 강제한다.
+코드 스타일, 네이밍 규칙, 클래스 구조 패턴, Enum 매핑을 정의한다. Spotless + Palantir Java Format으로 포맷팅을 자동 강제한다.
 
 > 아키텍처 규칙(레이어 의존성, 패키지 구조, Entity 불사용)은 Project Architecture 문서 참고.
 
 ---
 
 ## 2. Spotless 설정
+
+Palantir Java Format의 상세 스타일 규칙은 공식 문서를 참고한다.
+
+> **Palantir Java Format:** https://github.com/palantir/palantir-java-format
 
 ### 2.1 Maven 플러그인
 
@@ -19,10 +23,9 @@
     <version>2.44.0</version>
     <configuration>
         <java>
-            <googleJavaFormat>
-                <version>1.25.2</version>
-                <style>AOSP</style>
-            </googleJavaFormat>
+            <palantirJavaFormat>
+                <version>2.50.0</version>
+            </palantirJavaFormat>
             <importOrder>
                 <order>java|javax,org,com,,\#</order>
             </importOrder>
@@ -42,9 +45,9 @@
 
 | 항목 | 값 |
 |------|-----|
-| 스타일 | Google Java Format — AOSP 변형 |
+| 스타일 | Palantir Java Format |
 | 들여쓰기 | 4칸 스페이스 |
-| 줄 길이 | 100자 (Google Java Format 기본값) |
+| 줄 길이 | 120자 (Palantir Java Format 기본값) |
 | import 순서 | `java\|javax` → `org` → `com` → 프로젝트 → `static` |
 | 미사용 import | 자동 제거 |
 
@@ -306,4 +309,4 @@ mybatis:
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

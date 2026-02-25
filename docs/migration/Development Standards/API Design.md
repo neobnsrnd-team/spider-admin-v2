@@ -422,34 +422,12 @@ public class PageResponse<T> {
     private final int size;
     private final long totalElements;
     private final int totalPages;
-
-    public static <T> PageResponse<T> from(List<T> list) {
-        PageInfo<T> pageInfo = new PageInfo<>(list);
-        return PageResponse.<T>builder()
-                .content(list)
-                .page(pageInfo.getPageNum())
-                .size(pageInfo.getPageSize())
-                .totalElements(pageInfo.getTotal())
-                .totalPages(pageInfo.getPages())
-                .build();
-    }
 }
 ```
 
-> `PageInfo`는 PageHelper가 제공하는 클래스다.
-
 ### 7.3 Controller → Service 흐름
 
-> PageHelper 설정은 SQL 2.2절, DB별 자동 적용은 SQL 9절 참고.
-
 ```java
-// Service
-public PageResponse<UserResponseDTO> findAll(PageRequest request) {
-    PageHelper.startPage(request.getPage(), request.getSize());
-    List<UserResponseDTO> list = userMapper.findAllWithSearch(params);
-    return PageResponse.from(list);
-}
-
 // Controller
 @GetMapping
 public ResponseEntity<ApiResponse<PageResponse<UserResponseDTO>>> list(
@@ -613,7 +591,6 @@ src/main/java/{base-package}/
       → 형식=DTO @Valid, 비즈니스=Service Guard Clause
 
 □ 6. 페이징: PageRequest/PageResponse 사용
-      → PageHelper.startPage() → PageResponse.from()
 
 □ 7. Swagger 어노테이션 부여
       → @Tag, @Operation, @Schema, @ApiResponse

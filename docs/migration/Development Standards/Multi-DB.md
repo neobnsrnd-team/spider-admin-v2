@@ -8,7 +8,7 @@
 
 - DB 전환 시 **Java 코드 변경은 0건**이어야 한다
 - DB별 차이는 **설정 파일과 Mapper XML에서만** 흡수한다
-- 페이징 등 공통 처리는 **프레임워크(PageHelper)에 위임**한다
+- 페이징은 **MyBatis XML에서 직접 처리**한다
 
 ---
 
@@ -48,8 +48,6 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
 ```
-
-> PageHelper 설정은 SQL 2.2절 참고. DB별 `helper-dialect`만 변경한다.
 
 ---
 
@@ -170,20 +168,14 @@ public class UserService {
 
 ---
 
-## 4. 페이징 처리
-
-SQL 9절 참고. PageHelper가 dialect 설정에 따라 자동으로 DB별 페이징을 처리하므로 ROWNUM, LIMIT 등을 SQL에 직접 작성하지 않는다.
-
----
-
-## 5. DB별 SQL 문법 차이 요약
+## 4. DB별 SQL 문법 차이 요약
 
 | 기능 | Oracle | MySQL | 공통화 방법 |
 | --- | --- | --- | --- |
 | 문자열 결합 | `\|\|` | `CONCAT()` | databaseId 분기 |
 | NULL 대체 | `NVL()` | `IFNULL()` | databaseId 분기 |
 | Batch Insert | `DUAL + UNION ALL` | `VALUES (...), (...)` | databaseId 분기 |
-| 페이징 | `ROWNUM` | `LIMIT` | PageHelper 자동 처리 |
+| 페이징 | `ROWNUM` | `LIMIT` | databaseId 분기 |
 | 현재 시간 | `SYSDATE` | `NOW()` | databaseId 분기 |
 | 시퀀스 | `SEQ.NEXTVAL` | `AUTO_INCREMENT` | databaseId 분기 |
 | 타입 변환 | `TO_CHAR()` / `TO_NUMBER()` | `CAST()` | databaseId 분기 |
@@ -192,7 +184,7 @@ SQL 9절 참고. PageHelper가 dialect 설정에 따라 자동으로 DB별 페�
 
 ---
 
-## 6. 체크리스트
+## 5. 체크리스트
 
 DB 전환 시 확인 항목:
 
@@ -200,10 +192,9 @@ DB 전환 시 확인 항목:
 - [ ]  `application-{db}.yml` 설정 완료 (DataSource, HikariCP)
 - [ ]  DatabaseIdProvider Bean 등록 확인
 - [ ]  모든 DB 전용 SQL에 `databaseId` 지정 확인
-- [ ]  PageHelper `helper-dialect` 설정 확인
 - [ ]  DDL 스크립트로 테이블/초기 데이터 생성 완료
 - [ ]  기본 CRUD + 주요 조회 화면 동작 검증 완료
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*

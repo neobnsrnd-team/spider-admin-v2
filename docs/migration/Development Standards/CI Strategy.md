@@ -216,7 +216,7 @@ build ──┬──► playwright-oracle  ┐
 
 - 유닛 테스트는 외부 의존성(DB, 네트워크) 없이 실행되어야 한다. DB가 필요한 테스트는 통합 테스트로 분리한다.
 - `compile` 단계에서 빌드 실패 시 이후 모든 Job이 실행되지 않는다.
-- `npm run lint` (`eslint` + `htmlhint`)는 Java 빌드 전에 실행하여 프론트엔드 금지 패턴을 조기 차단한다. ESLint 규칙과 HTMLHint 규칙은 UI Design §12.3절 및 §12.4절 참고.
+- `npm run lint` (`eslint` + `htmlhint`)는 Java 빌드 전에 실행하여 프론트엔드 금지 패턴을 조기 차단한다. ESLint 규칙과 HTMLHint 규칙은 Frontend Code Convention 참고.
 
 **코드 품질 + SAST 분석 — SonarCloud:**
 
