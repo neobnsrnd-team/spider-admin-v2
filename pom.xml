@@ -24,7 +24,7 @@
         <logback-classic-db.version>1.2.11.1</logback-classic-db.version>
         <!-- Code Quality Plugins -->
         <spotless.version>2.44.0</spotless.version>
-        <google-java-format.version>1.25.2</google-java-format.version>
+        <palantir-java-format.version>2.50.0</palantir-java-format.version>
         <sonar.organization>neobnsrnd-team</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>neobnsrnd-team_spider-admin-v2</sonar.projectKey>
@@ -189,10 +189,9 @@
                 <version>${spotless.version}</version>
                 <configuration>
                     <java>
-                        <googleJavaFormat>
-                            <version>${google-java-format.version}</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
+                        <palantirJavaFormat>
+                            <version>${palantir-java-format.version}</version>
+                        </palantirJavaFormat>
                         <importOrder>
                             <order>java|javax,org,com,,\#</order>
                         </importOrder>

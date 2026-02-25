@@ -12,8 +12,7 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 class ArchitectureTest {
 
-    private static final JavaClasses classes =
-            new ClassFileImporter().importPackages("org.example.springadminv2");
+    private static final JavaClasses classes = new ClassFileImporter().importPackages("org.example.springadminv2");
 
     // ── 레이어 의존성: Controller → Service → Mapper 단방향만 허용 ──
 
