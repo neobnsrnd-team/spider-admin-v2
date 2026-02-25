@@ -2,160 +2,193 @@
 # 메뉴별 리소스 의존성 (resource-dependencies)
 # ==============================================================================
 #
-# 화면이 다른 도메인의 API를 참조할 때, 해당 리소스에 대한 읽기/쓰기 권한을
-# 자동 파생하기 위한 정의이다.
+# 각 화면의 권한 수준별 필요 리소스 목록
 #
-# - Key        : 화면명 (Product Requirements/00-overview.md 기준)
-# - RES_XXX    : 도메인 패키지명 (Package Structure.md 기준)
-# - level 생략 시 기본값 READ
-#
-# 크로스 도메인 의존성이 없는 화면은 생략한다.
+# - 화면명     : Product Requirements/00-overview.md 기준
+# - RES_XXX    : Package Structure.md 도메인 패키지명 (대문자)
+# - _READ      : 조회 시 필요한 리소스
+# - _WRITE     : 등록/수정/삭제 시 필요한 리소스
+# - _WRITE 미정의 = 조회 전용 (Template B/C)
 # ==============================================================================
 
-security:
-  access:
-    resource-dependencies:
 
-      # ── 시스템 관리 ──────────────────────────────────────────────────────────
+# ── 인증 (2개) ────────────────────────────────────────────────────────────────
 
-      역할 관리:
-        - resource: RES_MENU                  # 역할별 메뉴 권한 설정 시 메뉴 목록
+로그인: permitAll
+개인정보 수정: isAuthenticated                            # 본인 정보만 (Principal 기반)
 
-      사용자 관리:
-        - resource: RES_ROLE                  # 사용자 등록·수정 시 역할 드롭다운
 
-      코드 관리:
-        - resource: RES_CODEGROUP             # 코드 검색·등록 시 코드 그룹 드롭다운
+# ── 홈 (1개) ──────────────────────────────────────────────────────────────────
 
-      # ── 인프라 관리 ──────────────────────────────────────────────────────────
+대시보드: isAuthenticated                                 # 전용 집계 API
 
-      WAS 인스턴스 관리:
-        - resource: RES_WASGROUP              # WAS 그룹 드롭다운
 
-      속성 관리:
-        - resource: RES_WASINSTANCE            # 속성 반영 대상 WAS
+# ── 시스템 관리 (6개) ─────────────────────────────────────────────────────────
 
-      XML 속성 관리:
-        - resource: RES_WASINSTANCE            # Reload 대상 WAS
+메뉴 관리_READ: RES_MENU_READ
+메뉴 관리_WRITE: RES_MENU_WRITE
 
-      운영정보 Reload:
-        - resource: RES_WASINSTANCE            # Reload 대상 WAS 선택
+역할 관리_READ: RES_ROLE_READ, RES_MENU_READ
+역할 관리_WRITE: RES_ROLE_WRITE, RES_MENU_READ
 
-      # ── 연계 관리 ────────────────────────────────────────────────────────────
+사용자 관리_READ: RES_USER_READ, RES_ROLE_READ
+사용자 관리_WRITE: RES_USER_WRITE, RES_ROLE_READ
 
-      기관 관리:
-        - resource: RES_GATEWAY               # 기관에 게이트웨이 할당
-        - resource: RES_MESSAGEHANDLER        # 기관에 핸들러 할당
+코드 그룹 관리_READ: RES_CODEGROUP_READ
+코드 그룹 관리_WRITE: RES_CODEGROUP_WRITE
 
-      코드 맵핑 관리:
-        - resource: RES_ORG                   # 기관 드롭다운
-        - resource: RES_CODEGROUP             # 코드 그룹 드롭다운
+코드 관리_READ: RES_CODE_READ, RES_CODEGROUP_READ
+코드 관리_WRITE: RES_CODE_WRITE, RES_CODEGROUP_READ
 
-      게이트웨이 관리:
-        - resource: RES_ORG                   # 기관 할당
+업무분류 관리_READ: RES_BIZGROUP_READ
+업무분류 관리_WRITE: RES_BIZGROUP_WRITE
 
-      게이트웨이 맵핑 관리:
-        - resource: RES_GATEWAY               # 게이트웨이 드롭다운
-        - resource: RES_ORG                   # 기관 드롭다운
-        - resource: RES_TRANSACTION           # 거래 검색 팝업
 
-      요청처리 APP 맵핑 관리:
-        - resource: RES_TRANSACTION           # 거래 검색
-        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
-        - resource: RES_GATEWAY               # 게이트웨이 드롭다운
-        - resource: RES_RELOAD
-          level: WRITE                        # 맵핑 변경 후 Reload
+# ── 인프라 관리 (5개) ─────────────────────────────────────────────────────────
 
-      리스너/응답커넥터 맵핑 관리:
-        - resource: RES_GATEWAY               # 리스너·응답커넥터 게이트웨이
+WAS 그룹 관리_READ: RES_WASGROUP_READ
+WAS 그룹 관리_WRITE: RES_WASGROUP_WRITE
 
-      타행상태 관리:
-        - resource: RES_ORG                   # 은행(기관) 목록
+WAS 인스턴스 관리_READ: RES_WASINSTANCE_READ, RES_WASGROUP_READ
+WAS 인스턴스 관리_WRITE: RES_WASINSTANCE_WRITE, RES_WASGROUP_READ
 
-      # ── 거래/전문 관리 ───────────────────────────────────────────────────────
+속성 관리_READ: RES_PROPERTY_READ, RES_WASINSTANCE_READ
+속성 관리_WRITE: RES_PROPERTY_WRITE, RES_WASINSTANCE_READ
 
-      전문 관리:
-        - resource: RES_ORG                   # 기관 드롭다운
+XML 속성 관리_READ: RES_XMLPROPERTY_READ, RES_WASINSTANCE_READ
+XML 속성 관리_WRITE: RES_XMLPROPERTY_WRITE, RES_WASINSTANCE_READ
 
-      거래 관리:
-        - resource: RES_WASGROUP              # WAS 그룹 드롭다운
-        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
-        - resource: RES_ORG                   # 기관 드롭다운
-        - resource: RES_MESSAGE               # 전문 검색 팝업
+운영정보 Reload_READ: RES_RELOAD_READ, RES_WASINSTANCE_READ
+운영정보 Reload_WRITE: RES_RELOAD_WRITE, RES_WASINSTANCE_READ
 
-      거래 Validator 관리:
-        - resource: RES_TRANSACTION           # 거래 목록 참조
 
-      거래 중지 관리:
-        - resource: RES_TRANSACTION           # 거래 검색 팝업
-        - resource: RES_WASINSTANCE            # Reload 대상 WAS
-        - resource: RES_RELOAD
-          level: WRITE                        # 중지·재개 후 Reload
+# ── 연계 관리 (8개) ──────────────────────────────────────────────────────────
 
-      전문 테스트:
-        - resource: RES_ORG                   # 기관 드롭다운
-        - resource: RES_TRANSACTION           # 거래 검색 팝업
-        - resource: RES_WASINSTANCE            # 테스트 대상 WAS
+기관 관리_READ: RES_ORG_READ, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
+기관 관리_WRITE: RES_ORG_WRITE, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
 
-      당발 대응답 관리:
-        - resource: RES_TRANSACTION           # 거래 검색 팝업
+코드 맵핑 관리_READ: RES_CODE_READ, RES_ORG_READ, RES_CODEGROUP_READ    # TODO: Package Structure에 codemapping 패키지 미정의 → code 패키지 임시 사용
+코드 맵핑 관리_WRITE: RES_CODE_WRITE, RES_ORG_READ, RES_CODEGROUP_READ
 
-      거래 추적 로그 조회:
-        - resource: RES_ORG                   # 기관 검색 필터
+게이트웨이 관리_READ: RES_GATEWAY_READ, RES_ORG_READ
+게이트웨이 관리_WRITE: RES_GATEWAY_WRITE, RES_ORG_READ
 
-      # ── 배치 관리 ────────────────────────────────────────────────────────────
+게이트웨이 맵핑 관리_READ: RES_GWSYSTEM_READ, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
+게이트웨이 맵핑 관리_WRITE: RES_GWSYSTEM_WRITE, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
 
-      배치 APP 관리:
-        - resource: RES_WASINSTANCE            # WAS 인스턴스 할당
+요청처리 APP 맵핑 관리_READ: RES_TRANSPORT_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ
+요청처리 APP 맵핑 관리_WRITE: RES_TRANSPORT_WRITE, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ, RES_RELOAD_WRITE
 
-      배치 수행 내역:
-        - resource: RES_WASINSTANCE            # WAS 인스턴스 필터
+리스너/응답커넥터 맵핑 관리_READ: RES_LISTENERTRX_READ, RES_GATEWAY_READ
+리스너/응답커넥터 맵핑 관리_WRITE: RES_LISTENERTRX_WRITE, RES_GATEWAY_READ
 
-      # ── 오류 관리 ────────────────────────────────────────────────────────────
+전문처리핸들러 관리_READ: RES_MESSAGEHANDLER_READ
+전문처리핸들러 관리_WRITE: RES_MESSAGEHANDLER_WRITE
 
-      에러 내역 통계:
-        - resource: RES_ORG                   # 채널(기관) 필터
+타행상태 관리_READ: RES_ORG_READ                          # TODO: Package Structure에 bankstatus 패키지 미정의 → org 패키지 임시 사용
+타행상태 관리_WRITE: RES_ORG_WRITE
 
-      # ── 모니터링 ─────────────────────────────────────────────────────────────
 
-      WAS별 Gateway 정보:
-        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
+# ── 거래/전문 관리 (8개) ──────────────────────────────────────────────────────
 
-      WAS별 Gateway 모니터링:
-        - resource: RES_WASINSTANCE            # WAS 인스턴스별 모니터링
+전문 관리_READ: RES_MESSAGE_READ, RES_ORG_READ
+전문 관리_WRITE: RES_MESSAGE_WRITE, RES_ORG_READ
 
-      # ── 이력/감사 ────────────────────────────────────────────────────────────
+거래 관리_READ: RES_TRANSACTION_READ, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
+거래 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
 
-      관리자 작업 이력:
-        - resource: RES_USER                  # 사용자명 필터
+거래 Validator 관리_READ: RES_VALIDATOR_READ, RES_TRANSACTION_READ
+거래 Validator 관리_WRITE: RES_VALIDATOR_WRITE, RES_TRANSACTION_READ
 
-      거래 중지 이력:
-        - resource: RES_TRANSACTION           # 거래 ID 검색
+거래 중지 관리_READ: RES_TRANSACTION_READ
+거래 중지 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASINSTANCE_READ, RES_RELOAD_WRITE
 
-      # ── 로그 관리 ────────────────────────────────────────────────────────────
+전문 테스트_READ: RES_MESSAGETEST_READ, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
+전문 테스트_WRITE: RES_MESSAGETEST_WRITE, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
 
-      전문로그 조회(DB):
-        - resource: RES_ORG                   # 기관 검색 필터
+당발 대응답 관리_READ: RES_PROXYRESPONSE_READ, RES_TRANSACTION_READ
+당발 대응답 관리_WRITE: RES_PROXYRESPONSE_WRITE, RES_TRANSACTION_READ
 
-      # ── 게시판 ───────────────────────────────────────────────────────────────
+거래 추적 로그 조회_READ: RES_MESSAGEINSTANCE_READ, RES_ORG_READ
 
-      게시판 권한 관리:
-        - resource: RES_USER                  # 권한 부여 대상 사용자
-        - resource: RES_BOARD                 # 권한 설정 대상 게시판
+공통필드매핑 관리_READ: RES_MESSAGEFIELD_READ
+공통필드매핑 관리_WRITE: RES_MESSAGEFIELD_WRITE
 
-      페이지별 공지사항 관리:
-        - resource: RES_MENU                  # 대상 페이지 URL 선택
 
-      # ── 전송 데이터 ──────────────────────────────────────────────────────────
+# ── 배치 관리 (3개) ──────────────────────────────────────────────────────────
 
-      전송 데이터 관리:
-        - resource: RES_ORG                   # 전송 대상 기관
+배치 APP 관리_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
+배치 APP 관리_WRITE: RES_BATCH_WRITE, RES_WASINSTANCE_READ
 
-      전송 데이터 생성:
-        - resource: RES_ORG                   # 전송 대상 기관
+배치 수행 내역_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
 
-      # ── 개발 관리 ────────────────────────────────────────────────────────────
+실행 중인 배치_READ: RES_BATCH_READ
 
-      전문로그 파싱:
-        - resource: RES_ORG                   # 기관 드롭다운
-        - resource: RES_MESSAGE               # 전문 검색 팝업
+
+# ── 오류 관리 (3개) ──────────────────────────────────────────────────────────
+
+오류코드 관리_READ: RES_ERRORCODE_READ
+오류코드 관리_WRITE: RES_ERRORCODE_WRITE
+
+에러 내역 통계_READ: RES_ERRORHISTORY_READ, RES_ORG_READ
+
+오류 발생 현황_READ: RES_ERRORHISTORY_READ
+
+
+# ── 모니터링 (3개) ───────────────────────────────────────────────────────────
+
+현황판 관리_READ: RES_MONITOR_READ
+현황판 관리_WRITE: RES_MONITOR_WRITE
+
+WAS별 Gateway 정보_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
+
+WAS별 Gateway 모니터링_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
+
+
+# ── 이력/감사 (2개) ──────────────────────────────────────────────────────────
+
+관리자 작업 이력_READ: RES_ADMINHISTORY_READ, RES_USER_READ
+
+거래 중지 이력_READ: RES_TRANSACTION_READ
+
+
+# ── 로그 관리 (1개) ──────────────────────────────────────────────────────────
+
+전문로그 조회(DB)_READ: RES_MESSAGEINSTANCE_READ, RES_ORG_READ
+
+
+# ── 게시판 (5개) ─────────────────────────────────────────────────────────────
+
+게시판 관리_READ: RES_BOARD_READ
+게시판 관리_WRITE: RES_BOARD_WRITE
+
+게시판 권한 관리_READ: RES_BOARD_READ, RES_USER_READ
+게시판 권한 관리_WRITE: RES_BOARD_WRITE, RES_USER_READ
+
+게시판 열람/작성_READ: RES_ARTICLE_READ
+게시판 열람/작성_WRITE: RES_ARTICLE_WRITE
+
+긴급공지 관리_READ: RES_BOARD_READ
+긴급공지 관리_WRITE: RES_BOARD_WRITE
+
+페이지별 공지사항 관리_READ: RES_BOARD_READ, RES_MENU_READ
+페이지별 공지사항 관리_WRITE: RES_BOARD_WRITE, RES_MENU_READ
+
+
+# ── 전송 데이터 (3개) ────────────────────────────────────────────────────────
+
+전송 데이터 관리_READ: RES_TRANSDATA_READ, RES_ORG_READ
+전송 데이터 관리_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
+
+전송 데이터 생성_READ: RES_TRANSDATA_READ, RES_ORG_READ
+전송 데이터 생성_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
+
+전송 데이터 파일_READ: RES_TRANSDATA_READ
+전송 데이터 파일_WRITE: RES_TRANSDATA_WRITE
+
+
+# ── 개발 관리 (2개) ──────────────────────────────────────────────────────────
+
+전문로그 파싱_READ: RES_MESSAGEPARSING_READ, RES_ORG_READ, RES_MESSAGE_READ
+
+전문로그 조회(JSON)_READ: RES_MESSAGEPARSING_READ
