@@ -28,8 +28,13 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build + Test + Code Quality
+      - name: Build + Test
         run: mvn verify -B
+
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -B
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
@@ -37,17 +42,6 @@ jobs:
           name: app-jar
           path: target/*.jar
           retention-days: 1
-
-      - name: Upload Code Quality Reports
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-quality-report
-          path: |
-            target/spotbugsXml.xml
-            target/pmd.xml
-            target/cpd.xml
-          retention-days: 7
 
       - name: Publish Test Results
         if: always()

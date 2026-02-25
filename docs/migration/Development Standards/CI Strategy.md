@@ -11,15 +11,12 @@ feature/* ──PR──► main
                    │
                    ├── Dependabot       (주간 의존성 취약점 스캔 — 별도 워크플로)
                    │
-                   ├── CI Pipeline (.github/workflows/ci.yml)
-                   │     ├── build              (빌드 + 유닛 테스트 + SpotBugs + PMD)
-                   │     ├── playwright-oracle  (E2E UI 테스트 / Oracle)   ┐ build 완료 후
-                   │     ├── playwright-mysql   (E2E UI 테스트 / MySQL)    │
-                   │     ├── newman-oracle      (API 테스트 / Oracle)      │ 병렬 실행
-                   │     └── newman-mysql       (API 테스트 / MySQL)       ┘
-                   │
-                   └── CodeQL Pipeline (.github/workflows/codeql.yml)
-                         └── codeql             (SAST 보안 분석)           — PR + 주간 스케줄
+                   └── CI Pipeline (.github/workflows/ci.yml)
+                         ├── build              (빌드 + 유닛 테스트 + SonarCloud 분석)
+                         ├── playwright-oracle  (E2E UI 테스트 / Oracle)   ┐ build 완료 후
+                         ├── playwright-mysql   (E2E UI 테스트 / MySQL)    │
+                         ├── newman-oracle      (API 테스트 / Oracle)      │ 병렬 실행
+                         └── newman-mysql       (API 테스트 / MySQL)       ┘
 ```
 
 ---
@@ -155,7 +152,7 @@ src/test/resources/db/
 
 ## 4. 의존성 보안 (Dependabot)
 
-**Dependabot**을 사용하여 서드파티 라이브러리의 알려진 CVE를 자동으로 탐지하고 수정 PR을 생성한다. CodeQL이 *작성한 코드*의 취약점을 분석한다면, Dependabot은 *사용하는 라이브러리*의 취약점을 관리한다.
+**Dependabot**을 사용하여 서드파티 라이브러리의 알려진 CVE를 자동으로 탐지하고 수정 PR을 생성한다. SonarCloud가 *작성한 코드*의 품질과 보안 취약점을 분석한다면, Dependabot은 *사용하는 라이브러리*의 취약점을 관리한다.
 
 설정 파일 위치: `.github/dependabot.yml`
 
@@ -202,74 +199,60 @@ updates:
 ```
 [ci.yml]
 build ──┬──► playwright-oracle  ┐
-        ├──► playwright-mysql   │
-        ├──► newman-oracle      │ 모두 병렬 실행
+        ├──► playwright-mysql   │ 모두 병렬 실행
+        ├──► newman-oracle      │
         └──► newman-mysql       ┘
-
-[codeql.yml]
-codeql  ──────────────────────── 독립 실행 (PR + 주간 스케줄)
 ```
 
-### 5.1 build — 빌드 + 유닛 테스트 + 코드 품질 분석
+### 5.1 build — 빌드 + 유닛 테스트 + SonarCloud 분석
 
 | 항목 | 내용 |
 |------|------|
 | 환경 | JDK 17 (Temurin), Maven |
 | 타임아웃 | 15분 |
-| 단계 | `compile` → `test` → `spotbugs:check` → `pmd:check` → `package -DskipTests` |
+| 단계 | `compile` → `test` → `package -DskipTests` → `SonarCloud scan` |
 | 산출물 | `target/*.jar` (아티팩트 보관 1일) |
-| 리포트 | Surefire XML → PR Check + 코멘트 / SpotBugs·PMD 위반 시 빌드 실패로 Check 차단 + XML 아티팩트 업로드 |
+| 리포트 | Surefire XML → PR Check + 코멘트 / SonarCloud → PR Decoration + SonarCloud 대시보드 |
 
 - 유닛 테스트는 외부 의존성(DB, 네트워크) 없이 실행되어야 한다. DB가 필요한 테스트는 통합 테스트로 분리한다.
 - `compile` 단계에서 빌드 실패 시 이후 모든 Job이 실행되지 않는다.
 
-**코드 품질 분석 — SpotBugs + PMD:**
+**코드 품질 + SAST 분석 — SonarCloud:**
 
-SonarQube/SonarCloud는 별도 서버가 필요하거나 private repo에서 유료다. 대신 Maven 플러그인으로 동작하는 **SpotBugs**와 **PMD**를 `build` Job에 통합한다. 서버 불필요, 완전 무료, private repo 제약 없음.
+**SonarCloud**(SonarQube Cloud)를 사용하여 코드 품질 분석과 SAST 보안 분석을 통합 수행한다. Public GitHub 레포지토리에서 무료로 사용 가능하며, 기존 SpotBugs + PMD + CodeQL의 역할을 단일 플랫폼으로 대체한다.
 
-| 도구 | 역할 | CodeQL과의 차이 |
-|------|------|----------------|
-| **SpotBugs** | 버그 패턴 탐지 (null 역참조, 리소스 누수, 잘못된 동기화) | CodeQL은 보안 취약점(CWE), SpotBugs는 런타임 버그 패턴 |
-| **PMD** | 코드 복잡도·중복·미사용 변수 등 유지보수성 지표 | CodeQL·SpotBugs와 역할 비중복 |
-| **PMD CPD** | Copy-Paste Detector — 코드 중복 탐지 | PMD에 내장 |
+| 분석 영역 | SonarCloud 기능 | 대체 대상 |
+|-----------|----------------|-----------|
+| **버그 탐지** | Bug 룰 (null 역참조, 리소스 누수 등) | SpotBugs |
+| **코드 품질** | Code Smell 룰 (복잡도, 미사용 변수, 유지보수성) | PMD |
+| **코드 중복** | Duplications 탐지 | PMD CPD |
+| **보안 취약점** | SAST Taint Analysis (SQL Injection, XSS, Path Traversal 등) | CodeQL |
+| **보안 핫스팟** | Security Hotspot 리뷰 | — |
+| **코드 커버리지** | JaCoCo 연동 (추후 설정) | — |
+
+SonarCloud는 `build` Job의 마지막 단계에서 실행된다. `mvn verify` 완료 후 별도 step으로 `mvn sonar:sonar`를 실행하여 컴파일된 바이트코드와 테스트 리포트를 함께 분석한다.
+
+**pom.xml 설정:**
 
 ```xml
-<!-- pom.xml -->
-<plugin>
-    <groupId>com.github.spotbugs</groupId>
-    <artifactId>spotbugs-maven-plugin</artifactId>
-    <version>4.8.6.5</version>
-    <configuration>
-        <effort>Max</effort>
-        <threshold>Medium</threshold>   <!-- Medium 이상 발견 시 빌드 실패 -->
-        <xmlOutput>true</xmlOutput>
-    </configuration>
-    <executions>
-        <execution>
-            <goals><goal>check</goal></goals>
-        </execution>
-    </executions>
-</plugin>
-
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-pmd-plugin</artifactId>
-    <version>3.25.0</version>
-    <configuration>
-        <failOnViolation>true</failOnViolation>
-        <printFailingErrors>true</printFailingErrors>
-        <minimumTokens>100</minimumTokens>   <!-- CPD: 100토큰 이상 중복 탐지 -->
-    </configuration>
-    <executions>
-        <execution>
-            <goals>
-                <goal>check</goal>
-                <goal>cpd-check</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
+<!-- pom.xml properties -->
+<sonar.organization>neobnsrnd-team</sonar.organization>
+<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 ```
+
+**ci.yml SonarCloud step:**
+
+```yaml
+- name: SonarCloud Scan
+  env:
+    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  run: mvn sonar:sonar -B
+```
+
+**PR Decoration:**
+- SonarCloud가 PR에 직접 코멘트를 게시한다 (품질 게이트 통과 여부, 신규 이슈 수).
+- Quality Gate 실패 시 PR Check가 `failure`로 표시되어 merge를 블로킹한다.
+- 결과는 SonarCloud 대시보드에서 누적 관리된다.
 
 ### 5.2 playwright — E2E UI 테스트
 
@@ -297,45 +280,21 @@ SonarQube/SonarCloud는 별도 서버가 필요하거나 private repo에서 유�
 
 > 컬렉션 작성 표준은 Postman 문서 참고.
 
-### 5.4 codeql — SAST 보안 분석
+### 5.4 SonarCloud Quality Gate 설정
 
-| 항목 | 내용 |
+SonarCloud의 Quality Gate는 PR merge 조건으로 사용된다. **Sonar Way** (기본 프로파일)를 사용하며, 주요 조건:
+
+| 조건 | 기준 |
 |------|------|
-| 도구 | GitHub CodeQL |
-| 타임아웃 | 60분 |
-| 분석 대상 | Java 소스 |
-| 트리거 | PR + 주간 스케줄 (`schedule`) |
-| 리포트 | GitHub Security 탭 + PR Check |
+| 신규 버그 | 0개 |
+| 신규 취약점 | 0개 |
+| 신규 보안 핫스팟 리뷰율 | 100% |
+| 신규 코드 중복률 | 3% 이하 |
+| 신규 코드 커버리지 | 80% 이상 (JaCoCo 연동 후) |
 
-- `ci.yml`과 분리된 **`.github/workflows/codeql.yml`** 로 관리한다. PR 트리거와 주간 스케줄 트리거를 함께 정의한다.
-- 다른 Job과 독립적으로 실행되며, CodeQL이 직접 소스를 컴파일하여 분석한다.
-- SQL Injection, XSS, Path Traversal 등 CWE 기반 취약점을 탐지하며, 심각도 `High` 이상 발견 시 PR merge를 블로킹한다.
-- 탐지 결과는 GitHub **Security > Code scanning** 탭에 누적 관리된다.
-- 주간 스케줄 실행 실패 시 담당자에게 알림이 전송되어야 한다 (Section 7 참고).
-
-```yaml
-# .github/workflows/codeql.yml
-on:
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 2 * * 1'  # 매주 월요일 02:00 UTC
-
-jobs:
-  codeql:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: github/codeql-action/init@v3
-        with:
-          languages: java
-
-      - uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:java"
-```
+- Quality Gate 실패 시 GitHub PR Check가 `failure`로 표시되어 merge가 블로킹된다.
+- SonarCloud 대시보드에서 프로젝트 전체 품질 현황을 확인할 수 있다.
+- SAST Taint Analysis로 SQL Injection, XSS, Path Traversal 등 CWE 기반 취약점을 탐지한다.
 
 ---
 
@@ -354,12 +313,11 @@ jobs:
 
 ```
 Build — Unit Tests                     ✅  42 passed,  0 failed
-  └─ SpotBugs + PMD 위반 시 위 Job 자체가 ❌ 로 표시됨 (별도 코멘트 없음)
+SonarCloud — Quality Gate              ✅  Passed (0 bugs, 0 vulnerabilities, 0 hotspots)
 Playwright — E2E Tests (Oracle)        ✅  10 passed,  0 failed
 Playwright — E2E Tests (MySQL)         ❌  10 passed,  2 failed  ← 실패 케이스명 + 오류 메시지 포함
 Newman — API Tests (Oracle)            ✅  36 passed,  0 failed
 Newman — API Tests (MySQL)             ✅  36 passed,  0 failed
-CodeQL — Security Analysis             ✅  No vulnerabilities found
 ```
 
 ### 6.3 아티팩트 보관 정책
@@ -367,7 +325,7 @@ CodeQL — Security Analysis             ✅  No vulnerabilities found
 | 아티팩트 | 보관 기간 | 조건 |
 |----------|-----------|------|
 | `app-jar` | 1일 | 항상 |
-| `code-quality-report` | 7일 | 실패 시에만 |
+| SonarCloud 대시보드 | — (SonarCloud 호스팅) | 항상 |
 | `playwright-report-oracle` | 7일 | 항상 |
 | `playwright-report-mysql` | 7일 | 항상 |
 | `newman-results-oracle` | 7일 | 항상 |
@@ -383,16 +341,15 @@ PR 코멘트는 리뷰어가 직접 확인해야 하므로, 아래 이벤트는 
 | 이벤트 | 이유 |
 |--------|------|
 | `main` push 후 CI 실패 | merge 직후 파이프라인 깨짐 — 즉시 인지 필요 |
-| CodeQL 주간 스케줄 실패 | PR과 무관하게 실행되어 코멘트가 달리지 않음 |
 | Dependabot PR 생성 | 신규 취약점 발견 시 빠른 대응 필요 |
 
 ```yaml
-# 스케줄 실패 알림 예시 (Slack)
-- name: Notify on failure
-  if: failure() && github.event_name == 'schedule'
+# main 실패 알림 예시 (Slack)
+- name: Notify on main failure
+  if: failure() && github.ref == 'refs/heads/main'
   uses: slackapi/slack-github-action@v2
   with:
-    payload: '{"text": "⚠️ CodeQL 주간 스캔 실패: ${{ github.repository }}"}'
+    payload: '{"text": "CI build failed on main: ${{ github.repository }} — ${{ github.sha }}"}'
   env:
     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
@@ -410,6 +367,7 @@ PR 코멘트는 리뷰어가 직접 확인해야 하므로, 아래 이벤트는 
 | `CI_ORACLE_PASSWORD` | CI용 Oracle 컨테이너 비밀번호 |
 | `CI_MYSQL_PASSWORD` | CI용 MySQL 컨테이너 비밀번호 |
 | `SLACK_WEBHOOK_URL` | 알림용 Slack Incoming Webhook |
+| `SONAR_TOKEN` | SonarCloud 분석 인증 토큰 |
 
 애플리케이션 설정은 프로파일 그룹(`ci-oracle`, `ci-mysql`)으로 조합하여 주입한다. 프로파일 구성 및 각 YAML 파일의 역할은 **Configuration Management 부록**을 참고한다.
 
@@ -421,4 +379,4 @@ CI workflow의 각 Job에서 `env:` 블록으로 공통 변수명(`DB_HOST`, `DB
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-25*
