@@ -85,10 +85,6 @@ XML 속성 관리_WRITE: RES_XMLPROPERTY_WRITE, RES_WASINSTANCE_READ
 전문처리핸들러 관리_READ: RES_MESSAGEHANDLER_READ
 전문처리핸들러 관리_WRITE: RES_MESSAGEHANDLER_WRITE
 
-타행상태 관리_READ: RES_ORG_READ                          # TODO: Package Structure에 bankstatus 패키지 미정의 → org 패키지 임시 사용
-타행상태 관리_WRITE: RES_ORG_WRITE
-
-
 # ── 거래/전문 관리 (8개) ──────────────────────────────────────────────────────
 
 전문 관리_READ: RES_MESSAGE_READ, RES_ORG_READ
