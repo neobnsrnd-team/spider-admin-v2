@@ -93,6 +93,15 @@ USER                             ROLE
 
 ### 3.1 security-access.yml
 
+> **52개 메뉴의 전체 리소스 의존성 정의:**
+> [`src/main/resources/menu-resource-permissions.yml`](../../../src/main/resources/menu-resource-permissions.yml)
+>
+> - Key: 화면명 (`Product Requirements/00-overview.md` 기준)
+> - RES_XXX: 도메인 패키지명 (`Package Structure.md` 기준)
+> - 크로스 도메인 의존성이 없는 화면은 생략
+>
+> 아래는 대표 예시만 발췌한 것이다. 전체 목록은 위 파일을 참조한다.
+
 ```yaml
 # ==============================================
 # Menu-Based Access Control Configuration
@@ -121,32 +130,32 @@ security:
     #   RES_   : 다른 도메인의 리소스 접근 (조회, 실행 등)
     #
     # level 기본값: READ (생략 가능)
+    #
+    # 전체 목록: src/main/resources/menu-resource-permissions.yml
     # ------------------------------------------
     resource-dependencies:
 
-      BATCH_APP:
-        - resource: RES_WAS_INSTANCE
+      배치 APP 관리:
+        - resource: RES_WASINSTANCE
 
-      APP_MAPPING:
-        - resource: RES_TRX
-        - resource: RES_WAS_INSTANCE
+      요청처리 APP 맵핑 관리:
+        - resource: RES_TRANSACTION
+        - resource: RES_WASINSTANCE
         - resource: RES_GATEWAY
-        - resource: RES_WAS_RELOAD
+        - resource: RES_RELOAD
           level: WRITE
 
-      MESSAGE:
+      전문 관리:
         - resource: RES_ORG
 
-      TRX:
-        - resource: RES_WAS_GROUP
-        - resource: RES_WAS_INSTANCE
+      거래 관리:
+        - resource: RES_WASGROUP
+        - resource: RES_WASINSTANCE
+        - resource: RES_ORG
+        - resource: RES_MESSAGE
 
-      USER:
+      사용자 관리:
         - resource: RES_ROLE
-
-      ACCESS_USER:
-        - resource: RES_WAS_GROUP
-        - resource: RES_WAS_INSTANCE
 ```
 
 ### 3.2 application.yml에서 import

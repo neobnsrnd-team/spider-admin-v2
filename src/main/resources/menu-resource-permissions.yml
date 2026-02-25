@@ -1,0 +1,161 @@
+# ==============================================================================
+# 메뉴별 리소스 의존성 (resource-dependencies)
+# ==============================================================================
+#
+# 화면이 다른 도메인의 API를 참조할 때, 해당 리소스에 대한 읽기/쓰기 권한을
+# 자동 파생하기 위한 정의이다.
+#
+# - Key        : 화면명 (Product Requirements/00-overview.md 기준)
+# - RES_XXX    : 도메인 패키지명 (Package Structure.md 기준)
+# - level 생략 시 기본값 READ
+#
+# 크로스 도메인 의존성이 없는 화면은 생략한다.
+# ==============================================================================
+
+security:
+  access:
+    resource-dependencies:
+
+      # ── 시스템 관리 ──────────────────────────────────────────────────────────
+
+      역할 관리:
+        - resource: RES_MENU                  # 역할별 메뉴 권한 설정 시 메뉴 목록
+
+      사용자 관리:
+        - resource: RES_ROLE                  # 사용자 등록·수정 시 역할 드롭다운
+
+      코드 관리:
+        - resource: RES_CODEGROUP             # 코드 검색·등록 시 코드 그룹 드롭다운
+
+      # ── 인프라 관리 ──────────────────────────────────────────────────────────
+
+      WAS 인스턴스 관리:
+        - resource: RES_WASGROUP              # WAS 그룹 드롭다운
+
+      속성 관리:
+        - resource: RES_WASINSTANCE            # 속성 반영 대상 WAS
+
+      XML 속성 관리:
+        - resource: RES_WASINSTANCE            # Reload 대상 WAS
+
+      운영정보 Reload:
+        - resource: RES_WASINSTANCE            # Reload 대상 WAS 선택
+
+      # ── 연계 관리 ────────────────────────────────────────────────────────────
+
+      기관 관리:
+        - resource: RES_GATEWAY               # 기관에 게이트웨이 할당
+        - resource: RES_MESSAGEHANDLER        # 기관에 핸들러 할당
+
+      코드 맵핑 관리:
+        - resource: RES_ORG                   # 기관 드롭다운
+        - resource: RES_CODEGROUP             # 코드 그룹 드롭다운
+
+      게이트웨이 관리:
+        - resource: RES_ORG                   # 기관 할당
+
+      게이트웨이 맵핑 관리:
+        - resource: RES_GATEWAY               # 게이트웨이 드롭다운
+        - resource: RES_ORG                   # 기관 드롭다운
+        - resource: RES_TRANSACTION           # 거래 검색 팝업
+
+      요청처리 APP 맵핑 관리:
+        - resource: RES_TRANSACTION           # 거래 검색
+        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
+        - resource: RES_GATEWAY               # 게이트웨이 드롭다운
+        - resource: RES_RELOAD
+          level: WRITE                        # 맵핑 변경 후 Reload
+
+      리스너/응답커넥터 맵핑 관리:
+        - resource: RES_GATEWAY               # 리스너·응답커넥터 게이트웨이
+
+      타행상태 관리:
+        - resource: RES_ORG                   # 은행(기관) 목록
+
+      # ── 거래/전문 관리 ───────────────────────────────────────────────────────
+
+      전문 관리:
+        - resource: RES_ORG                   # 기관 드롭다운
+
+      거래 관리:
+        - resource: RES_WASGROUP              # WAS 그룹 드롭다운
+        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
+        - resource: RES_ORG                   # 기관 드롭다운
+        - resource: RES_MESSAGE               # 전문 검색 팝업
+
+      거래 Validator 관리:
+        - resource: RES_TRANSACTION           # 거래 목록 참조
+
+      거래 중지 관리:
+        - resource: RES_TRANSACTION           # 거래 검색 팝업
+        - resource: RES_WASINSTANCE            # Reload 대상 WAS
+        - resource: RES_RELOAD
+          level: WRITE                        # 중지·재개 후 Reload
+
+      전문 테스트:
+        - resource: RES_ORG                   # 기관 드롭다운
+        - resource: RES_TRANSACTION           # 거래 검색 팝업
+        - resource: RES_WASINSTANCE            # 테스트 대상 WAS
+
+      당발 대응답 관리:
+        - resource: RES_TRANSACTION           # 거래 검색 팝업
+
+      거래 추적 로그 조회:
+        - resource: RES_ORG                   # 기관 검색 필터
+
+      # ── 배치 관리 ────────────────────────────────────────────────────────────
+
+      배치 APP 관리:
+        - resource: RES_WASINSTANCE            # WAS 인스턴스 할당
+
+      배치 수행 내역:
+        - resource: RES_WASINSTANCE            # WAS 인스턴스 필터
+
+      # ── 오류 관리 ────────────────────────────────────────────────────────────
+
+      에러 내역 통계:
+        - resource: RES_ORG                   # 채널(기관) 필터
+
+      # ── 모니터링 ─────────────────────────────────────────────────────────────
+
+      WAS별 Gateway 정보:
+        - resource: RES_WASINSTANCE            # WAS 인스턴스 드롭다운
+
+      WAS별 Gateway 모니터링:
+        - resource: RES_WASINSTANCE            # WAS 인스턴스별 모니터링
+
+      # ── 이력/감사 ────────────────────────────────────────────────────────────
+
+      관리자 작업 이력:
+        - resource: RES_USER                  # 사용자명 필터
+
+      거래 중지 이력:
+        - resource: RES_TRANSACTION           # 거래 ID 검색
+
+      # ── 로그 관리 ────────────────────────────────────────────────────────────
+
+      전문로그 조회(DB):
+        - resource: RES_ORG                   # 기관 검색 필터
+
+      # ── 게시판 ───────────────────────────────────────────────────────────────
+
+      게시판 권한 관리:
+        - resource: RES_USER                  # 권한 부여 대상 사용자
+        - resource: RES_BOARD                 # 권한 설정 대상 게시판
+
+      페이지별 공지사항 관리:
+        - resource: RES_MENU                  # 대상 페이지 URL 선택
+
+      # ── 전송 데이터 ──────────────────────────────────────────────────────────
+
+      전송 데이터 관리:
+        - resource: RES_ORG                   # 전송 대상 기관
+
+      전송 데이터 생성:
+        - resource: RES_ORG                   # 전송 대상 기관
+
+      # ── 개발 관리 ────────────────────────────────────────────────────────────
+
+      전문로그 파싱:
+        - resource: RES_ORG                   # 기관 드롭다운
+        - resource: RES_MESSAGE               # 전문 검색 팝업
