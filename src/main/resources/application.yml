@@ -1,0 +1,10 @@
+spring:
+  config:
+    import: optional:file:./.env[.properties]
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local-oracle}
+    group:
+      local-oracle: "base,oracle,local"
+      local-mysql: "base,mysql,local"
+      ci-oracle: "base,oracle,ci"
+      ci-mysql: "base,mysql,ci"
