@@ -93,6 +93,14 @@ USER                             ROLE
 
 ### 3.1 security-access.yml
 
+> **52개 메뉴의 전체 리소스 의존성 정의:**
+> [`src/main/resources/menu-resource-permissions.yml`](../../../src/main/resources/menu-resource-permissions.yml)
+>
+> - 화면명: `Product Requirements/00-overview.md` 기준
+> - `RES_XXX`: `Package Structure.md` 도메인 패키지명 (대문자)
+> - 양식: `화면명_LEVEL : RES_자기도메인_LEVEL, RES_참조도메인_READ, ...`
+> - `_WRITE` 미정의 = 조회 전용 (Template B/C)
+
 ```yaml
 # ==============================================
 # Menu-Based Access Control Configuration
@@ -104,49 +112,26 @@ security:
     # ------------------------------------------
     # 권한 소스 설정
     # ------------------------------------------
-    # USER_MENU : 사용자별 개별 메뉴 권한 (USER_MENU 테이블)
-    # ROLE_MENU : 역할 기반 메뉴 권한 (USER.ROLE_ID → ROLE_MENU 테이블)
-    #
-    # USER_MENU: 사용자마다 다른 메뉴 접근 범위를 부여할 때
-    # ROLE_MENU: 역할(관리자/운영자/조회자)로 일괄 관리할 때
-    # ------------------------------------------
     authority-source: USER_MENU
 
     # ------------------------------------------
     # 리소스 의존성 정의
     # ------------------------------------------
-    # 메뉴 권한 보유 시 자동으로 파생되는 리소스 권한
+    # 양식: 화면명_LEVEL : RES_자기도메인_LEVEL, RES_참조도메인_READ
+    # _WRITE 시 자기 도메인만 WRITE 승격, 참조 도메인은 READ 유지
+    # 예외: RES_RELOAD_WRITE 등 실행 행위가 필요한 경우
     #
-    # 접두사 규칙:
-    #   RES_   : 다른 도메인의 리소스 접근 (조회, 실행 등)
-    #
-    # level 기본값: READ (생략 가능)
+    # 전체 목록: src/main/resources/menu-resource-permissions.yml
     # ------------------------------------------
-    resource-dependencies:
+    # 예시:
+    역할 관리_READ: RES_ROLE_READ, RES_MENU_READ
+    역할 관리_WRITE: RES_ROLE_WRITE, RES_MENU_READ
 
-      BATCH_APP:
-        - resource: RES_WAS_INSTANCE
+    거래 관리_READ: RES_TRANSACTION_READ, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
+    거래 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
 
-      APP_MAPPING:
-        - resource: RES_TRX
-        - resource: RES_WAS_INSTANCE
-        - resource: RES_GATEWAY
-        - resource: RES_WAS_RELOAD
-          level: WRITE
-
-      MESSAGE:
-        - resource: RES_ORG
-
-      TRX:
-        - resource: RES_WAS_GROUP
-        - resource: RES_WAS_INSTANCE
-
-      USER:
-        - resource: RES_ROLE
-
-      ACCESS_USER:
-        - resource: RES_WAS_GROUP
-        - resource: RES_WAS_INSTANCE
+    요청처리 APP 맵핑 관리_READ: RES_TRANSPORT_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ
+    요청처리 APP 맵핑 관리_WRITE: RES_TRANSPORT_WRITE, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ, RES_RELOAD_WRITE
 ```
 
 ### 3.2 application.yml에서 import
