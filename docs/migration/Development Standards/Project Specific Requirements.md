@@ -7,7 +7,7 @@
 | 항목 | 관련 문서 |
 |------|----------|
 | 메뉴 기반 인가 (MenuGuard, @PreAuthorize) | Authentication & Authorization 5-6절 |
-| DB Schema (USER_MENU, ROLE_MENU, MENU) | Authentication & Authorization 5.4절 |
+| DB Schema (USER_MENU, ROLE_MENU, MENU) | Authentication & Authorization 2절 |
 | DB별 SQL 분기 (databaseId) | Multi-DB 3절 |
 | 예외 처리 (ErrorType, BusinessException) | Exception Handling 2절 |
 | 보안 설정 (CSRF, 세션, 비밀번호) | Security |
@@ -19,7 +19,7 @@
 ## 2. 메뉴 계층 구조
 
 > 메뉴 기반 인가(MenuGuard, @PreAuthorize)는 Authentication & Authorization 5-6절 참고.
-> DB Schema(USER_MENU, ROLE_MENU, MENU)는 Authentication & Authorization 5.4절 참고.
+> DB Schema(USER_MENU, ROLE_MENU, MENU)는 Authentication & Authorization 2절 참고.
 
 ### 2.1 MENU 트리 규칙
 
@@ -47,7 +47,7 @@ AND USE_YN = 'Y'
 ORDER SIBLINGS BY SORT_ORDER
 ```
 
-> MySQL에서는 `WITH RECURSIVE` CTE로 대체한다. DB별 SQL 분기는 Multi-DB 3.5절 참고.
+> MySQL에서는 `WITH RECURSIVE` CTE로 대체한다. DB별 SQL 분기는 Multi-DB 3절 참고.
 
 ### 2.3 LEAF_YN 판별
 

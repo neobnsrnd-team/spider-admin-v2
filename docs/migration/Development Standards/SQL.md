@@ -22,18 +22,6 @@ mybatis:
     auto-mapping-behavior: PARTIAL          # 명시된 컬럼만 매핑
 ```
 
-### 2.2 PageHelper 설정
-
-```yaml
-pagehelper:
-  helper-dialect: oracle                    # oracle, mysql, postgresql
-  reasonable: true                          # pageNum < 1 → 1, pageNum > 총페이지 → 마지막
-  support-methods-arguments: true
-  params: count=countSql
-```
-
-> DB 전환 시 `helper-dialect`만 변경하면 된다. → Multi-DB 2절 참고
-
 ---
 
 ## 3. Mapper 파일 구조
@@ -336,30 +324,7 @@ Enum 컬럼은 반드시 TypeHandler를 지정한다.
 
 ---
 
-## 9. 페이징 표준
-
-### 9.1 PageHelper 사용
-
-```java
-// Service 계층에서 호출
-PageHelper.startPage(request.getPage(), request.getSize());
-List<UserResponseDTO> list = userMapper.findAllWithSearch(params);
-return PageResponse.from(list);     // PageInfo → PageResponse 변환
-```
-
-| DB | PageHelper 자동 적용 |
-| --- | --- |
-| Oracle | ROWNUM 방식 |
-| MySQL | LIMIT 방식 |
-| PostgreSQL | LIMIT OFFSET 방식 |
-
-> **규칙:** SQL에 ROWNUM, LIMIT을 직접 작성하지 않는다. PageHelper에 위임한다.
-
-> `PageRequest`/`PageResponse` 클래스 정의는 API Design 7절 참고.
-
----
-
-## 10. 체크리스트
+## 9. 체크리스트
 
 새 Mapper XML 작성 시 확인 항목:
 
@@ -372,9 +337,8 @@ return PageResponse.from(list);     // PageInfo → PageResponse 변환
 - [ ]  `<where>` 태그를 사용했는가 (WHERE 1=1 금지)
 - [ ]  정렬에 `${}` 대신 `<choose>` 를 사용했는가
 - [ ]  Enum 컬럼에 TypeHandler를 지정했는가
-- [ ]  페이징은 PageHelper에 위임했는가 (ROWNUM/LIMIT 직접 작성 금지)
 - [ ]  DB별 문법 차이가 있는 SQL에 `databaseId`를 지정했는가
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*

@@ -314,8 +314,8 @@ src/main/java/{base-package}/
 │   └── GlobalExceptionHandler.java
 │
 └── global/dto/
-    ├── ApiResponse.java            # API Design 10절 참고
-    └── ErrorDetail.java            # API Design 10절 참고
+    ├── ApiResponse.java            # API Design 4절 참고
+    └── ErrorDetail.java            # API Design 4절 참고
 ```
 
 도메인별 별도 파일은 만들지 않는다. `ErrorType`에 항목을 추가하는 것으로 확장한다.

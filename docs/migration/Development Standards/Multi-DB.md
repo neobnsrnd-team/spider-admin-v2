@@ -8,7 +8,7 @@
 
 - DB 전환 시 **Java 코드 변경은 0건**이어야 한다
 - DB별 차이는 **설정 파일과 Mapper XML에서만** 흡수한다
-- 페이징 등 공통 처리는 **프레임워크(PageHelper)에 위임**한다
+- 페이징은 **MyBatis XML에서 직접 처리**한다
 
 ---
 
@@ -49,8 +49,6 @@ spring:
       max-lifetime: 1800000
 ```
 
-> PageHelper 설정은 SQL 2.2절 참고. DB별 `helper-dialect`만 변경한다.
-
 ---
 
 ## 3. DatabaseIdProvider를 이용한 SQL 공통화
@@ -62,7 +60,6 @@ MyBatis 내장 기능으로, **하나의 XML 파일 안에서 DB별 SQL을 분�
 - `databaseId` 없는 SQL → 모든 DB에서 사용 (공통)
 - `databaseId="oracle"` → Oracle에서만 사용
 - `databaseId="mysql"` → MySQL에서만 사용
-- **우선순위:** databaseId 일치 > databaseId 없음
 
 ### 3.2 설정
 
@@ -85,30 +82,9 @@ public class MyBatisConfig {
 
 ### 3.3 SQL 작성 규칙
 
-SQL은 표준 SQL과 DB별 분기의 두 가지로 구분한다.
+표준 SQL은 `databaseId`를 붙이지 않는다. DB별 문법 차이가 있는 경우에만 같은 SQL ID로 DB별 버전을 각각 작성한다. MyBatis가 현재 DB에 맞는 것을 자동 선택한다.
 
-### 3.4 표준 SQL 규칙
-
-표준 SQL은 `databaseId`를 붙이지 않는다.
-
-```xml
-<!-- 공통: SELECT, UPDATE, DELETE 등 표준 SQL -->
-<select id="selectById" resultMap="BaseResultMap">
-    SELECT id, name, status FROM users WHERE id = #{id}
-</select>
-
-<update id="update">
-UPDATE users SET name = #{name} WHERE id = #{id}
-</update>
-
-<delete id="deleteById">
-DELETE FROM users WHERE id = #{id}
-</delete>
-```
-
-### 3.5 DB별 분기 규칙
-
-같은 SQL ID로 DB별 버전을 각각 작성한다. MyBatis가 현재 DB에 맞는 것을 자동 선택한다.
+### 3.4 DB별 분기 예시
 
 **Batch Insert:**
 
@@ -149,41 +125,16 @@ WHERE name LIKE CONCAT('%', #{keyword}, '%')
 </select>
 ```
 
-### 3.6 Java 코드 DB 무관성 원칙
-
-```java
-// Mapper 인터페이스 - DB에 무관하게 동일
-@Mapper
-public interface UserMapper {
-    User selectById(String id);
-    int insert(User user);
-    int insertBatch(List<User> list);   // XML에서 DB별 분기
-}
-
-// Service - DB에 무관하게 동일
-@Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserMapper userMapper;
-}
-```
-
 ---
 
-## 4. 페이징 처리
-
-SQL 9절 참고. PageHelper가 dialect 설정에 따라 자동으로 DB별 페이징을 처리하므로 ROWNUM, LIMIT 등을 SQL에 직접 작성하지 않는다.
-
----
-
-## 5. DB별 SQL 문법 차이 요약
+## 4. DB별 SQL 문법 차이 요약
 
 | 기능 | Oracle | MySQL | 공통화 방법 |
 | --- | --- | --- | --- |
 | 문자열 결합 | `\|\|` | `CONCAT()` | databaseId 분기 |
 | NULL 대체 | `NVL()` | `IFNULL()` | databaseId 분기 |
 | Batch Insert | `DUAL + UNION ALL` | `VALUES (...), (...)` | databaseId 분기 |
-| 페이징 | `ROWNUM` | `LIMIT` | PageHelper 자동 처리 |
+| 페이징 | `ROWNUM` | `LIMIT` | databaseId 분기 |
 | 현재 시간 | `SYSDATE` | `NOW()` | databaseId 분기 |
 | 시퀀스 | `SEQ.NEXTVAL` | `AUTO_INCREMENT` | databaseId 분기 |
 | 타입 변환 | `TO_CHAR()` / `TO_NUMBER()` | `CAST()` | databaseId 분기 |
@@ -192,7 +143,7 @@ SQL 9절 참고. PageHelper가 dialect 설정에 따라 자동으로 DB별 페�
 
 ---
 
-## 6. 체크리스트
+## 5. 체크리스트
 
 DB 전환 시 확인 항목:
 
@@ -200,10 +151,9 @@ DB 전환 시 확인 항목:
 - [ ]  `application-{db}.yml` 설정 완료 (DataSource, HikariCP)
 - [ ]  DatabaseIdProvider Bean 등록 확인
 - [ ]  모든 DB 전용 SQL에 `databaseId` 지정 확인
-- [ ]  PageHelper `helper-dialect` 설정 확인
 - [ ]  DDL 스크립트로 테이블/초기 데이터 생성 완료
 - [ ]  기본 CRUD + 주요 조회 화면 동작 검증 완료
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*

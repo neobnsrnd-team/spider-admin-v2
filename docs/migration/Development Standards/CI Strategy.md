@@ -216,20 +216,20 @@ build ──┬──► playwright-oracle  ┐
 
 - 유닛 테스트는 외부 의존성(DB, 네트워크) 없이 실행되어야 한다. DB가 필요한 테스트는 통합 테스트로 분리한다.
 - `compile` 단계에서 빌드 실패 시 이후 모든 Job이 실행되지 않는다.
-- `npm run lint` (`eslint` + `htmlhint`)는 Java 빌드 전에 실행하여 프론트엔드 금지 패턴을 조기 차단한다. ESLint 규칙과 HTMLHint 규칙은 UI Design §12.3절 및 §12.4절 참고.
+- `npm run lint` (`eslint` + `htmlhint`)는 Java 빌드 전에 실행하여 프론트엔드 금지 패턴을 조기 차단한다. ESLint 규칙과 HTMLHint 규칙은 Frontend Code Convention 참고.
 
 **코드 품질 + SAST 분석 — SonarCloud:**
 
-**SonarCloud**(SonarQube Cloud)를 사용하여 코드 품질 분석과 SAST 보안 분석을 통합 수행한다. Public GitHub 레포지토리에서 무료로 사용 가능하며, 기존 SpotBugs + PMD + CodeQL의 역할을 단일 플랫폼으로 대체한다.
+**SonarCloud**(SonarQube Cloud)를 사용하여 코드 품질 분석과 SAST 보안 분석을 통합 수행한다. Public GitHub 레포지토리에서 무료로 사용 가능하다.
 
-| 분석 영역 | SonarCloud 기능 | 대체 대상 |
-|-----------|----------------|-----------|
-| **버그 탐지** | Bug 룰 (null 역참조, 리소스 누수 등) | SpotBugs |
-| **코드 품질** | Code Smell 룰 (복잡도, 미사용 변수, 유지보수성) | PMD |
-| **코드 중복** | Duplications 탐지 | PMD CPD |
-| **보안 취약점** | SAST Taint Analysis (SQL Injection, XSS, Path Traversal 등) | CodeQL |
-| **보안 핫스팟** | Security Hotspot 리뷰 | — |
-| **코드 커버리지** | JaCoCo 연동 (추후 설정) | — |
+| 분석 영역 | SonarCloud 기능 |
+|-----------|----------------|
+| **버그 탐지** | Bug 룰 (null 역참조, 리소스 누수 등) |
+| **코드 품질** | Code Smell 룰 (복잡도, 미사용 변수, 유지보수성) |
+| **코드 중복** | Duplications 탐지 |
+| **보안 취약점** | SAST Taint Analysis (SQL Injection, XSS, Path Traversal 등) |
+| **보안 핫스팟** | Security Hotspot 리뷰 |
+| **코드 커버리지** | JaCoCo 연동 (추후 설정) |
 
 SonarCloud는 `build` Job의 마지막 단계에서 실행된다. `mvn verify` 완료 후 별도 step으로 `mvn sonar:sonar`를 실행하여 컴파일된 바이트코드와 테스트 리포트를 함께 분석한다.
 
@@ -370,7 +370,7 @@ PR 코멘트는 리뷰어가 직접 확인해야 하므로, 아래 이벤트는 
 | `SLACK_WEBHOOK_URL` | 알림용 Slack Incoming Webhook |
 | `SONAR_TOKEN` | SonarCloud 분석 인증 토큰 |
 
-애플리케이션 설정은 프로파일 그룹(`ci-oracle`, `ci-mysql`)으로 조합하여 주입한다. 프로파일 구성 및 각 YAML 파일의 역할은 **Configuration Management 부록**을 참고한다.
+애플리케이션 설정은 프로파일 그룹(`ci-oracle`, `ci-mysql`)으로 조합하여 주입한다. 프로파일 구성 및 각 YAML 파일의 역할은 **Configuration 부록**을 참고한다.
 
 CI workflow의 각 Job에서 `env:` 블록으로 공통 변수명(`DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` 등)에 매핑하여 주입한다. 애플리케이션 YAML은 Secret 이름을 직접 참조하지 않고 `${DB_HOST}`, `${DB_PASSWORD}` 같은 공통 변수명만 참조한다. Oracle·MySQL Job이 각자의 Secret을 동일한 변수명으로 노출하므로 YAML 수정 없이 DB를 전환할 수 있다.
 
@@ -380,4 +380,4 @@ CI workflow의 각 Job에서 `env:` 블록으로 공통 변수명(`DB_HOST`, `DB
 
 ---
 
-*Last updated: 2026-02-25*
+*Last updated: 2026-02-26*

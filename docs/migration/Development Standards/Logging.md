@@ -579,53 +579,7 @@ return MaskingUtil.mask(body);  // 마스킹 후 저장
 
 ---
 
-## 9. GlobalExceptionHandler 로그 레벨 표준
-
-> GlobalExceptionHandler 전체 구현은 Exception Handling 3절 참고.
-
-4xx와 5xx를 구분한다.
-
-```java
-// 4xx — log.warn() (클라이언트 오류, 예측 가능)
-@ExceptionHandler(BaseException.class)
-public ResponseEntity<...> handleBaseException(BaseException ex) {
-    ErrorCode code = ex.getErrorCode();
-    HttpStatus status = code.getHttpStatus();
-
-    if (status.is4xxClientError()) {
-        log.warn("[{}] {}", code.getCode(), ex.getMessage());  // WARN
-    } else {
-        log.error("[{}] {}", code.getCode(), ex.getMessage()); // ERROR — 5xx
-        logEventPort.record(buildErrorEvent(ex, ...));         // ERROR 이벤트 기록
-    }
-    ...
-}
-
-// Validation — log.warn()
-@ExceptionHandler(MethodArgumentNotValidException.class)
-public ResponseEntity<...> handleValidation(MethodArgumentNotValidException ex) {
-    log.warn("Validation failed: fields={}", extractFields(ex));  // 4xx → WARN
-    ...
-}
-
-// 5xx — log.error() + ERROR 이벤트
-@ExceptionHandler(Exception.class)
-public ResponseEntity<...> handleException(Exception ex, HttpServletRequest request) {
-    log.error("Unexpected error", ex);
-    logEventPort.record(ErrorLogEvent.builder()
-            .traceId(MDC.get("traceId"))
-            .errorCode("UNEXPECTED")
-            .errorClass(ex.getClass().getSimpleName())
-            .errorMessage(ex.getMessage())
-            .stackTrace(getStackTrace(ex))
-            .build());
-    ...
-}
-```
-
----
-
-## 10. 환경별 전략
+## 9. 환경별 전략
 
 | 환경 | 진단 로그 (Logback) | 이벤트 로그 (LogEventPort) | 루트 레벨 |
 |------|--------------------|-----------------------------|-----------|
@@ -668,4 +622,4 @@ Elasticsearch에 수신되는 문서 예시:
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

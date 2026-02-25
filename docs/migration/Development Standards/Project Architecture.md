@@ -45,8 +45,7 @@ Client → Controller → Service → Mapper → DB
 MyBatis는 ResultMap으로 SQL 결과를 임의 클래스에 매핑할 수 있다. 별도 Entity 클래스를 거치면 Entity ↔ DTO 변환 코드가 불필요하게 증가한다.
 
 ```
-❌ 기존: DB → Entity → Converter → ResponseDTO
-✅ 채택: DB → ResultMap → ResponseDTO (직접 매핑)
+DB → ResultMap → ResponseDTO (직접 매핑)
 ```
 
 > 이 결정으로 `entity/`, `converter/`, `model/`, `vo/` 패키지가 불필요하다.

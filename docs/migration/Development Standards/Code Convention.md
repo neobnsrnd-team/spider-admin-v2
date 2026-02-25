@@ -2,13 +2,17 @@
 
 ## 1. 개요
 
-코드 스타일, 네이밍 규칙, 클래스 구조 패턴, Enum 매핑을 정의한다. Spotless + Google Java Format (AOSP 변형)으로 포맷팅을 자동 강제한다.
+코드 스타일, 네이밍 규칙, 클래스 구조 패턴, Enum 매핑을 정의한다. Spotless + Palantir Java Format으로 포맷팅을 자동 강제한다.
 
 > 아키텍처 규칙(레이어 의존성, 패키지 구조, Entity 불사용)은 Project Architecture 문서 참고.
 
 ---
 
 ## 2. Spotless 설정
+
+Palantir Java Format의 상세 스타일 규칙은 공식 문서를 참고한다.
+
+> **Palantir Java Format:** https://github.com/palantir/palantir-java-format
 
 ### 2.1 Maven 플러그인
 
@@ -19,10 +23,9 @@
     <version>2.44.0</version>
     <configuration>
         <java>
-            <googleJavaFormat>
-                <version>1.25.2</version>
-                <style>AOSP</style>
-            </googleJavaFormat>
+            <palantirJavaFormat>
+                <version>2.50.0</version>
+            </palantirJavaFormat>
             <importOrder>
                 <order>java|javax,org,com,,\#</order>
             </importOrder>
@@ -42,9 +45,9 @@
 
 | 항목 | 값 |
 |------|-----|
-| 스타일 | Google Java Format — AOSP 변형 |
+| 스타일 | Palantir Java Format |
 | 들여쓰기 | 4칸 스페이스 |
-| 줄 길이 | 100자 (Google Java Format 기본값) |
+| 줄 길이 | 120자 (Palantir Java Format 기본값) |
 | import 순서 | `java\|javax` → `org` → `com` → 프로젝트 → `static` |
 | 미사용 import | 자동 제거 |
 
@@ -129,83 +132,16 @@ mvn spotless:apply
 
 ## 4. 클래스 구조
 
-### 4.1 Controller
+각 계층별 클래스 구조와 상세 예제는 아래 문서를 참고한다.
 
-```java
-@RestController
-@RequestMapping("/api/users")
-@RequiredArgsConstructor
-@Tag(name = "사용자 관리")
-@PreAuthorize("hasAuthority('USER:READ')")
-public class UserController {
+| 계층 | 참고 문서 |
+|------|----------|
+| Controller (CRUD 전체 예제) | API Design 5절 |
+| Service (트랜잭션, Guard Clause) | Project Architecture 6절, Exception Handling 5절 |
+| Mapper (MyBatis 인터페이스) | SQL 3-4절 |
+| Request/Response DTO (검증, 네이밍) | API Design 6절 |
 
-    private final UserService userService;
-
-    // 메서드 순서: list → get → create → update → delete
-}
-```
-
-> 전체 CRUD Controller 예제는 API Design 5.1절 참고.
-
-### 4.2 Service
-
-```java
-@Service
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
-public class UserService {
-
-    private final UserMapper userMapper;
-
-    // 조회 메서드: readOnly = true (클래스 레벨 상속)
-    // 쓰기 메서드: @Transactional 오버라이드
-}
-```
-
-> Guard Clause + BusinessException 패턴은 Exception Handling 5절 참고.
-
-### 4.3 Mapper
-
-```java
-@Mapper
-public interface UserMapper {
-    // MyBatis XML과 1:1 매핑
-    // Statement ID 규칙은 SQL 4절 참고
-}
-```
-
-### 4.4 Request DTO
-
-```java
-@Getter
-@Setter
-public class UserCreateRequestDTO {
-
-    @NotBlank(message = "사용자 ID는 필수입니다.")
-    @Size(max = 20)
-    @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
-}
-```
-
-> 검증 위치 전략은 API Design 6.3절 참고.
-
-### 4.5 Response DTO
-
-```java
-@Getter
-@Setter
-public class UserResponseDTO {
-
-    @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
-
-    @Schema(description = "사용자 이름", example = "홍길동")
-    private String userName;
-
-    // Mapper resultType/resultMap에서 직접 매핑
-}
-```
+**메서드 정의 순서:** `list → get → create → update → delete`
 
 ---
 
@@ -306,4 +242,4 @@ mybatis:
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

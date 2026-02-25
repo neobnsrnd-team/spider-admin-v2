@@ -101,15 +101,6 @@ GET /api/departments/select-options
 
 > 에러 상태 코드(400, 401, 403, 404, 409, 422, 500, 502)는 Exception Handling 2.3절의 `ErrorType.httpStatus` 참고.
 
-### 3.3 멱등성 규칙
-
-| 메서드 | 멱등성 | 설명 |
-|--------|--------|------|
-| GET | 멱등 | 동일 요청 = 동일 결과 |
-| PUT | 멱등 | 동일 데이터로 재전송 = 동일 결과 |
-| DELETE | 멱등 | 이미 삭제된 리소스 재삭제 = 동일 결과 (404 또는 204) |
-| POST | 비멱등 | 동일 요청을 반복하면 새 리소스 생성 |
-
 ---
 
 ## 4. 공통 응답 구조
@@ -422,39 +413,6 @@ public class PageResponse<T> {
     private final int size;
     private final long totalElements;
     private final int totalPages;
-
-    public static <T> PageResponse<T> from(List<T> list) {
-        PageInfo<T> pageInfo = new PageInfo<>(list);
-        return PageResponse.<T>builder()
-                .content(list)
-                .page(pageInfo.getPageNum())
-                .size(pageInfo.getPageSize())
-                .totalElements(pageInfo.getTotal())
-                .totalPages(pageInfo.getPages())
-                .build();
-    }
-}
-```
-
-> `PageInfo`는 PageHelper가 제공하는 클래스다.
-
-### 7.3 Controller → Service 흐름
-
-> PageHelper 설정은 SQL 2.2절, DB별 자동 적용은 SQL 9절 참고.
-
-```java
-// Service
-public PageResponse<UserResponseDTO> findAll(PageRequest request) {
-    PageHelper.startPage(request.getPage(), request.getSize());
-    List<UserResponseDTO> list = userMapper.findAllWithSearch(params);
-    return PageResponse.from(list);
-}
-
-// Controller
-@GetMapping
-public ResponseEntity<ApiResponse<PageResponse<UserResponseDTO>>> list(
-        @ModelAttribute PageRequest pageRequest) {
-    return ResponseEntity.ok(ApiResponse.success(userService.findAll(pageRequest)));
 }
 ```
 
@@ -462,17 +420,7 @@ public ResponseEntity<ApiResponse<PageResponse<UserResponseDTO>>> list(
 
 ## 8. Swagger/OpenAPI
 
-### 8.1 의존성
-
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.3.0</version>
-</dependency>
-```
-
-### 8.2 어노테이션 표준
+### 8.1 어노테이션 표준
 
 | 위치 | 어노테이션 | 용도 |
 |------|-----------|------|
@@ -516,24 +464,9 @@ public class UserCreateRequestDTO {
 
 > Swagger 2.x 어노테이션(`@Api`, `@ApiOperation`, `@ApiParam`)은 사용하지 않는다.
 
-### 8.3 그룹 설정
+### 8.2 환경별 노출 제한
 
-단일 패널은 별도 그룹 설정 없이 기본값을 사용한다. 기능 영역이 확장되면 `GroupedOpenApi`로 분리한다.
-
-```java
-// 확장 시 그룹 분리 예시
-@Bean
-public GroupedOpenApi adminApi() {
-    return GroupedOpenApi.builder()
-            .group("admin")
-            .pathsToMatch("/api/users/**", "/api/roles/**")
-            .build();
-}
-```
-
-### 8.4 환경별 노출 제한
-
-> Security 11절 참고.
+> Security 9절 참고.
 
 ```yaml
 # application-base.yml
@@ -549,25 +482,7 @@ springdoc:
 
 ---
 
-## 9. Content-Type
-
-### 9.1 요청
-
-| Content-Type | 사용 시점 |
-|-------------|-----------|
-| `application/json` | POST, PUT 요청 본문 |
-| `multipart/form-data` | 파일 업로드 |
-
-### 9.2 응답
-
-| 구분 | Content-Type |
-|------|-------------|
-| REST API | `application/json` |
-| Thymeleaf 페이지 | `text/html` |
-
----
-
-## 10. 파일 구조
+## 9. 파일 구조
 
 ```
 src/main/java/{base-package}/
@@ -594,7 +509,7 @@ src/main/java/{base-package}/
 
 ---
 
-## 11. 체크리스트
+## 10. 체크리스트
 
 ```
 □ 1. URL이 복수 명사 + kebab-case인지 확인
@@ -613,7 +528,6 @@ src/main/java/{base-package}/
       → 형식=DTO @Valid, 비즈니스=Service Guard Clause
 
 □ 6. 페이징: PageRequest/PageResponse 사용
-      → PageHelper.startPage() → PageResponse.from()
 
 □ 7. Swagger 어노테이션 부여
       → @Tag, @Operation, @Schema, @ApiResponse
@@ -627,4 +541,4 @@ src/main/java/{base-package}/
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*
