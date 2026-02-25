@@ -1,0 +1,35 @@
+services:
+  oracle:
+    image: gvenzl/oracle-xe:21.3.0-slim
+    ports:
+      - "${DB_PORT_ORACLE:-1521}:1521"
+    environment:
+      ORACLE_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./src/test/resources/db/oracle/ddl:/docker-entrypoint-initdb.d/ddl
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  mysql:
+    image: mysql:8.0.41
+    ports:
+      - "${DB_PORT_MYSQL:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: spider_admin
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./src/test/resources/db/mysql/ddl:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  oracle-data:
+  mysql-data:

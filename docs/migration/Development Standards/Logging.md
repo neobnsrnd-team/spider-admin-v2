@@ -174,19 +174,19 @@ public enum LogEventType { ACCESS, AUDIT, SECURITY, ERROR, SYSTEM }
 ```java
 // ACCESS — HTTP 요청/응답
 public record AccessLogEvent(
-        String traceId,
-        String userId,
-        Instant timestamp,
-        LogEventType type,         // ACCESS
-        String httpMethod,         // GET, POST, ...
-        String uri,
-        int statusCode,
-        long latencyMs,
-        String clientIp,
-        String requestData,        // 마스킹된 쿼리스트링 또는 body
-        String errorClass,         // 4xx/5xx 시
-        String errorMessage
-) implements LogEvent {}
+                String traceId,
+                String userId,
+                Instant timestamp,
+                LogEventType type,         // ACCESS
+                String httpMethod,         // GET, POST, ...
+                String uri,
+                int statusCode,
+                long latencyMs,
+                String clientIp,
+                String requestData,        // 마스킹된 쿼리스트링 또는 body
+                String errorClass,         // 4xx/5xx 시
+                String errorMessage
+        ) implements LogEvent {}
 ```
 
 | 이벤트 | 고유 필드 |
@@ -428,6 +428,7 @@ public UserResponseDTO update(String id, UserUpdateRequestDTO dto) {
     UserResponseDTO before = userMapper.selectById(id);
     // ... update logic
     userMapper.update(id, dto);
+    UserResponseDTO after = userMapper.selectById(id);  // 변경 후 재조회
 
     logEventPort.record(AuditLogEvent.builder()
             .traceId(MDC.get("traceId"))
@@ -438,7 +439,7 @@ public UserResponseDTO update(String id, UserUpdateRequestDTO dto) {
             .entityType("User")
             .entityId(id)
             .beforeSnapshot(toJson(before))    // 변경 전
-            .afterSnapshot(toJson(before))     // 변경 후 (updateEntity 후)
+            .afterSnapshot(toJson(after))      // 변경 후
             .build());
 }
 ```

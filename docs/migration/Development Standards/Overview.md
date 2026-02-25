@@ -34,7 +34,8 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | §13 | Configuration | 12-Factor, 프로파일, 환경 변수 |
 | §14 | Postman | Newman 컬렉션, API 자동 검증 |
 | §15 | CI Strategy | GitHub Actions, 멀티 DB 테스트, 자동 강제 |
-| §16 | Document Structure | 문서 작성 형식 규칙 |
+| §16 | UI Design | Thymeleaf 레이아웃, Tailwind CSS, 프론트엔드 규칙 |
+| §17 | Document Structure | 문서 작성 형식 규칙 |
 
 ---
 
@@ -52,6 +53,9 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | DB | Oracle 19c+ / MySQL 8.0+ | — |
 | 캐시 | Caffeine | Spring Boot 관리 |
 | 빌드 | Maven | 3.x |
+| CSS | Tailwind CSS | 3.4.x |
+| JS 유틸 | jQuery | 3.7.x |
+| 코드 품질 | SonarCloud / ESLint / HTMLHint / Husky | — / 9.x / 1.x / 9.x |
 
 전체 의존성 목록과 버전 관리 원칙은 Tech Stack 문서를 참고한다.
 
@@ -498,7 +502,10 @@ GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된�
 |------|-----------|---------|
 | Spotless | 코드 포맷 (AOSP, 100자) | PR 블로킹 |
 | ArchUnit | 레이어 의존성, 금지 클래스, DI 규칙 | PR 블로킹 |
+| ESLint | JS 코드 품질 (`static/js/**`) | PR 블로킹 |
+| HTMLHint | HTML 구조 (`templates/**`) | PR 블로킹 |
 | Newman | API 동작, 응답 구조 (Oracle + MySQL) | PR 블로킹 |
+| SonarCloud | 코드 품질 + SAST 보안 분석 | PR 블로킹 (Quality Gate) |
 | Dependabot | 의존성 보안 취약점 | PR 자동 생성 |
 
 코드 스타일과 아키텍처 규칙은 리뷰어가 지적하는 것이 아니라, CI가 자동으로 차단한다.
@@ -507,7 +514,64 @@ GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된�
 
 ---
 
-## 16. 문서 체계
+## 16. UI 설계
+
+### 16.1 Thymeleaf 템플릿 구조
+
+모든 페이지는 `fragments/layout.html`을 베이스 레이아웃으로 사용한다. 페이지 콘텐츠는 `pages/*-content.html`에 `<div class="content-inner">`로 시작하는 fragment로 작성하며, `th:replace`로 조립한다. `th:insert`는 금지다.
+
+```html
+<html th:replace="~{fragments/layout :: layout(~{::head}, ~{::main})}">
+```
+
+### 16.2 Tailwind CSS 규칙
+
+스타일은 Tailwind 유틸리티 클래스만 사용한다. Inline `style=""` 속성, Raw hex 직접 기재(`bg-[#3b2e5a]`)는 금지이며, `tailwind.config.js`에 선언한 색상 토큰을 사용한다.
+
+```html
+<!-- ❌ 금지 -->
+<div style="background: #3b2e5a">
+
+<!-- ✅ 올바른 예시 -->
+<div class="bg-sidebar">
+```
+
+전 환경에서 PostCSS 빌드를 사용한다. CDN은 CSP(`style-src 'self'`) 정책으로 차단된다(`npm run css:watch` — 로컬, `npm run css:build` — CI·운영).
+
+### 16.3 JavaScript 규칙
+
+`window.{Domain}Page` 네임스페이스 패턴으로 전역 오염을 방지한다. AJAX는 `$.ajax()`를 사용하며 `fetch()`는 금지다. `var`, `==` 비교, 직접 `addEventListener` 사용도 금지한다.
+
+```javascript
+// ✅ 올바른 예시
+window.UserPage = {
+  init() {
+    $('#saveBtn').off('click').on('click', () => {
+      $.ajax({ url: '/api/users', method: 'POST', ... });
+    });
+  }
+};
+
+// ❌ 금지 예시
+var count = 0;                            // var 금지
+const MyPage = { init() {} };            // window 미명시
+if (status == '1') { ... }               // == 금지
+fetch('/api/users');                      // fetch 금지
+```
+
+### 16.4 자동 강제
+
+| 도구 | 대상 | 강제 수준 |
+|------|------|-----------|
+| ESLint | `static/js/**/*.js` | CI 빌드 실패 |
+| HTMLHint | `templates/**/*.html` | CI 빌드 실패 |
+| Husky pre-commit | HTML 금지 패턴 | 커밋 차단 |
+
+> 상세: UI Design
+
+---
+
+## 17. 문서 체계
 
 이 폴더의 모든 문서는 동일한 구조를 따른다.
 

@@ -77,6 +77,7 @@ public class MyBatisConfig {
         properties.setProperty("Oracle", "oracle");
         properties.setProperty("MySQL", "mysql");
         properties.setProperty("PostgreSQL", "postgresql");
+        provider.setProperties(properties);
         return provider;
     }
 }
@@ -97,11 +98,11 @@ SQL은 표준 SQL과 DB별 분기의 두 가지로 구분한다.
 </select>
 
 <update id="update">
-    UPDATE users SET name = #{name} WHERE id = #{id}
+UPDATE users SET name = #{name} WHERE id = #{id}
 </update>
 
 <delete id="deleteById">
-    DELETE FROM users WHERE id = #{id}
+DELETE FROM users WHERE id = #{id}
 </delete>
 ```
 
@@ -126,9 +127,9 @@ SQL은 표준 SQL과 DB별 분기의 두 가지로 구분한다.
     SELECT NVL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
 </select>
 
-<!-- MySQL -->
+        <!-- MySQL -->
 <select id="getNextSeq" databaseId="mysql" resultType="int">
-    SELECT IFNULL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
+SELECT IFNULL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
 </select>
 ```
 
@@ -141,10 +142,10 @@ SQL은 표준 SQL과 DB별 분기의 두 가지로 구분한다.
     WHERE name LIKE '%' || #{keyword} || '%'
 </select>
 
-<!-- MySQL -->
+        <!-- MySQL -->
 <select id="search" databaseId="mysql" resultType="UserDTO">
-    SELECT id, name FROM users
-    WHERE name LIKE CONCAT('%', #{keyword}, '%')
+SELECT id, name FROM users
+WHERE name LIKE CONCAT('%', #{keyword}, '%')
 </select>
 ```
 
@@ -161,7 +162,8 @@ public interface UserMapper {
 
 // Service - DB에 무관하게 동일
 @Service
-public class UserServiceImpl implements UserService {
+@RequiredArgsConstructor
+public class UserService {
     private final UserMapper userMapper;
 }
 ```
