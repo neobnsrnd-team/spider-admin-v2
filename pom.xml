@@ -20,7 +20,7 @@
         <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
         <pagehelper.version>2.1.0</pagehelper.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <logstash-logback.version>8.0</logstash-logback.version>
+        <logstash-logback.version>9.0</logstash-logback.version>
         <logback-classic-db.version>1.2.11.1</logback-classic-db.version>
         <!-- Code Quality Plugins -->
         <spotless.version>2.44.0</spotless.version>
