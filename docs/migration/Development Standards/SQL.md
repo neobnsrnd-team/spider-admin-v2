@@ -58,7 +58,7 @@ resources/mapper/{domain}/
 ### 3.1 네임스페이스 규칙
 
 ```xml
-<mapper namespace="com.example.domain.{domain}.mapper.{Entity}Mapper">
+<mapper namespace="com.spider.admin.domain.{domain}.mapper.{Domain}Mapper">
 ```
 
 > 네임스페이스는 Java Mapper 인터페이스의 FQCN과 **정확히 일치**해야 한다.
@@ -107,7 +107,7 @@ ResultMap은 **Mapper XML 상단**에 정의한다.
 
 | 패턴 | 용도 | 예시 |
 | --- | --- | --- |
-| `Base{Entity}ResultMap` | 엔티티 기본 매핑 | `BaseUserResultMap` |
+| `Base{Domain}ResultMap` | 도메인 기본 DTO 매핑 | `BaseUserResultMap` |
 
 > 조인 결과는 ResultMap을 만들지 않고 `resultType="DTO"`로 직접 매핑한다. (5.4 참조)
 >
@@ -116,7 +116,7 @@ ResultMap은 **Mapper XML 상단**에 정의한다.
 
 ```xml
 <!-- Mapper XML 상단에 정의 -->
-<resultMap id="BaseUserResultMap" type="com.example.domain.user.entity.User">
+<resultMap id="BaseUserResultMap" type="com.example.domain.user.dto.response.UserResponseDTO">
     <id property="userId" column="USER_ID"/>
     <result property="userName" column="USER_NAME"/>
     <result property="email" column="EMAIL"/>
@@ -137,8 +137,8 @@ ResultMap은 **Mapper XML 상단**에 정의한다.
 ```xml
 <select id="findAllWithSearch" resultType="UserDetailResponseDTO">
     SELECT u.USER_ID     AS userId,
-           u.USER_NAME   AS userName,
-           r.ROLE_NAME   AS roleName        <!-- 조인 컬럼은 DTO 필드에 직접 매핑 -->
+    u.USER_NAME   AS userName,
+    r.ROLE_NAME   AS roleName        <!-- 조인 컬럼은 DTO 필드에 직접 매핑 -->
     FROM USERS u
     LEFT JOIN ROLES r ON u.ROLE_ID = r.ROLE_ID
 </select>
@@ -187,7 +187,7 @@ SQL Fragment(`<sql>`)는 **3곳 이상에서 동일하게 반복되는 경우에
 <!-- 같은 Mapper 내 -->
 <include refid="baseColumns"/>
 
-<!-- 다른 Mapper의 Fragment 참조 -->
+        <!-- 다른 Mapper의 Fragment 참조 -->
 <include refid="com.example.domain.user.mapper.UserMapper.baseColumns"/>
 ```
 
@@ -222,8 +222,8 @@ SQL Fragment(`<sql>`)는 **3곳 이상에서 동일하게 반복되는 경우에
     </where>
 </select>
 
-<!-- ❌ 금지: WHERE 1=1 패턴 -->
-WHERE 1=1
+        <!-- ❌ 금지: WHERE 1=1 패턴 -->
+        WHERE 1=1
 <if test="...">AND ...</if>
 ```
 
@@ -239,8 +239,8 @@ ORDER BY
     <otherwise>u.LAST_UPDATE_DTIME</otherwise>
 </choose>
 <choose>
-    <when test="sortDirection == 'ASC'">ASC</when>
-    <otherwise>DESC</otherwise>
+<when test="sortDirection == 'ASC'">ASC</when>
+<otherwise>DESC</otherwise>
 </choose>
 ```
 
@@ -256,20 +256,20 @@ DB별로 Batch Insert 문법이 다르므로 `databaseId`로 분기한다.
 <insert id="insertBatch" databaseId="oracle">
     INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
     SELECT A.* FROM (
-        <foreach collection="list" item="item" separator=" UNION ALL ">
-            SELECT #{item.roleId}, #{item.menuId}, #{item.authCode}
-            FROM DUAL
-        </foreach>
+    <foreach collection="list" item="item" separator=" UNION ALL ">
+        SELECT #{item.roleId}, #{item.menuId}, #{item.authCode}
+        FROM DUAL
+    </foreach>
     ) A
 </insert>
 
-<!-- MySQL -->
+        <!-- MySQL -->
 <insert id="insertBatch" databaseId="mysql">
-    INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
-    VALUES
-    <foreach collection="list" item="item" separator=",">
-        (#{item.roleId}, #{item.menuId}, #{item.authCode})
-    </foreach>
+INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
+VALUES
+<foreach collection="list" item="item" separator=",">
+    (#{item.roleId}, #{item.menuId}, #{item.authCode})
+</foreach>
 </insert>
 ```
 
@@ -295,12 +295,12 @@ DB별로 Batch Insert 문법이 다르므로 `databaseId`로 분기한다.
 
 ```xml
 <!-- ✅ #{} 사용 (PreparedStatement, SQL Injection 방지) -->
-WHERE USER_ID = #{userId}
-VALUES (#{userName}, #{email})
+        WHERE USER_ID = #{userId}
+        VALUES (#{userName}, #{email})
 
-<!-- ❌ ${} 금지 (Statement, SQL Injection 취약) -->
-WHERE USER_ID = '${userId}'
-ORDER BY ${sortColumn}              <!-- 동적 정렬은 6.2의 <choose> 방식 사용 -->
+        <!-- ❌ ${} 금지 (Statement, SQL Injection 취약) -->
+        WHERE USER_ID = '${userId}'
+        ORDER BY ${sortColumn}              <!-- 동적 정렬은 6.2의 <choose> 방식 사용 -->
 ```
 
 ### 8.2 JDBC 타입 힌트
@@ -309,8 +309,8 @@ NULL 가능 파라미터에는 `jdbcType`을 명시한다.
 
 ```xml
 #{password, jdbcType=VARCHAR}
-#{seq, jdbcType=INTEGER}
-#{description, jdbcType=CLOB}
+        #{seq, jdbcType=INTEGER}
+        #{description, jdbcType=CLOB}
 ```
 
 ### 8.3 Enum TypeHandler
@@ -319,14 +319,14 @@ Enum 컬럼은 반드시 TypeHandler를 지정한다.
 
 ```xml
 <!-- Insert/Update -->
-#{status, typeHandler=com.example.global.handler.StatusTypeHandler}
+        #{status, typeHandler=com.example.global.handler.StatusTypeHandler}
 
-<!-- ResultMap -->
+        <!-- ResultMap -->
 <result property="status" column="STATUS"
         typeHandler="com.example.global.handler.StatusTypeHandler"/>
 
-<!-- Where 조건 -->
-AND u.STATUS = #{statusFilter,
+        <!-- Where 조건 -->
+        AND u.STATUS = #{statusFilter,
     typeHandler=com.example.global.handler.StatusTypeHandler}
 ```
 

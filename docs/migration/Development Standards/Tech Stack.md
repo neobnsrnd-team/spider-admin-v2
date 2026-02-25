@@ -41,7 +41,18 @@
 
 ---
 
-## 5. 유틸리티
+## 5. 프론트엔드
+
+| 기술 | 버전 | 비고 |
+|------|------|------|
+| Tailwind CSS | 3.4.x | 유틸리티 클래스 기반 스타일링, UI Design §12.1 참고 |
+| jQuery | 3.7.x | DOM 조작, AJAX (`fetch` 대신 `$.ajax` 사용), UI Design §12.2 참고 |
+
+> 프론트엔드 빌드: `tailwindcss` CLI (PostCSS). 전 환경에서 PostCSS 빌드 사용. CDN은 CSP(`style-src 'self'`) 정책으로 차단되므로 사용하지 않는다.
+
+---
+
+## 6. 유틸리티
 
 | 기술 | 버전 | 비고 |
 |------|------|------|
@@ -51,17 +62,20 @@
 
 ---
 
-## 6. 빌드
+## 7. 빌드
 
 | 기술 | 버전 | 비고 |
 |------|------|------|
-| Maven | 3.x | 빌드 도구 |
+| Maven | 3.x | Java 빌드 도구 |
 | Maven Compiler Plugin | 3.11.0 | `release=17` |
-| Spotless | 2.44.0 | Google Java Format (AOSP), 코드 포맷 강제 |
+| Spotless | 2.44.0 | Google Java Format (AOSP), Java 코드 포맷 강제 |
+| ESLint | 9.x | JavaScript 코드 품질 강제, UI Design §12.3 참고 |
+| HTMLHint | 1.x | HTML 구조 검사, Thymeleaf 템플릿 오용 탐지 보조 |
+| Husky | 9.x | Pre-commit 훅, 금지 패턴 커밋 시점 차단, UI Design §12.4 참고 |
 
 ---
 
-## 7. 테스트·CI
+## 8. 테스트·CI
 
 | 기술 | 버전 | 비고 |
 |------|------|------|
@@ -76,7 +90,7 @@
 
 ---
 
-## 8. 버전 관리 원칙
+## 9. 버전 관리 원칙
 
 | 원칙 | 설명 |
 |------|------|
@@ -86,4 +100,4 @@
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-25*
