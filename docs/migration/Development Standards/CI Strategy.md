@@ -370,7 +370,7 @@ PR 코멘트는 리뷰어가 직접 확인해야 하므로, 아래 이벤트는 
 | `SLACK_WEBHOOK_URL` | 알림용 Slack Incoming Webhook |
 | `SONAR_TOKEN` | SonarCloud 분석 인증 토큰 |
 
-애플리케이션 설정은 프로파일 그룹(`ci-oracle`, `ci-mysql`)으로 조합하여 주입한다. 프로파일 구성 및 각 YAML 파일의 역할은 **Configuration Management 부록**을 참고한다.
+애플리케이션 설정은 프로파일 그룹(`ci-oracle`, `ci-mysql`)으로 조합하여 주입한다. 프로파일 구성 및 각 YAML 파일의 역할은 **Configuration 부록**을 참고한다.
 
 CI workflow의 각 Job에서 `env:` 블록으로 공통 변수명(`DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` 등)에 매핑하여 주입한다. 애플리케이션 YAML은 Secret 이름을 직접 참조하지 않고 `${DB_HOST}`, `${DB_PASSWORD}` 같은 공통 변수명만 참조한다. Oracle·MySQL Job이 각자의 Secret을 동일한 변수명으로 노출하므로 YAML 수정 없이 DB를 전환할 수 있다.
 

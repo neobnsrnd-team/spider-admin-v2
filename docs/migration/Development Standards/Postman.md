@@ -96,7 +96,7 @@ DELETE Delete User - 204
 
 ### 4.1 CSRF + Session 인증 흐름
 
-> Security 3.3절 (CSRF), Auth & Auth 3절 (인증 흐름) 참고.
+> Security 3.3절 (CSRF), Auth & Auth 4절 (인증 흐름) 참고.
 
 Spring Security Form Login 환경에서 Postman 인증 흐름:
 

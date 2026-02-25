@@ -464,9 +464,9 @@ public class UserCreateRequestDTO {
 
 > Swagger 2.x 어노테이션(`@Api`, `@ApiOperation`, `@ApiParam`)은 사용하지 않는다.
 
-### 8.3 환경별 노출 제한
+### 8.2 환경별 노출 제한
 
-> Security 11절 참고.
+> Security 9절 참고.
 
 ```yaml
 # application-base.yml
