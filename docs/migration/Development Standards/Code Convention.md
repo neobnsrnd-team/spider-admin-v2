@@ -132,83 +132,16 @@ mvn spotless:apply
 
 ## 4. 클래스 구조
 
-### 4.1 Controller
+각 계층별 클래스 구조와 상세 예제는 아래 문서를 참고한다.
 
-```java
-@RestController
-@RequestMapping("/api/users")
-@RequiredArgsConstructor
-@Tag(name = "사용자 관리")
-@PreAuthorize("hasAuthority('USER:READ')")
-public class UserController {
+| 계층 | 참고 문서 |
+|------|----------|
+| Controller (CRUD 전체 예제) | API Design 5절 |
+| Service (트랜잭션, Guard Clause) | Project Architecture 6절, Exception Handling 5절 |
+| Mapper (MyBatis 인터페이스) | SQL 3-4절 |
+| Request/Response DTO (검증, 네이밍) | API Design 6절 |
 
-    private final UserService userService;
-
-    // 메서드 순서: list → get → create → update → delete
-}
-```
-
-> 전체 CRUD Controller 예제는 API Design 5.1절 참고.
-
-### 4.2 Service
-
-```java
-@Service
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
-public class UserService {
-
-    private final UserMapper userMapper;
-
-    // 조회 메서드: readOnly = true (클래스 레벨 상속)
-    // 쓰기 메서드: @Transactional 오버라이드
-}
-```
-
-> Guard Clause + BusinessException 패턴은 Exception Handling 5절 참고.
-
-### 4.3 Mapper
-
-```java
-@Mapper
-public interface UserMapper {
-    // MyBatis XML과 1:1 매핑
-    // Statement ID 규칙은 SQL 4절 참고
-}
-```
-
-### 4.4 Request DTO
-
-```java
-@Getter
-@Setter
-public class UserCreateRequestDTO {
-
-    @NotBlank(message = "사용자 ID는 필수입니다.")
-    @Size(max = 20)
-    @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
-}
-```
-
-> 검증 위치 전략은 API Design 6.3절 참고.
-
-### 4.5 Response DTO
-
-```java
-@Getter
-@Setter
-public class UserResponseDTO {
-
-    @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
-
-    @Schema(description = "사용자 이름", example = "홍길동")
-    private String userName;
-
-    // Mapper resultType/resultMap에서 직접 매핑
-}
-```
+**메서드 정의 순서:** `list → get → create → update → delete`
 
 ---
 

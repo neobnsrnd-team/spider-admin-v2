@@ -220,16 +220,16 @@ build ──┬──► playwright-oracle  ┐
 
 **코드 품질 + SAST 분석 — SonarCloud:**
 
-**SonarCloud**(SonarQube Cloud)를 사용하여 코드 품질 분석과 SAST 보안 분석을 통합 수행한다. Public GitHub 레포지토리에서 무료로 사용 가능하며, 기존 SpotBugs + PMD + CodeQL의 역할을 단일 플랫폼으로 대체한다.
+**SonarCloud**(SonarQube Cloud)를 사용하여 코드 품질 분석과 SAST 보안 분석을 통합 수행한다. Public GitHub 레포지토리에서 무료로 사용 가능하다.
 
-| 분석 영역 | SonarCloud 기능 | 대체 대상 |
-|-----------|----------------|-----------|
-| **버그 탐지** | Bug 룰 (null 역참조, 리소스 누수 등) | SpotBugs |
-| **코드 품질** | Code Smell 룰 (복잡도, 미사용 변수, 유지보수성) | PMD |
-| **코드 중복** | Duplications 탐지 | PMD CPD |
-| **보안 취약점** | SAST Taint Analysis (SQL Injection, XSS, Path Traversal 등) | CodeQL |
-| **보안 핫스팟** | Security Hotspot 리뷰 | — |
-| **코드 커버리지** | JaCoCo 연동 (추후 설정) | — |
+| 분석 영역 | SonarCloud 기능 |
+|-----------|----------------|
+| **버그 탐지** | Bug 룰 (null 역참조, 리소스 누수 등) |
+| **코드 품질** | Code Smell 룰 (복잡도, 미사용 변수, 유지보수성) |
+| **코드 중복** | Duplications 탐지 |
+| **보안 취약점** | SAST Taint Analysis (SQL Injection, XSS, Path Traversal 등) |
+| **보안 핫스팟** | Security Hotspot 리뷰 |
+| **코드 커버리지** | JaCoCo 연동 (추후 설정) |
 
 SonarCloud는 `build` Job의 마지막 단계에서 실행된다. `mvn verify` 완료 후 별도 step으로 `mvn sonar:sonar`를 실행하여 컴파일된 바이트코드와 테스트 리포트를 함께 분석한다.
 
@@ -380,4 +380,4 @@ CI workflow의 각 Job에서 `env:` 블록으로 공통 변수명(`DB_HOST`, `DB
 
 ---
 
-*Last updated: 2026-02-25*
+*Last updated: 2026-02-26*

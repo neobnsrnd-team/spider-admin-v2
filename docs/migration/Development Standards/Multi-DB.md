@@ -60,7 +60,6 @@ MyBatis 내장 기능으로, **하나의 XML 파일 안에서 DB별 SQL을 분�
 - `databaseId` 없는 SQL → 모든 DB에서 사용 (공통)
 - `databaseId="oracle"` → Oracle에서만 사용
 - `databaseId="mysql"` → MySQL에서만 사용
-- **우선순위:** databaseId 일치 > databaseId 없음
 
 ### 3.2 설정
 
@@ -83,30 +82,9 @@ public class MyBatisConfig {
 
 ### 3.3 SQL 작성 규칙
 
-SQL은 표준 SQL과 DB별 분기의 두 가지로 구분한다.
+표준 SQL은 `databaseId`를 붙이지 않는다. DB별 문법 차이가 있는 경우에만 같은 SQL ID로 DB별 버전을 각각 작성한다. MyBatis가 현재 DB에 맞는 것을 자동 선택한다.
 
-### 3.4 표준 SQL 규칙
-
-표준 SQL은 `databaseId`를 붙이지 않는다.
-
-```xml
-<!-- 공통: SELECT, UPDATE, DELETE 등 표준 SQL -->
-<select id="selectById" resultMap="BaseResultMap">
-    SELECT id, name, status FROM users WHERE id = #{id}
-</select>
-
-<update id="update">
-UPDATE users SET name = #{name} WHERE id = #{id}
-</update>
-
-<delete id="deleteById">
-DELETE FROM users WHERE id = #{id}
-</delete>
-```
-
-### 3.5 DB별 분기 규칙
-
-같은 SQL ID로 DB별 버전을 각각 작성한다. MyBatis가 현재 DB에 맞는 것을 자동 선택한다.
+### 3.4 DB별 분기 예시
 
 **Batch Insert:**
 
@@ -145,25 +123,6 @@ SELECT IFNULL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
 SELECT id, name FROM users
 WHERE name LIKE CONCAT('%', #{keyword}, '%')
 </select>
-```
-
-### 3.6 Java 코드 DB 무관성 원칙
-
-```java
-// Mapper 인터페이스 - DB에 무관하게 동일
-@Mapper
-public interface UserMapper {
-    User selectById(String id);
-    int insert(User user);
-    int insertBatch(List<User> list);   // XML에서 DB별 분기
-}
-
-// Service - DB에 무관하게 동일
-@Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserMapper userMapper;
-}
 ```
 
 ---

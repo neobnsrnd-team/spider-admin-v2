@@ -136,17 +136,11 @@ public class SecurityConfig {
 
 ## 4. 인증 방식
 
-프로젝트 특성에 맞게 선택한다. **혼용 금지.**
+이 프로젝트는 **Form Login + Session** 방식을 사용한다.
 
-| 방식 | 적합한 경우 | Spring Security 설정 |
-|------|------------|---------------------|
-| **Form Login + Session** | 서버 렌더링, 내부 시스템 | `.formLogin()` + `.sessionManagement()` |
-| **JWT (Stateless)** | SPA + API, 모바일 클라이언트 | `.oauth2ResourceServer(jwt -> ...)` |
-| **OAuth2 / OIDC** | SSO, 외부 IdP 연동 | `.oauth2Login()` |
+> 인증 흐름 상세는 Authentication & Authorization 4절 참고.
 
-선택 후 해당 방식의 설정만 `SecurityFilterChain`에 포함한다.
-
-### 4.1 Session 사용 시 필수 설정
+### 4.1 Session 필수 설정
 
 ```java
 .sessionManagement(session -> session
@@ -159,19 +153,6 @@ public class SecurityConfig {
 | `none()` | 금지 — 세션 고정 공격 취약 |
 
 동시 세션 수(`maximumSessions`)는 서비스 요구사항에 따라 결정한다.
-
-### 4.2 JWT 사용 시 필수 설정
-
-```java
-.sessionManagement(session -> session
-    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-.oauth2ResourceServer(oauth2 -> oauth2
-    .jwt(jwt -> jwt.decoder(jwtDecoder())))
-```
-
-- Access Token 만료 시간은 **15분 이하**로 설정한다.
-- Refresh Token은 **HTTP-Only 쿠키** 또는 **서버 사이드 저장소**에 보관한다.
-- 토큰에 민감 정보(비밀번호, 주민번호 등)를 포함하지 않는다.
 
 ---
 
@@ -289,32 +270,7 @@ Spring Security 기본 헤더를 유지한다. **약화 금지.**
 
 ---
 
-## 9. Rate Limiting
-
-인증 엔드포인트에 대한 브루트포스 공격을 방어한다.
-
-| 대상 | 방식 | 권장 |
-|------|------|------|
-| 로그인 엔드포인트 | IP 기반 요청 제한 | 5회/분 |
-| API 전체 | 사용자/IP 기반 | 서비스 요구사항에 따라 |
-
-**구현 위치:** API Gateway, 리버스 프록시(Nginx `limit_req`), 또는 Spring Filter(`bucket4j` 등).
-Application 레벨에서 구현 시 `SecurityFilterChain` 앞에 Filter로 배치한다.
-
----
-
-## 10. 의존성 보안
-
-| 항목 | 규칙 |
-|------|------|
-| 취약점 스캔 | `dependencyCheck` 또는 Dependabot 활성화 |
-| Critical/High 취약점 | **릴리즈 전 해결 필수** |
-| Spring Security 버전 | 패치 릴리즈 1주 이내 적용 권장 |
-| 미사용 의존성 | 제거. 공격 표면 최소화 |
-
----
-
-## 11. 환경별 보안 구성
+## 9. 환경별 보안 구성
 
 | 항목 | 개발 | 운영 |
 |------|------|------|
@@ -344,7 +300,7 @@ public SecurityFilterChain devConsoleFilterChain(HttpSecurity http) throws Excep
 
 ---
 
-## 12. 체크리스트
+## 10. 체크리스트
 
 ```
 □ 1. SecurityFilterChain에서만 보안 설정
@@ -368,16 +324,13 @@ public SecurityFilterChain devConsoleFilterChain(HttpSecurity http) throws Excep
 □ 7. Security Headers: 기본값 유지 + CSP 추가
       → X-Frame-Options, X-Content-Type-Options 약화 없음
 
-□ 8. Session 사용 시: sessionFixation().changeSessionId()
+□ 8. Session: sessionFixation().changeSessionId()
       → 로그인 후 세션 ID 변경 확인
 
-□ 9. 의존성: 취약점 스캔 활성화
-      → Critical/High 릴리즈 전 해결
-
-□ 10. 환경 분리: 개발 전용 설정 @Profile 제한
-       → 운영에서 DB Console, Swagger 접근 불가
+□ 9. 환경 분리: 개발 전용 설정 @Profile 제한
+      → 운영에서 DB Console, Swagger 접근 불가
 ```
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*
