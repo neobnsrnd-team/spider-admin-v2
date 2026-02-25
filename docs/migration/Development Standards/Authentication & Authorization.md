@@ -96,11 +96,10 @@ USER                             ROLE
 > **52개 메뉴의 전체 리소스 의존성 정의:**
 > [`src/main/resources/menu-resource-permissions.yml`](../../../src/main/resources/menu-resource-permissions.yml)
 >
-> - Key: 화면명 (`Product Requirements/00-overview.md` 기준)
-> - RES_XXX: 도메인 패키지명 (`Package Structure.md` 기준)
-> - 크로스 도메인 의존성이 없는 화면은 생략
->
-> 아래는 대표 예시만 발췌한 것이다. 전체 목록은 위 파일을 참조한다.
+> - 화면명: `Product Requirements/00-overview.md` 기준
+> - `RES_XXX`: `Package Structure.md` 도메인 패키지명 (대문자)
+> - 양식: `화면명_LEVEL : RES_자기도메인_LEVEL, RES_참조도메인_READ, ...`
+> - `_WRITE` 미정의 = 조회 전용 (Template B/C)
 
 ```yaml
 # ==============================================
@@ -113,49 +112,26 @@ security:
     # ------------------------------------------
     # 권한 소스 설정
     # ------------------------------------------
-    # USER_MENU : 사용자별 개별 메뉴 권한 (USER_MENU 테이블)
-    # ROLE_MENU : 역할 기반 메뉴 권한 (USER.ROLE_ID → ROLE_MENU 테이블)
-    #
-    # USER_MENU: 사용자마다 다른 메뉴 접근 범위를 부여할 때
-    # ROLE_MENU: 역할(관리자/운영자/조회자)로 일괄 관리할 때
-    # ------------------------------------------
     authority-source: USER_MENU
 
     # ------------------------------------------
     # 리소스 의존성 정의
     # ------------------------------------------
-    # 메뉴 권한 보유 시 자동으로 파생되는 리소스 권한
-    #
-    # 접두사 규칙:
-    #   RES_   : 다른 도메인의 리소스 접근 (조회, 실행 등)
-    #
-    # level 기본값: READ (생략 가능)
+    # 양식: 화면명_LEVEL : RES_자기도메인_LEVEL, RES_참조도메인_READ
+    # _WRITE 시 자기 도메인만 WRITE 승격, 참조 도메인은 READ 유지
+    # 예외: RES_RELOAD_WRITE 등 실행 행위가 필요한 경우
     #
     # 전체 목록: src/main/resources/menu-resource-permissions.yml
     # ------------------------------------------
-    resource-dependencies:
+    # 예시:
+    역할 관리_READ: RES_ROLE_READ, RES_MENU_READ
+    역할 관리_WRITE: RES_ROLE_WRITE, RES_MENU_READ
 
-      배치 APP 관리:
-        - resource: RES_WASINSTANCE
+    거래 관리_READ: RES_TRANSACTION_READ, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
+    거래 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
 
-      요청처리 APP 맵핑 관리:
-        - resource: RES_TRANSACTION
-        - resource: RES_WASINSTANCE
-        - resource: RES_GATEWAY
-        - resource: RES_RELOAD
-          level: WRITE
-
-      전문 관리:
-        - resource: RES_ORG
-
-      거래 관리:
-        - resource: RES_WASGROUP
-        - resource: RES_WASINSTANCE
-        - resource: RES_ORG
-        - resource: RES_MESSAGE
-
-      사용자 관리:
-        - resource: RES_ROLE
+    요청처리 APP 맵핑 관리_READ: RES_TRANSPORT_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ
+    요청처리 APP 맵핑 관리_WRITE: RES_TRANSPORT_WRITE, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ, RES_RELOAD_WRITE
 ```
 
 ### 3.2 application.yml에서 import
