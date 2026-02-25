@@ -23,7 +23,7 @@
         <logstash-logback.version>8.0</logstash-logback.version>
         <logback-classic-db.version>1.2.11.1</logback-classic-db.version>
         <!-- Code Quality Plugins -->
-        <spotless.version>2.44.0</spotless.version>
+        <spotless.version>3.2.1</spotless.version>
         <google-java-format.version>1.25.2</google-java-format.version>
         <sonar.organization>neobnsrnd-team</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
