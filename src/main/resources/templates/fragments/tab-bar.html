@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+    <div id="spider-tab-bar" class="tab-bar" th:fragment="tabBar">
+        <!-- Tab items are dynamically created by tab-manager.js -->
+        <div id="tab-list" class="tab-list">
+            <!-- Tab item template (created by JS):
+            <div class="tab-item" data-menu-id="xxx">
+                <span class="tab-item-label">메뉴명</span>
+                <button class="tab-item-close" aria-label="닫기">&times;</button>
+            </div>
+            -->
+        </div>
+    </div>
+
+    <!-- Tab context menu (hidden by default, positioned by JS) -->
+    <div id="tab-context-menu" class="tab-context-menu hidden">
+        <button data-action="closeOthers" data-i18n="tab.closeOthers">다른 탭 닫기</button>
+        <button data-action="closeAll" data-i18n="tab.closeAll">모든 탭 닫기</button>
+        <button data-action="closeRight" data-i18n="tab.closeRight">오른쪽 탭 닫기</button>
+    </div>
+</body>
+</html>
