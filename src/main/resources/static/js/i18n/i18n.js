@@ -36,18 +36,36 @@
     }
 
     function translateDom(container, bundle) {
-        const els = (container || document).querySelectorAll('[data-i18n]');
+        const root = container || document;
+        var els = root.querySelectorAll('[data-i18n]');
         els.forEach(function (el) {
             const key = el.getAttribute('data-i18n');
             const text = resolve(key, bundle);
             if (text !== key) {
-                // Support placeholder translation
                 if (el.hasAttribute('data-i18n-attr')) {
                     el.setAttribute(el.getAttribute('data-i18n-attr'), text);
                 } else {
                     el.textContent = text;
                 }
             }
+        });
+
+        // title attribute
+        root.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+            const text = resolve(el.getAttribute('data-i18n-title'), bundle);
+            if (text !== el.getAttribute('data-i18n-title')) el.setAttribute('title', text);
+        });
+
+        // placeholder attribute
+        root.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+            const text = resolve(el.getAttribute('data-i18n-placeholder'), bundle);
+            if (text !== el.getAttribute('data-i18n-placeholder')) el.setAttribute('placeholder', text);
+        });
+
+        // aria-label attribute
+        root.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+            const text = resolve(el.getAttribute('data-i18n-aria'), bundle);
+            if (text !== el.getAttribute('data-i18n-aria')) el.setAttribute('aria-label', text);
         });
     }
 

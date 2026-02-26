@@ -4,9 +4,13 @@
 (function () {
     'use strict';
 
+    function t(key) {
+        return (window.SpiderI18n && SpiderI18n.t) ? SpiderI18n.t(key) : key;
+    }
+
     window.SpiderExcel = {
         download: async function (url, params, screenName) {
-            SpiderToast.info('엑셀 파일을 생성 중입니다...');
+            SpiderToast.info(t('excel.downloading'));
 
             try {
                 const resp = await api.request(url, {
@@ -34,9 +38,9 @@
                 document.body.removeChild(link);
                 URL.revokeObjectURL(objectUrl);
 
-                SpiderToast.success('엑셀 다운로드가 완료되었습니다.');
+                SpiderToast.success(t('excel.downloadSuccess'));
             } catch (error) {
-                SpiderToast.error('엑셀 다운로드에 실패했습니다: ' + error.message);
+                SpiderToast.error(t('excel.downloadFail') + ': ' + error.message);
             }
         }
     };

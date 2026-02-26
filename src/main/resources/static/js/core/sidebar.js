@@ -98,13 +98,6 @@
         }
     }
 
-    // ── Escape HTML to prevent XSS ──
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
     // ── Category collapse/expand state persistence ──
     function loadCategoryState() {
         try {

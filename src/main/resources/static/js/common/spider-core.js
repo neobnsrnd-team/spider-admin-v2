@@ -26,6 +26,18 @@
         });
     }
 
+    /** Escape HTML to prevent XSS */
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    /** i18n helper (safe to call before SpiderI18n loads) */
+    function t(key) {
+        return (window.SpiderI18n && SpiderI18n.t) ? SpiderI18n.t(key) : key;
+    }
+
     /**
      * Fetch wrapper with CSRF, JSON handling, and auth redirect
      */
@@ -36,8 +48,9 @@
                 'X-Requested-With': 'XMLHttpRequest',
             }, options.headers || {});
 
-            // Add CSRF token for state-changing methods
-            if (config.csrfHeader && config.csrfToken) {
+            // Add CSRF token for state-changing methods only
+            const method = (options.method || 'GET').toUpperCase();
+            if (config.csrfHeader && config.csrfToken && method !== 'GET' && method !== 'HEAD') {
                 headers[config.csrfHeader] = config.csrfToken;
             }
 
@@ -48,7 +61,7 @@
                 throw new Error('Unauthorized');
             }
             if (resp.status === 403) {
-                SpiderToast.error('접근 권한이 없습니다.');
+                SpiderToast.error(t('common.forbidden'));
                 throw new Error('Forbidden');
             }
             if (!resp.ok) {
@@ -96,5 +109,6 @@
     window.qs = qs;
     window.qsa = qsa;
     window.delegate = delegate;
+    window.escapeHtml = escapeHtml;
     window.api = api;
 })();

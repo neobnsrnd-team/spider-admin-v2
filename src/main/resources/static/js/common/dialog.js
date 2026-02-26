@@ -4,6 +4,10 @@
 (function () {
     'use strict';
 
+    function t(key) {
+        return (window.SpiderI18n && SpiderI18n.t) ? SpiderI18n.t(key) : key;
+    }
+
     function create(options) {
         var overlay = document.createElement('div');
         Object.assign(overlay.style, {
@@ -116,13 +120,13 @@
 
             // Cancel button (for confirm type)
             if (isConfirm) {
-                var cancelBtn = makeButton(options.cancelText || '취소', false, false);
+                var cancelBtn = makeButton(options.cancelText || t('common.cancel'), false, false);
                 cancelBtn.addEventListener('click', function () { close(false); });
                 ui.footer.appendChild(cancelBtn);
             }
 
             // OK/Confirm button
-            var okText = options.okText || (isConfirm ? '확인' : '확인');
+            var okText = options.okText || t('common.confirm');
             var okBtn = makeButton(okText, true, isDanger);
             okBtn.addEventListener('click', function () { close(true); });
             ui.footer.appendChild(okBtn);
@@ -165,7 +169,7 @@
             options = options || {};
             return showDialog({
                 type: 'confirm',
-                title: options.title || '확인',
+                title: options.title || t('dialog.confirmTitle'),
                 message: message,
                 okText: options.okText,
                 cancelText: options.cancelText,
@@ -177,7 +181,7 @@
             options = options || {};
             return showDialog({
                 type: 'alert',
-                title: options.title || '알림',
+                title: options.title || t('dialog.alertTitle'),
                 message: message,
                 okText: options.okText,
             });
@@ -186,10 +190,10 @@
         confirmDelete: function (message) {
             return showDialog({
                 type: 'confirm',
-                title: '삭제 확인',
-                message: message || '정말 삭제하시겠습니까?',
-                okText: '삭제',
-                cancelText: '취소',
+                title: t('dialog.deleteTitle'),
+                message: message || t('dialog.confirmDelete'),
+                okText: t('common.delete'),
+                cancelText: t('common.cancel'),
                 danger: true,
             });
         },

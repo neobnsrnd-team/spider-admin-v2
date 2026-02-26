@@ -29,6 +29,10 @@
         return date;
     }
 
+    function t(key) {
+        return (window.SpiderI18n && SpiderI18n.t) ? SpiderI18n.t(key) : key;
+    }
+
     /* Track AbortControllers per element to prevent duplicate listeners */
     const abortMap = new WeakMap();
 
@@ -58,7 +62,7 @@
                     const startVal = start.value;
                     const endVal = end ? end.value : '';
                     if (startVal && endVal && startVal > endVal) {
-                        SpiderToast.warning('시작일이 종료일보다 클 수 없습니다.');
+                        SpiderToast.warning(t('date.startAfterEnd'));
                         start.value = endVal;
                     }
                 }, { signal: ac.signal });
@@ -72,7 +76,7 @@
                     const startVal = start ? start.value : '';
                     const endVal = end.value;
                     if (startVal && endVal && startVal > endVal) {
-                        SpiderToast.warning('종료일이 시작일보다 작을 수 없습니다.');
+                        SpiderToast.warning(t('date.endBeforeStart'));
                         end.value = startVal;
                     }
                 }, { signal: ac.signal });

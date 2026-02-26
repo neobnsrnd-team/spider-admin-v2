@@ -43,6 +43,7 @@
         var wrap = ensureContainer();
 
         var toast = document.createElement('div');
+        toast.setAttribute('role', 'alert');
         Object.assign(toast.style, {
             display: 'flex',
             alignItems: 'flex-start',

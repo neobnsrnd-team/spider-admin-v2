@@ -28,7 +28,9 @@
     SpiderTheme.init();
 
     // Initialize i18n (translates data-i18n elements)
-    SpiderI18n.init();
+    SpiderI18n.init().then(setup);
+
+    function setup() {
 
     // ── Dark mode toggle ──
     const themeBtn = qs('#theme-toggle');
@@ -72,4 +74,6 @@
             }
         });
     }
+
+    } // setup
 })();
