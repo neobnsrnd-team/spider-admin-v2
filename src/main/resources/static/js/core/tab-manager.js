@@ -106,18 +106,16 @@
             })
             .catch(function (err) {
                 panel.innerHTML = '<div style="padding:2rem;color:var(--cds-text-error);">'
-                    + '<p style="font-weight:600;margin-bottom:0.5rem;">콘텐츠를 로드할 수 없습니다</p>'
+                    + '<p style="font-weight:600;margin-bottom:0.5rem;">' + escapeHtml(t('tab.loadError')) + '</p>'
                     + '<p style="font-size:var(--cds-label-01-size);color:var(--cds-text-secondary);">'
                     + escapeHtml(err.message || String(err)) + '</p></div>';
                 console.error('[SpiderTabManager] Failed to load content for ' + menuId + ':', err);
             });
     }
 
-    // ── Escape HTML ──
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+    // ── i18n helper ──
+    function t(key) {
+        return (window.SpiderI18n && SpiderI18n.t) ? SpiderI18n.t(key) : key;
     }
 
     // ── Show context menu at position ──
@@ -233,7 +231,7 @@
             tabItem.className = 'tab-item';
             tabItem.setAttribute('data-menu-id', menuId);
             tabItem.innerHTML = '<span class="tab-item-label">' + escapeHtml(menuName) + '</span>'
-                + '<button class="tab-item-close" aria-label="\uB2EB\uAE30">&times;</button>';
+                + '<button class="tab-item-close" aria-label="' + escapeHtml(t('common.close')) + '">&times;</button>';
             tabList.appendChild(tabItem);
 
             // Create tab panel element
@@ -243,7 +241,7 @@
             panel.innerHTML = '<div class="tab-panel-loading" style="display:flex;align-items:center;'
                 + 'justify-content:center;height:100%;color:var(--cds-text-secondary);'
                 + 'font-size:var(--cds-body-01-size);">'
-                + '\uB85C\uB529 \uC911...</div>';
+                + escapeHtml(t('common.loading')) + '</div>';
             contentArea.appendChild(panel);
 
             // Add to internal state

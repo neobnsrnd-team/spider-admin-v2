@@ -1,7 +1,7 @@
 package org.example.springadminv2.exception;
 
 import org.example.springadminv2.global.dto.ApiResponse;
-import org.example.springadminv2.global.exception.BusinessException;
+import org.example.springadminv2.global.exception.BaseException;
 import org.example.springadminv2.global.exception.ErrorType;
 import org.example.springadminv2.global.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -146,17 +146,17 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/not-found")
         public ApiResponse<String> notFound() {
-            throw new BusinessException(ErrorType.RESOURCE_NOT_FOUND, "testId=1");
+            throw new BaseException(ErrorType.RESOURCE_NOT_FOUND, "testId=1");
         }
 
         @GetMapping("/forbidden")
         public ApiResponse<String> forbidden() {
-            throw new BusinessException(ErrorType.FORBIDDEN);
+            throw new BaseException(ErrorType.FORBIDDEN);
         }
 
         @GetMapping("/external-error")
         public ApiResponse<String> externalError() {
-            throw new BusinessException(ErrorType.EXTERNAL_SERVICE_ERROR, "service=payment");
+            throw new BaseException(ErrorType.EXTERNAL_SERVICE_ERROR, "service=payment");
         }
 
         @PostMapping("/validate")
@@ -189,17 +189,17 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/internal-error")
         public ApiResponse<String> internalError() {
-            throw new BusinessException(ErrorType.INTERNAL_ERROR);
+            throw new BaseException(ErrorType.INTERNAL_ERROR);
         }
 
         @GetMapping("/invalid-input")
         public ApiResponse<String> invalidInput() {
-            throw new BusinessException(ErrorType.INVALID_INPUT);
+            throw new BaseException(ErrorType.INVALID_INPUT);
         }
 
         @GetMapping("/invalid-state")
         public ApiResponse<String> invalidState() {
-            throw new BusinessException(ErrorType.INVALID_STATE);
+            throw new BaseException(ErrorType.INVALID_STATE);
         }
     }
 

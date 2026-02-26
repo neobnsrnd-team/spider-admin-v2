@@ -19,9 +19,9 @@
 
     /* ── Mode label i18n keys ── */
     const MODE_LABELS = {
-        create: 'panel.mode.create',
-        edit:   'panel.mode.edit',
-        view:   'panel.mode.view'
+        create: 'panel.create',
+        edit:   'panel.edit',
+        view:   'panel.view'
     };
 
     /* ── Helpers ── */

@@ -25,7 +25,8 @@
     "excel": "Download Excel",
     "useYn": "Status",
     "all": "All",
-    "searchPlaceholder": "Enter search keyword"
+    "searchPlaceholder": "Enter search keyword",
+    "forbidden": "Access denied."
   },
   "login": {
     "title": "Spider Admin",
@@ -47,12 +48,15 @@
   "sidebar": {
     "collapse": "Collapse menu",
     "expand": "Expand menu",
-    "search": "Search menu"
+    "search": "Search menu",
+    "searchPlaceholder": "Search menu...",
+    "toggle": "Toggle sidebar"
   },
   "tab": {
     "closeOthers": "Close other tabs",
     "closeAll": "Close all tabs",
-    "closeRight": "Close tabs to the right"
+    "closeRight": "Close tabs to the right",
+    "loadError": "Failed to load content"
   },
   "validation": {
     "required": "{field} is required.",
@@ -67,7 +71,8 @@
     "confirmTitle": "Confirm",
     "confirmDelete": "Are you sure you want to delete?",
     "confirmSave": "Do you want to save?",
-    "alertTitle": "Notice"
+    "alertTitle": "Notice",
+    "deleteTitle": "Confirm Delete"
   },
   "toast": {
     "saveSuccess": "Saved successfully.",
@@ -105,7 +110,10 @@
     "create": "Create",
     "edit": "Edit",
     "view": "Detail",
-    "close": "Close"
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "tree": {
     "expandAll": "Expand All",

@@ -24,17 +24,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers(
-                                "/login", "/css/**", "/js/**", "/images/**", "/fonts/**", "/h2-console/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
+        http.authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/fonts/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
                 .formLogin(form ->
                         form.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .headers(headers -> headers.frameOptions(f -> f.sameOrigin()))
                 .sessionManagement(session -> session.sessionFixation().migrateSession());
 
         return http.build();

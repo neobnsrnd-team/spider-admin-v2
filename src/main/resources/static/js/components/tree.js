@@ -182,7 +182,11 @@
                 textOverflow: 'ellipsis',
                 lineHeight:   '1.43'
             });
-            labelEl.textContent = renderLabel ? renderLabel(node) : node[labelField];
+            if (renderLabel) {
+                labelEl.innerHTML = renderLabel(node);
+            } else {
+                labelEl.textContent = node[labelField];
+            }
 
             itemEl.appendChild(labelEl);
 

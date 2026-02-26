@@ -25,7 +25,8 @@
     "excel": "엑셀 다운로드",
     "useYn": "사용여부",
     "all": "전체",
-    "searchPlaceholder": "검색어를 입력하세요"
+    "searchPlaceholder": "검색어를 입력하세요",
+    "forbidden": "접근 권한이 없습니다."
   },
   "login": {
     "title": "Spider Admin",
@@ -47,12 +48,15 @@
   "sidebar": {
     "collapse": "메뉴 접기",
     "expand": "메뉴 펼치기",
-    "search": "메뉴 검색"
+    "search": "메뉴 검색",
+    "searchPlaceholder": "메뉴 검색...",
+    "toggle": "사이드바 접기/펼치기"
   },
   "tab": {
     "closeOthers": "다른 탭 닫기",
     "closeAll": "모든 탭 닫기",
-    "closeRight": "오른쪽 탭 닫기"
+    "closeRight": "오른쪽 탭 닫기",
+    "loadError": "콘텐츠를 로드할 수 없습니다"
   },
   "validation": {
     "required": "{field} 항목은 필수입니다.",
@@ -67,7 +71,8 @@
     "confirmTitle": "확인",
     "confirmDelete": "정말 삭제하시겠습니까?",
     "confirmSave": "저장하시겠습니까?",
-    "alertTitle": "알림"
+    "alertTitle": "알림",
+    "deleteTitle": "삭제 확인"
   },
   "toast": {
     "saveSuccess": "저장되었습니다.",
@@ -105,7 +110,10 @@
     "create": "등록",
     "edit": "수정",
     "view": "상세",
-    "close": "닫기"
+    "close": "닫기",
+    "save": "저장",
+    "delete": "삭제",
+    "cancel": "취소"
   },
   "tree": {
     "expandAll": "전체 펼치기",

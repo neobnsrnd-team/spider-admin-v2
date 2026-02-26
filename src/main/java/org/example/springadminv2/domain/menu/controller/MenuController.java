@@ -9,7 +9,6 @@ import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.dto.ApiResponse;
-import org.example.springadminv2.global.dto.ErrorDetail;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,13 +49,6 @@ public class MenuController {
     @PreAuthorize("hasAuthority('MENU:R')")
     public ResponseEntity<ApiResponse<MenuResponse>> getMenuDetail(@PathVariable String menuId) {
         MenuResponse menu = menuService.getMenuDetail(menuId);
-        if (menu == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(ErrorDetail.builder()
-                            .code("MENU_NOT_FOUND")
-                            .message("메뉴를 찾을 수 없습니다: " + menuId)
-                            .build()));
-        }
         return ResponseEntity.ok(ApiResponse.success(menu));
     }
 
@@ -85,21 +77,13 @@ public class MenuController {
     }
 
     /**
-     * 메뉴 삭제. 하위 메뉴가 있으면 400 오류 반환.
+     * 메뉴 삭제. 하위 메뉴가 있으면 BusinessException(INVALID_STATE) 발생.
      */
     @DeleteMapping("/{menuId}")
     @PreAuthorize("hasAuthority('MENU:W')")
     public ResponseEntity<ApiResponse<Void>> deleteMenu(@PathVariable String menuId) {
-        try {
-            menuService.deleteMenu(menuId);
-            return ResponseEntity.ok(ApiResponse.success(null));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(ErrorDetail.builder()
-                            .code("HAS_CHILDREN")
-                            .message(e.getMessage())
-                            .build()));
-        }
+        menuService.deleteMenu(menuId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     /**

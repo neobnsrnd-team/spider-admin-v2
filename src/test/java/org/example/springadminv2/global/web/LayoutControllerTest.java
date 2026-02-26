@@ -3,7 +3,7 @@ package org.example.springadminv2.global.web;
 import java.util.List;
 import java.util.Set;
 
-import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.dto.UserMenuTreeNode;
 import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.CustomUserDetails;
@@ -61,9 +61,16 @@ class LayoutControllerTest {
         void returns_layout_with_model() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            List<UserMenuRow> menuTree = List.of(
-                    new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
-                    new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
+            List<UserMenuTreeNode> menuTree = List.of(new UserMenuTreeNode(
+                    "system",
+                    "ROOT",
+                    1,
+                    "시스템 관리",
+                    null,
+                    "settings",
+                    null,
+                    List.of(new UserMenuTreeNode(
+                            "v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW", null))));
             given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
             // when & then
@@ -86,18 +93,25 @@ class LayoutControllerTest {
         void returns_user_menu_tree() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            List<UserMenuRow> menuTree = List.of(
-                    new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
-                    new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
+            List<UserMenuTreeNode> menuTree = List.of(new UserMenuTreeNode(
+                    "system",
+                    "ROOT",
+                    1,
+                    "시스템 관리",
+                    null,
+                    "settings",
+                    null,
+                    List.of(new UserMenuTreeNode(
+                            "v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW", null))));
             given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
             // when & then
             mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data.length()").value(2))
+                    .andExpect(jsonPath("$.data.length()").value(1))
                     .andExpect(jsonPath("$.data[0].menuId").value("system"))
-                    .andExpect(jsonPath("$.data[1].menuId").value("v3_menu_manage"));
+                    .andExpect(jsonPath("$.data[0].children[0].menuId").value("v3_menu_manage"));
         }
 
         @Test
@@ -111,7 +125,7 @@ class LayoutControllerTest {
             mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data.length()").value(0));
+                    .andExpect(jsonPath("$.data").isEmpty());
         }
     }
 }
