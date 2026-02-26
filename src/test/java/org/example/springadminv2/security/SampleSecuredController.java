@@ -6,34 +6,44 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/test/menu001")
 public class SampleSecuredController {
 
-    @GetMapping
+    @GetMapping("/test/menu001")
     @PreAuthorize("hasAuthority('MENU001:R')")
     public ResponseEntity<String> read() {
         return ResponseEntity.ok("read");
     }
 
-    @PostMapping
+    @PostMapping("/test/menu001")
     @PreAuthorize("hasAuthority('MENU001:W')")
     public ResponseEntity<String> create() {
         return ResponseEntity.ok("created");
     }
 
-    @PutMapping
+    @PutMapping("/test/menu001")
     @PreAuthorize("hasAuthority('MENU001:W')")
     public ResponseEntity<String> update() {
         return ResponseEntity.ok("updated");
     }
 
-    @DeleteMapping
+    @DeleteMapping("/test/menu001")
     @PreAuthorize("hasAuthority('MENU001:W')")
     public ResponseEntity<String> delete() {
         return ResponseEntity.ok("deleted");
+    }
+
+    @GetMapping("/test/cross-resource")
+    @PreAuthorize("hasAnyAuthority('v3_was_instance:R', 'RES_WASINSTANCE:R')")
+    public ResponseEntity<String> crossResourceRead() {
+        return ResponseEntity.ok("cross-resource-read");
+    }
+
+    @PostMapping("/test/cross-resource")
+    @PreAuthorize("hasAnyAuthority('v3_was_instance:W', 'RES_WASINSTANCE:W')")
+    public ResponseEntity<String> crossResourceWrite() {
+        return ResponseEntity.ok("cross-resource-write");
     }
 }
