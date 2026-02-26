@@ -29,6 +29,9 @@
         return date;
     }
 
+    /* Track AbortControllers per element to prevent duplicate listeners */
+    const abortMap = new WeakMap();
+
     window.SpiderDateDefaults = {
         init: function (screenType, startSelector, endSelector) {
             const startDate = calcStartDate(screenType);
@@ -48,6 +51,9 @@
             }
 
             if (start) {
+                if (abortMap.has(start)) abortMap.get(start).abort();
+                const ac = new AbortController();
+                abortMap.set(start, ac);
                 start.addEventListener('change', function () {
                     const startVal = start.value;
                     const endVal = end ? end.value : '';
@@ -55,10 +61,13 @@
                         SpiderToast.warning('시작일이 종료일보다 클 수 없습니다.');
                         start.value = endVal;
                     }
-                });
+                }, { signal: ac.signal });
             }
 
             if (end) {
+                if (abortMap.has(end)) abortMap.get(end).abort();
+                const ac = new AbortController();
+                abortMap.set(end, ac);
                 end.addEventListener('change', function () {
                     const startVal = start ? start.value : '';
                     const endVal = end.value;
@@ -66,7 +75,7 @@
                         SpiderToast.warning('종료일이 시작일보다 작을 수 없습니다.');
                         end.value = startVal;
                     }
-                });
+                }, { signal: ac.signal });
             }
         }
     };

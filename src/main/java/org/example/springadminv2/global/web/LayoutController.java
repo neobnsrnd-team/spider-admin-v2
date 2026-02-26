@@ -66,11 +66,11 @@ public class LayoutController {
     private List<Map<String, Object>> buildTree(
             List<Map<String, Object>> allMenus, Set<String> accessibleMenuIds, Map<String, String> permMap) {
 
-        // Group by parent
+        // Group by parent (null and "" are treated as ROOT)
         Map<String, List<Map<String, Object>>> byParent = new LinkedHashMap<>();
         for (Map<String, Object> menu : allMenus) {
             String parentId = (String) menu.get("priorMenuId");
-            if (parentId == null) parentId = "ROOT";
+            if (parentId == null || parentId.isEmpty()) parentId = "ROOT";
             byParent.computeIfAbsent(parentId, k -> new ArrayList<>()).add(menu);
         }
 

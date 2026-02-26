@@ -12,31 +12,26 @@ import jakarta.servlet.http.HttpServletRequest;
 public abstract class BaseViewController {
 
     protected boolean isAjaxRequest(HttpServletRequest request) {
-        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))
+                || "true".equals(request.getHeader("X-Tab-Request"));
     }
 
     /**
-     * 특정 메뉴에 대한 사용자의 접근 수준을 결정한다.
-     * authorities에 "RESOURCE:W"가 있으면 "W", "RESOURCE:R"이 있으면 "R", 없으면 null.
+     * 특정 리소스에 대한 사용자의 접근 수준을 결정한다.
+     * authorities에 "RESOURCE:W"가 있으면 "W", "RESOURCE:R"이 있으면 "R", 없으면 "NONE".
      * @param user 인증된 사용자
-     * @param menuId 메뉴 ID (화면별 리소스 코드 매핑에 사용)
-     * @return "W", "R", or null
+     * @param resource 리소스 코드
+     * @return "W", "R", or "NONE"
      */
-    protected String determineAccessLevel(CustomUserDetails user, String menuId) {
-        if (user == null || user.getAuthorities() == null) {
-            return null;
+    protected String determineAccessLevel(CustomUserDetails user, String resource) {
+        if (user == null) {
+            return "NONE";
         }
-        // Check if user has any W authority for this screen's resources
-        boolean hasWrite = user.getAuthorities().stream()
+        return user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.endsWith(":W"));
-        if (hasWrite) return "W";
-
-        boolean hasRead = user.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.endsWith(":R"));
-        if (hasRead) return "R";
-
-        return null;
+                .filter(a -> a.startsWith(resource + ":"))
+                .map(a -> a.substring(a.indexOf(':') + 1))
+                .reduce((a, b) -> "W".equals(a) || "W".equals(b) ? "W" : "R")
+                .orElse("NONE");
     }
 }

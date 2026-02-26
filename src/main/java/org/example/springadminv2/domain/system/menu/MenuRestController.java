@@ -1,10 +1,10 @@
 package org.example.springadminv2.domain.system.menu;
 
 import java.util.List;
-import java.util.Map;
 
 import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
 import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.system.menu.dto.MenuSortUpdateRequest;
 import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.global.dto.ApiResponse;
@@ -104,17 +104,14 @@ public class MenuRestController {
 
     /**
      * 메뉴 순서 변경.
-     * Body: { "sortOrder": 3, "priorMenuId": "ROOT" }
      */
     @PutMapping("/{menuId}/sort")
     @PreAuthorize("hasAuthority('MENU:W')")
     public ResponseEntity<ApiResponse<Void>> updateSortOrder(
             @PathVariable String menuId,
-            @RequestBody Map<String, Object> body,
+            @Validated @RequestBody MenuSortUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
-        int sortOrder = ((Number) body.get("sortOrder")).intValue();
-        String priorMenuId = (String) body.get("priorMenuId");
-        menuService.updateSortOrder(menuId, sortOrder, priorMenuId, user.getUserId());
+        menuService.updateSortOrder(menuId, request.sortOrder(), request.priorMenuId(), user.getUserId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
