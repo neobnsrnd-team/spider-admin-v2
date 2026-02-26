@@ -20,43 +20,64 @@ class AuthorityProviderTest {
 
     @Test
     @DisplayName("USER_MENU 기반: userId로 리소스 권한 로딩")
-    void loadAuthoritiesByUserId() {
-        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("admin", "ADMIN");
+    void load_authorities_by_user_id() {
+        // given
+        String userId = "admin";
+        String roleId = "ADMIN";
 
+        // when
+        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities(userId, roleId);
+
+        // then
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-
         assertThat(authorityStrings).contains("MENU:R", "MENU:W", "ROLE:R", "ROLE:W");
     }
 
     @Test
     @DisplayName("WRITE → READ + WRITE 리소스 자동 확장")
-    void writeIncludesRead() {
-        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("admin", "ADMIN");
+    void write_includes_read() {
+        // given
+        String userId = "admin";
+        String roleId = "ADMIN";
 
+        // when
+        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities(userId, roleId);
+
+        // then
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-
         assertThat(authorityStrings).contains("MENU:R", "MENU:W");
     }
 
     @Test
     @DisplayName("READ 전용 사용자: READ 리소스만 포함, WRITE 미포함")
-    void readOnlyUser() {
-        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("user01", "USER");
+    void read_only_user() {
+        // given
+        String userId = "user01";
+        String roleId = "USER";
 
+        // when
+        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities(userId, roleId);
+
+        // then
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-
         assertThat(authorityStrings).contains("MENU:R");
         assertThat(authorityStrings).doesNotContain("MENU:W");
     }
 
     @Test
     @DisplayName("권한 없는 사용자 → 빈 Set")
-    void noPermissions_emptySet() {
-        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("disabled", "USER");
+    void no_permissions_returns_empty_set() {
+        // given
+        String userId = "disabled";
+        String roleId = "USER";
 
+        // when
+        Set<GrantedAuthority> authorities = authorityProvider.getAuthorities(userId, roleId);
+
+        // then
         assertThat(authorities).isEmpty();
     }
 }

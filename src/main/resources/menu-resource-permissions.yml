@@ -13,173 +13,173 @@ menu-resource:
 
     # ── 시스템 관리 (5개) ─────────────────────────────────────────────────────
     v3_menu_manage:
-      R: "MENU:R"
-      W: "MENU:W"
+      R: MENU:R
+      W: MENU:W
 
     v3_role_manage:
-      R: "ROLE:R, MENU:R"
-      W: "ROLE:W, MENU:R"
+      R: ROLE:R, MENU:R
+      W: ROLE:W, MENU:R
 
     v3_user_manage:
-      R: "USER:R, ROLE:R"
-      W: "USER:W, ROLE:R"
+      R: USER:R, ROLE:R
+      W: USER:W, ROLE:R
 
     v3_neb_code_group_manage:
-      R: "CODEGROUP:R"
-      W: "CODEGROUP:W"
+      R: CODEGROUP:R
+      W: CODEGROUP:W
 
     v3_code_manage:
-      R: "CODE:R, CODEGROUP:R"
-      W: "CODE:W, CODEGROUP:R"
+      R: CODE:R, CODEGROUP:R
+      W: CODE:W, CODEGROUP:R
 
     # ── 인프라 관리 (5개) ─────────────────────────────────────────────────────
     v3_was_group_manage:
-      R: "WASGROUP:R"
-      W: "WASGROUP:W"
+      R: WASGROUP:R
+      W: WASGROUP:W
 
     v3_was_instance:
-      R: "WASINSTANCE:R, WASGROUP:R"
-      W: "WASINSTANCE:W, WASGROUP:R"
+      R: WASINSTANCE:R, WASGROUP:R
+      W: WASINSTANCE:W, WASGROUP:R
 
     v3_property_db_manage:
-      R: "PROPERTY:R, WASINSTANCE:R"
-      W: "PROPERTY:W, WASINSTANCE:R"
+      R: PROPERTY:R, WASINSTANCE:R
+      W: PROPERTY:W, WASINSTANCE:R
 
     v3_xml_property_manage:
-      R: "XMLPROPERTY:R, WASINSTANCE:R"
-      W: "XMLPROPERTY:W, WASINSTANCE:R"
+      R: XMLPROPERTY:R, WASINSTANCE:R
+      W: XMLPROPERTY:W, WASINSTANCE:R
 
     v3_system_oper_manage:
-      R: "RELOAD:R, WASINSTANCE:R"
-      W: "RELOAD:W, WASINSTANCE:R"
+      R: RELOAD:R, WASINSTANCE:R
+      W: RELOAD:W, WASINSTANCE:R
 
     # ── 연계 관리 (7개) ──────────────────────────────────────────────────────
     v3_connect_org_manage:
-      R: "ORG:R, GATEWAY:R, MESSAGEHANDLER:R"
-      W: "ORG:W, GATEWAY:R, MESSAGEHANDLER:R"
+      R: ORG:R, GATEWAY:R, MESSAGEHANDLER:R
+      W: ORG:W, GATEWAY:R, MESSAGEHANDLER:R
 
     v3_code_mapping_manage:
-      R: "CODE:R, ORG:R, CODEGROUP:R"
-      W: "CODE:W, ORG:R, CODEGROUP:R"
+      R: CODE:R, ORG:R, CODEGROUP:R
+      W: CODE:W, ORG:R, CODEGROUP:R
 
     v3_gw_manage:
-      R: "GATEWAY:R, ORG:R"
-      W: "GATEWAY:W, ORG:R"
+      R: GATEWAY:R, ORG:R
+      W: GATEWAY:W, ORG:R
 
     v3_org_trans_manage:
-      R: "GWSYSTEM:R, GATEWAY:R, ORG:R, TRANSACTION:R"
-      W: "GWSYSTEM:W, GATEWAY:R, ORG:R, TRANSACTION:R"
+      R: GWSYSTEM:R, GATEWAY:R, ORG:R, TRANSACTION:R
+      W: GWSYSTEM:W, GATEWAY:R, ORG:R, TRANSACTION:R
 
     v3_app_mapping_manage:
-      R: "TRANSPORT:R, TRANSACTION:R, WASINSTANCE:R, GATEWAY:R"
-      W: "TRANSPORT:W, TRANSACTION:R, WASINSTANCE:R, GATEWAY:R, RELOAD:W"
+      R: TRANSPORT:R, TRANSACTION:R, WASINSTANCE:R, GATEWAY:R
+      W: TRANSPORT:W, TRANSACTION:R, WASINSTANCE:R, GATEWAY:R, RELOAD:W
 
     v3_listener_connector_manage:
-      R: "LISTENERTRX:R, GATEWAY:R"
-      W: "LISTENERTRX:W, GATEWAY:R"
+      R: LISTENERTRX:R, GATEWAY:R
+      W: LISTENERTRX:W, GATEWAY:R
 
     v3_msg_handle_manage:
-      R: "MESSAGEHANDLER:R"
-      W: "MESSAGEHANDLER:W"
+      R: MESSAGEHANDLER:R
+      W: MESSAGEHANDLER:W
 
     # ── 거래/전문 관리 (7개) ──────────────────────────────────────────────────
     v3_message_manage:
-      R: "MESSAGE:R, ORG:R"
-      W: "MESSAGE:W, ORG:R"
+      R: MESSAGE:R, ORG:R
+      W: MESSAGE:W, ORG:R
 
     v3_msg_trx_manage:
-      R: "TRANSACTION:R, WASGROUP:R, WASINSTANCE:R, ORG:R, MESSAGE:R"
-      W: "TRANSACTION:W, WASGROUP:R, WASINSTANCE:R, ORG:R, MESSAGE:R"
+      R: TRANSACTION:R, WASGROUP:R, WASINSTANCE:R, ORG:R, MESSAGE:R
+      W: TRANSACTION:W, WASGROUP:R, WASINSTANCE:R, ORG:R, MESSAGE:R
 
     v3_trx_validator:
-      R: "VALIDATOR:R, TRANSACTION:R"
-      W: "VALIDATOR:W, TRANSACTION:R"
+      R: VALIDATOR:R, TRANSACTION:R
+      W: VALIDATOR:W, TRANSACTION:R
 
     v3_trx:
-      R: "TRANSACTION:R"
-      W: "TRANSACTION:W, WASINSTANCE:R, RELOAD:W"
+      R: TRANSACTION:R
+      W: TRANSACTION:W, WASINSTANCE:R, RELOAD:W
 
     v3_req_message_test:
-      R: "MESSAGETEST:R, ORG:R, TRANSACTION:R, WASINSTANCE:R"
-      W: "MESSAGETEST:W, ORG:R, TRANSACTION:R, WASINSTANCE:R"
+      R: MESSAGETEST:R, ORG:R, TRANSACTION:R, WASINSTANCE:R
+      W: MESSAGETEST:W, ORG:R, TRANSACTION:R, WASINSTANCE:R
 
     v3_proxy_testdata:
-      R: "PROXYRESPONSE:R, TRANSACTION:R"
-      W: "PROXYRESPONSE:W, TRANSACTION:R"
+      R: PROXYRESPONSE:R, TRANSACTION:R
+      W: PROXYRESPONSE:W, TRANSACTION:R
 
     v3_db_log:
-      R: "MESSAGEINSTANCE:R, ORG:R"
+      R: MESSAGEINSTANCE:R, ORG:R
 
     # ── 배치 관리 (3개) ──────────────────────────────────────────────────────
     v3_batch_app_manage:
-      R: "BATCH:R, WASINSTANCE:R"
-      W: "BATCH:W, WASINSTANCE:R"
+      R: BATCH:R, WASINSTANCE:R
+      W: BATCH:W, WASINSTANCE:R
 
     v3_batch_his_list:
-      R: "BATCH:R, WASINSTANCE:R"
+      R: BATCH:R, WASINSTANCE:R
 
     v3_executing_batch:
-      R: "BATCH:R"
+      R: BATCH:R
 
     # ── 오류 관리 (2개) ──────────────────────────────────────────────────────
     v3_error_code:
-      R: "ERRORCODE:R"
-      W: "ERRORCODE:W"
+      R: ERRORCODE:R
+      W: ERRORCODE:W
 
     v3_error_cause_his:
-      R: "ERRORHISTORY:R"
+      R: ERRORHISTORY:R
 
     # ── 모니터링 (3개) ───────────────────────────────────────────────────────
     v3_system_biz_reg:
-      R: "MONITOR:R"
-      W: "MONITOR:W"
+      R: MONITOR:R
+      W: MONITOR:W
 
     v3_was_status:
-      R: "MONITOR:R, WASINSTANCE:R"
+      R: MONITOR:R, WASINSTANCE:R
 
     v3_was_status_monitor:
-      R: "MONITOR:R, WASINSTANCE:R"
+      R: MONITOR:R, WASINSTANCE:R
 
     # ── 이력/감사 (2개) ──────────────────────────────────────────────────────
     v3_user_page_log:
-      R: "ADMINHISTORY:R, USER:R"
+      R: ADMINHISTORY:R, USER:R
 
     v3_trx_stop_his:
-      R: "TRANSACTION:R"
+      R: TRANSACTION:R
 
     # ── 게시판 (4개) ─────────────────────────────────────────────────────────
     v3_board_manage:
-      R: "BOARD:R"
-      W: "BOARD:W"
+      R: BOARD:R
+      W: BOARD:W
 
     v3_BOARD_AUTH:
-      R: "BOARD:R, USER:R"
-      W: "BOARD:W, USER:R"
+      R: BOARD:R, USER:R
+      W: BOARD:W, USER:R
 
     v3_FWKB_NOTICE_BOARD:
-      R: "ARTICLE:R"
-      W: "ARTICLE:W"
+      R: ARTICLE:R
+      W: ARTICLE:W
 
     v3_FWKB_TEST_BOARD:
-      R: "ARTICLE:R"
-      W: "ARTICLE:W"
+      R: ARTICLE:R
+      W: ARTICLE:W
 
     # ── 전송 데이터 (3개) ────────────────────────────────────────────────────
     v3_trans_data_exec:
-      R: "TRANSDATA:R, ORG:R"
-      W: "TRANSDATA:W, ORG:R"
+      R: TRANSDATA:R, ORG:R
+      W: TRANSDATA:W, ORG:R
 
     v3_trans_data_popup:
-      R: "TRANSDATA:R, ORG:R"
-      W: "TRANSDATA:W, ORG:R"
+      R: TRANSDATA:R, ORG:R
+      W: TRANSDATA:W, ORG:R
 
     v3_trans_data_list:
-      R: "TRANSDATA:R"
-      W: "TRANSDATA:W"
+      R: TRANSDATA:R
+      W: TRANSDATA:W
 
     # ── 개발 관리 (2개) ──────────────────────────────────────────────────────
     v3_message_parsing_test:
-      R: "MESSAGEPARSING:R, ORG:R, MESSAGE:R"
+      R: MESSAGEPARSING:R, ORG:R, MESSAGE:R
 
     v3_message_parsing_json:
-      R: "MESSAGEPARSING:R"
+      R: MESSAGEPARSING:R
