@@ -7,7 +7,9 @@ import org.example.springadminv2.domain.menu.dto.MenuResponse;
 import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.dto.UserMenuTreeNode;
 import org.example.springadminv2.domain.menu.mapper.MenuMapper;
+import org.example.springadminv2.global.exception.BaseException;
 import org.example.springadminv2.global.security.config.SecurityAccessProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -190,15 +192,14 @@ class MenuServiceTest {
         }
 
         @Test
-        @DisplayName("하위 메뉴가 존재하면 IllegalStateException을 던진다")
+        @DisplayName("하위 메뉴가 존재하면 BusinessException을 던진다")
         void throws_when_has_children() {
             // given
             given(menuMapper.countChildMenus("SYS")).willReturn(2);
 
             // when & then
             assertThatThrownBy(() -> menuService.deleteMenu("SYS"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("하위 메뉴가 존재하여 삭제할 수 없습니다")
+                    .isInstanceOf(BaseException.class)
                     .hasMessageContaining("children=2");
 
             then(menuMapper).should().countChildMenus("SYS");
@@ -230,37 +231,44 @@ class MenuServiceTest {
     class GetAuthorizedMenuTree {
 
         @Test
-        @DisplayName("USER_MENU 모드일 때 selectUserMenuTree를 호출한다")
-        void user_menu_mode_delegates_to_selectUserMenuTree() {
+        @DisplayName("USER_MENU 모드일 때 flat 리스트를 트리 구조로 변환한다")
+        void user_menu_mode_builds_tree() {
             // given
             given(securityAccessProperties.getAuthoritySource()).willReturn("USER_MENU");
-            List<UserMenuRow> expected = List.of(
+            List<UserMenuRow> flatRows = List.of(
                     new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null),
                     new UserMenuRow("MENU", "SYS", 1, "메뉴관리", "/system/menu", "list", "RW"));
-            given(menuMapper.selectUserMenuTree("testUser")).willReturn(expected);
+            given(menuMapper.selectUserMenuTree("testUser")).willReturn(flatRows);
 
             // when
-            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
+            List<UserMenuTreeNode> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
 
             // then
-            assertThat(result).isEqualTo(expected);
+            assertThat(result).hasSize(1);
+            UserMenuTreeNode sysNode = result.get(0);
+            assertThat(sysNode.menuId()).isEqualTo("SYS");
+            assertThat(sysNode.children()).hasSize(1);
+            assertThat(sysNode.children().get(0).menuId()).isEqualTo("MENU");
+            assertThat(sysNode.children().get(0).authCode()).isEqualTo("RW");
             then(menuMapper).should().selectUserMenuTree("testUser");
             then(menuMapper).shouldHaveNoMoreInteractions();
         }
 
         @Test
-        @DisplayName("ROLE_MENU 모드일 때 selectRoleMenuTree를 호출한다")
-        void role_menu_mode_delegates_to_selectRoleMenuTree() {
+        @DisplayName("ROLE_MENU 모드일 때 트리 구조로 변환한다")
+        void role_menu_mode_builds_tree() {
             // given
             given(securityAccessProperties.getAuthoritySource()).willReturn("ROLE_MENU");
-            List<UserMenuRow> expected = List.of(new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null));
-            given(menuMapper.selectRoleMenuTree("ROLE01")).willReturn(expected);
+            List<UserMenuRow> flatRows = List.of(new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null));
+            given(menuMapper.selectRoleMenuTree("ROLE01")).willReturn(flatRows);
 
             // when
-            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
+            List<UserMenuTreeNode> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
 
             // then
-            assertThat(result).isEqualTo(expected);
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).menuId()).isEqualTo("SYS");
+            assertThat(result.get(0).children()).isNull();
             then(menuMapper).should().selectRoleMenuTree("ROLE01");
             then(menuMapper).shouldHaveNoMoreInteractions();
         }
@@ -273,7 +281,7 @@ class MenuServiceTest {
             given(menuMapper.selectUserMenuTree("noPermUser")).willReturn(List.of());
 
             // when
-            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("noPermUser", "ROLE01");
+            List<UserMenuTreeNode> result = menuService.getAuthorizedMenuTree("noPermUser", "ROLE01");
 
             // then
             assertThat(result).isEmpty();

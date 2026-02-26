@@ -50,52 +50,60 @@
             + '<path d="M4 6l4 4 4-4"/></svg>';
     }
 
-    // ── Render the full menu tree into the nav container ──
+    // ── Render the full menu tree into the nav container (infinite depth) ──
     function renderTree(menuTree) {
         if (!menuTreeEl) return;
         menuTreeEl.innerHTML = '';
 
-        const collapsedCategories = loadCategoryState();
+        const collapsedState = loadCategoryState();
 
         for (let i = 0; i < menuTree.length; i++) {
-            const cat = menuTree[i];
-            const catEl = document.createElement('div');
-            catEl.className = 'menu-category';
-            catEl.setAttribute('data-menu-id', cat.menuId);
-
-            // Apply saved collapsed state
-            if (collapsedCategories[cat.menuId]) {
-                catEl.classList.add('collapsed');
-            }
-
-            // Category header
-            const headerEl = document.createElement('div');
-            headerEl.className = 'menu-category-header';
-            headerEl.innerHTML = buildIconSvg(cat.menuImage)
-                + '<span>' + escapeHtml(cat.menuName) + '</span>'
-                + buildChevronSvg();
-
-            catEl.appendChild(headerEl);
-
-            // Category items container
-            const itemsEl = document.createElement('div');
-            itemsEl.className = 'menu-category-items';
-
-            const children = cat.children || [];
-            for (let j = 0; j < children.length; j++) {
-                const item = children[j];
-                const itemEl = document.createElement('div');
-                itemEl.className = 'menu-item';
-                itemEl.setAttribute('data-menu-id', item.menuId);
-                itemEl.setAttribute('data-menu-url', item.menuUrl || '');
-                itemEl.setAttribute('data-menu-name', item.menuName);
-                itemEl.textContent = item.menuName;
-                itemsEl.appendChild(itemEl);
-            }
-
-            catEl.appendChild(itemsEl);
-            menuTreeEl.appendChild(catEl);
+            menuTreeEl.appendChild(renderNode(menuTree[i], 0, collapsedState));
         }
+    }
+
+    function renderNode(node, depth, collapsedState) {
+        const children = node.children || [];
+        const indentRem = 1 + depth * 1.5;
+
+        // Leaf node → menu-item
+        if (children.length === 0) {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'menu-item';
+            itemEl.setAttribute('data-menu-id', node.menuId);
+            itemEl.setAttribute('data-menu-url', node.menuUrl || '');
+            itemEl.setAttribute('data-menu-name', node.menuName);
+            itemEl.style.paddingLeft = indentRem + 'rem';
+            itemEl.textContent = node.menuName;
+            return itemEl;
+        }
+
+        // Branch node → menu-category (collapsible)
+        const catEl = document.createElement('div');
+        catEl.className = 'menu-category';
+        catEl.setAttribute('data-menu-id', node.menuId);
+        if (collapsedState[node.menuId]) {
+            catEl.classList.add('collapsed');
+        }
+
+        const headerEl = document.createElement('div');
+        headerEl.className = 'menu-category-header';
+        headerEl.innerHTML = (depth === 0 ? buildIconSvg(node.menuImage) : '')
+            + '<span>' + escapeHtml(node.menuName) + '</span>'
+            + buildChevronSvg();
+        if (depth > 0) {
+            headerEl.style.paddingLeft = indentRem + 'rem';
+        }
+        catEl.appendChild(headerEl);
+
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 'menu-category-items';
+        for (let i = 0; i < children.length; i++) {
+            itemsEl.appendChild(renderNode(children[i], depth + 1, collapsedState));
+        }
+        catEl.appendChild(itemsEl);
+
+        return catEl;
     }
 
     // ── Category collapse/expand state persistence ──
@@ -143,42 +151,44 @@
         }));
     }
 
-    // ── Search / filter ──
+    // ── Search / filter (infinite depth) ──
     function filterMenus(term) {
         const normalizedTerm = term.toLowerCase().trim();
-        const categories = qsa('.menu-category', menuTreeEl);
 
-        for (let i = 0; i < categories.length; i++) {
-            const cat = categories[i];
-            const items = qsa('.menu-item', cat);
-            let hasVisibleChild = false;
+        // 1) Show/hide all leaf items
+        const allItems = qsa('.menu-item', menuTreeEl);
+        for (let i = 0; i < allItems.length; i++) {
+            const name = allItems[i].textContent.toLowerCase();
+            allItems[i].style.display = (!normalizedTerm || name.indexOf(normalizedTerm) !== -1) ? '' : 'none';
+        }
 
-            for (let j = 0; j < items.length; j++) {
-                const item = items[j];
-                const name = item.textContent.toLowerCase();
+        // 2) Bottom-up: show/hide categories based on visible descendants
+        const allCategories = qsa('.menu-category', menuTreeEl);
+        for (let i = allCategories.length - 1; i >= 0; i--) {
+            const cat = allCategories[i];
+            const itemsContainer = cat.children[1]; // .menu-category-items
+            if (!itemsContainer) continue;
 
-                if (!normalizedTerm || name.indexOf(normalizedTerm) !== -1) {
-                    item.style.display = '';
-                    hasVisibleChild = true;
-                } else {
-                    item.style.display = 'none';
+            let hasVisible = false;
+            for (let j = 0; j < itemsContainer.children.length; j++) {
+                if (itemsContainer.children[j].style.display !== 'none') {
+                    hasVisible = true;
+                    break;
                 }
             }
 
-            // Show/hide category based on whether any child matches
-            cat.style.display = hasVisibleChild ? '' : 'none';
+            cat.style.display = hasVisible ? '' : 'none';
 
-            // When searching, expand categories that have matching children
-            if (normalizedTerm && hasVisibleChild) {
+            if (normalizedTerm && hasVisible) {
                 cat.classList.remove('collapsed');
             }
         }
 
-        // If search is cleared, restore original collapsed states
+        // 3) Restore collapsed state when search is cleared
         if (!normalizedTerm) {
             const savedState = loadCategoryState();
-            for (let i = 0; i < categories.length; i++) {
-                const cat = categories[i];
+            for (let i = 0; i < allCategories.length; i++) {
+                const cat = allCategories[i];
                 const menuId = cat.getAttribute('data-menu-id');
                 if (savedState[menuId]) {
                     cat.classList.add('collapsed');
@@ -300,12 +310,14 @@
 
             target.classList.add('active');
 
-            // Ensure parent category is expanded
-            const parentCategory = target.closest('.menu-category');
-            if (parentCategory && parentCategory.classList.contains('collapsed')) {
-                parentCategory.classList.remove('collapsed');
-                saveCategoryState();
+            // Expand ALL ancestor categories
+            let ancestor = target.closest('.menu-category');
+            while (ancestor) {
+                ancestor.classList.remove('collapsed');
+                const parent = ancestor.parentElement;
+                ancestor = parent ? parent.closest('.menu-category') : null;
             }
+            saveCategoryState();
 
             // Scroll into view if needed
             target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -316,11 +328,12 @@
          */
         refresh: function () {
             api.getJson(((window.SpiderConfig && SpiderConfig.contextPath) || '') + '/api/user-menus/tree')
-                .then(function (data) {
+                .then(function (resp) {
+                    const tree = resp.data || [];
                     if (window.SpiderConfig) {
-                        SpiderConfig.menuTree = data;
+                        SpiderConfig.menuTree = tree;
                     }
-                    renderTree(data);
+                    renderTree(tree);
                 })
                 .catch(function (err) {
                     console.error('[SpiderSidebar] Failed to refresh menu tree:', err);

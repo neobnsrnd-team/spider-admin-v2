@@ -3,7 +3,7 @@ package org.example.springadminv2.global.web;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.dto.UserMenuTreeNode;
 import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.security.CustomUserDetails;
@@ -45,7 +45,7 @@ public class LayoutController {
      */
     @GetMapping("/api/user-menus/tree")
     @ResponseBody
-    public ApiResponse<List<UserMenuRow>> menuTree(@AuthenticationPrincipal CustomUserDetails user) {
+    public ApiResponse<List<UserMenuTreeNode>> menuTree(@AuthenticationPrincipal CustomUserDetails user) {
         return ApiResponse.success(menuService.getAuthorizedMenuTree(user.getUserId(), user.getRoleId()));
     }
 }

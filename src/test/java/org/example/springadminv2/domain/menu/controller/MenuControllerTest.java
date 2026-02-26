@@ -9,7 +9,7 @@ import org.example.springadminv2.domain.menu.dto.MenuSortUpdateRequest;
 import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.service.MenuService;
-import org.example.springadminv2.global.exception.BusinessException;
+import org.example.springadminv2.global.exception.BaseException;
 import org.example.springadminv2.global.exception.ErrorType;
 import org.example.springadminv2.global.exception.GlobalExceptionHandler;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
@@ -151,7 +151,7 @@ class MenuControllerTest {
         void returns_404_when_not_found() throws Exception {
             // given
             given(menuService.getMenuDetail("UNKNOWN"))
-                    .willThrow(new BusinessException(ErrorType.RESOURCE_NOT_FOUND, "menuId=UNKNOWN"));
+                    .willThrow(new BaseException(ErrorType.RESOURCE_NOT_FOUND, "menuId=UNKNOWN"));
 
             // when & then
             mockMvc.perform(get("/api/menus/UNKNOWN"))
@@ -260,7 +260,7 @@ class MenuControllerTest {
         @WithMockUser(authorities = {"MENU:R", "MENU:W"})
         void returns_409_when_has_children() throws Exception {
             // given
-            willThrow(new BusinessException(ErrorType.INVALID_STATE, "menuId=MENU001, children=2"))
+            willThrow(new BaseException(ErrorType.INVALID_STATE, "menuId=MENU001, children=2"))
                     .given(menuService)
                     .deleteMenu("MENU001");
 

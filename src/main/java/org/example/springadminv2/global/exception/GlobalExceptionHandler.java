@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     // ─── 1순위: BusinessException ─────────────────────────────────
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException ex) {
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusiness(BaseException ex) {
         ErrorType type = ex.getErrorType();
         String traceId = currentTraceId();
 
