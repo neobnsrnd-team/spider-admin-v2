@@ -44,3 +44,8 @@ src/main/frontend/node_modules/
 
 ### Claude Task Plan ##
 docs/plan/logs/
+
+### Runtime / Test artifacts ###
+logs/
+*.png
+.playwright-mcp/

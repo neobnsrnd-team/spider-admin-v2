@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.domain.system.menu.MenuMapper">
+
+    <select id="selectAllMenus"
+            resultType="org.example.springadminv2.domain.system.menu.dto.MenuResponse">
+        SELECT MENU_ID          AS menuId,
+               PRIOR_MENU_ID    AS priorMenuId,
+               SORT_ORDER       AS sortOrder,
+               MENU_NAME        AS menuName,
+               MENU_URL         AS menuUrl,
+               MENU_IMAGE       AS menuImage,
+               DISPLAY_YN       AS displayYn,
+               USE_YN           AS useYn,
+               LAST_UPDATE_DTIME     AS lastUpdateDtime,
+               LAST_UPDATE_USER_ID   AS lastUpdateUserId
+          FROM FWK_MENU
+         ORDER BY SORT_ORDER
+    </select>
+
+    <select id="selectMenuById"
+            parameterType="string"
+            resultType="org.example.springadminv2.domain.system.menu.dto.MenuResponse">
+        SELECT MENU_ID          AS menuId,
+               PRIOR_MENU_ID    AS priorMenuId,
+               SORT_ORDER       AS sortOrder,
+               MENU_NAME        AS menuName,
+               MENU_URL         AS menuUrl,
+               MENU_IMAGE       AS menuImage,
+               DISPLAY_YN       AS displayYn,
+               USE_YN           AS useYn,
+               LAST_UPDATE_DTIME     AS lastUpdateDtime,
+               LAST_UPDATE_USER_ID   AS lastUpdateUserId
+          FROM FWK_MENU
+         WHERE MENU_ID = #{menuId}
+    </select>
+
+    <insert id="insertMenu">
+        INSERT INTO FWK_MENU (
+            MENU_ID,
+            PRIOR_MENU_ID,
+            SORT_ORDER,
+            MENU_NAME,
+            MENU_URL,
+            MENU_IMAGE,
+            DISPLAY_YN,
+            USE_YN,
+            LAST_UPDATE_DTIME,
+            LAST_UPDATE_USER_ID
+        ) VALUES (
+            #{req.menuId},
+            #{req.priorMenuId},
+            #{req.sortOrder},
+            #{req.menuName},
+            #{req.menuUrl},
+            #{req.menuImage},
+            #{req.displayYn},
+            #{req.useYn},
+            #{lastUpdateDtime},
+            #{lastUpdateUserId}
+        )
+    </insert>
+
+    <update id="updateMenu">
+        UPDATE FWK_MENU
+           SET MENU_NAME        = #{req.menuName},
+               PRIOR_MENU_ID    = #{req.priorMenuId},
+               SORT_ORDER       = #{req.sortOrder},
+               MENU_URL         = #{req.menuUrl},
+               MENU_IMAGE       = #{req.menuImage},
+               DISPLAY_YN       = #{req.displayYn},
+               USE_YN           = #{req.useYn},
+               LAST_UPDATE_DTIME     = #{lastUpdateDtime},
+               LAST_UPDATE_USER_ID   = #{lastUpdateUserId}
+         WHERE MENU_ID = #{menuId}
+    </update>
+
+    <delete id="deleteMenu" parameterType="string">
+        DELETE FROM FWK_MENU
+         WHERE MENU_ID = #{menuId}
+    </delete>
+
+    <select id="countChildMenus" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+          FROM FWK_MENU
+         WHERE PRIOR_MENU_ID = #{menuId}
+    </select>
+
+    <update id="updateSortOrder">
+        UPDATE FWK_MENU
+           SET SORT_ORDER       = #{sortOrder},
+               PRIOR_MENU_ID    = #{priorMenuId},
+               LAST_UPDATE_DTIME     = #{lastUpdateDtime},
+               LAST_UPDATE_USER_ID   = #{lastUpdateUserId}
+         WHERE MENU_ID = #{menuId}
+    </update>
+
+</mapper>

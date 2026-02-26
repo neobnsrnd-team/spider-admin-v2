@@ -1,0 +1,131 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "search": "검색",
+    "reset": "초기화",
+    "add": "추가",
+    "edit": "수정",
+    "close": "닫기",
+    "confirm": "확인",
+    "yes": "예",
+    "no": "아니오",
+    "loading": "로딩 중...",
+    "noData": "데이터가 없습니다.",
+    "required": "필수 항목입니다.",
+    "success": "성공",
+    "error": "오류",
+    "warning": "경고",
+    "info": "정보",
+    "totalCount": "총 {count}건",
+    "selectAll": "전체 선택",
+    "deselectAll": "전체 해제",
+    "print": "인쇄",
+    "excel": "엑셀 다운로드",
+    "useYn": "사용여부",
+    "all": "전체",
+    "searchPlaceholder": "검색어를 입력하세요"
+  },
+  "login": {
+    "title": "Spider Admin",
+    "subtitle": "관리 시스템",
+    "userId": "사용자 ID",
+    "password": "비밀번호",
+    "submit": "로그인",
+    "error": "아이디 또는 비밀번호가 올바르지 않습니다.",
+    "logout": "로그아웃 되었습니다.",
+    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요.",
+    "rememberMe": "로그인 상태 유지"
+  },
+  "header": {
+    "darkMode": "다크모드",
+    "language": "언어",
+    "logout": "로그아웃",
+    "profile": "프로필"
+  },
+  "sidebar": {
+    "collapse": "메뉴 접기",
+    "expand": "메뉴 펼치기",
+    "search": "메뉴 검색"
+  },
+  "tab": {
+    "closeOthers": "다른 탭 닫기",
+    "closeAll": "모든 탭 닫기",
+    "closeRight": "오른쪽 탭 닫기"
+  },
+  "validation": {
+    "required": "{field} 항목은 필수입니다.",
+    "minLength": "{field} 항목은 최소 {min}자 이상이어야 합니다.",
+    "maxLength": "{field} 항목은 최대 {max}자까지 입력 가능합니다.",
+    "pattern": "{field} 항목의 형식이 올바르지 않습니다.",
+    "email": "올바른 이메일 형식이 아닙니다.",
+    "number": "숫자만 입력 가능합니다.",
+    "date": "올바른 날짜 형식이 아닙니다."
+  },
+  "dialog": {
+    "confirmTitle": "확인",
+    "confirmDelete": "정말 삭제하시겠습니까?",
+    "confirmSave": "저장하시겠습니까?",
+    "alertTitle": "알림"
+  },
+  "toast": {
+    "saveSuccess": "저장되었습니다.",
+    "deleteSuccess": "삭제되었습니다.",
+    "saveFail": "저장에 실패했습니다.",
+    "deleteFail": "삭제에 실패했습니다."
+  },
+  "date": {
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "startAfterEnd": "시작일이 종료일보다 클 수 없습니다.",
+    "endBeforeStart": "종료일이 시작일보다 작을 수 없습니다."
+  },
+  "excel": {
+    "downloading": "엑셀 파일을 생성 중입니다...",
+    "downloadSuccess": "엑셀 다운로드가 완료되었습니다.",
+    "downloadFail": "엑셀 다운로드에 실패했습니다."
+  },
+  "pagination": {
+    "first": "처음",
+    "prev": "이전",
+    "next": "다음",
+    "last": "마지막",
+    "pageOf": "{current} / {total} 페이지",
+    "itemRange": "{start}–{end} / {total}건",
+    "pageSize": "페이지당 행 수"
+  },
+  "table": {
+    "selectAll": "전체 선택",
+    "selected": "{count}건 선택",
+    "noData": "데이터가 없습니다.",
+    "loading": "불러오는 중..."
+  },
+  "panel": {
+    "create": "등록",
+    "edit": "수정",
+    "view": "상세",
+    "close": "닫기"
+  },
+  "tree": {
+    "expandAll": "전체 펼치기",
+    "collapseAll": "전체 접기",
+    "noChildren": "하위 항목 없음",
+    "root": "전체"
+  },
+  "menu": {
+    "title": "메뉴 관리",
+    "name": "메뉴명",
+    "id": "메뉴 ID",
+    "url": "URL",
+    "icon": "아이콘",
+    "parent": "상위 메뉴",
+    "sortOrder": "정렬순서",
+    "useYn": "사용여부",
+    "displayYn": "표시여부",
+    "addChild": "하위 메뉴 추가",
+    "deleteConfirm": "이 메뉴를 삭제하시겠습니까?",
+    "hasChildren": "하위 메뉴가 존재하여 삭제할 수 없습니다.",
+    "rootMenu": "최상위"
+  }
+}

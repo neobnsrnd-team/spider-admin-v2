@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spider Admin - Login</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="min-h-screen flex items-center justify-center"
+      style="background-color: var(--cds-background);">
+
+    <!-- Top-right controls: dark mode + language toggle -->
+    <div class="fixed top-4 right-4 flex items-center gap-3 z-10">
+        <!-- Dark mode toggle -->
+        <button id="theme-toggle" type="button"
+                class="flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-150"
+                style="color: var(--cds-icon-secondary); background-color: transparent;"
+                onmouseover="this.style.backgroundColor='var(--cds-background-hover)'"
+                onmouseout="this.style.backgroundColor='transparent'"
+                aria-label="Toggle dark mode">
+            <!-- Icon injected by login.js -->
+        </button>
+        <!-- Language toggle -->
+        <button id="lang-toggle" type="button"
+                class="flex items-center justify-center h-8 px-3 rounded text-xs font-medium tracking-wide transition-colors duration-150"
+                style="color: var(--cds-text-secondary); border: 1px solid var(--cds-border-subtle-01); background-color: transparent;"
+                onmouseover="this.style.backgroundColor='var(--cds-background-hover)'"
+                onmouseout="this.style.backgroundColor='transparent'">
+            KO
+        </button>
+    </div>
+
+    <!-- Login Card -->
+    <div class="w-full max-w-md mx-4 rounded"
+         style="background-color: var(--cds-layer-02); box-shadow: var(--cds-shadow);">
+
+        <!-- Header -->
+        <div class="px-8 pt-10 pb-2">
+            <!-- Logo mark -->
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded"
+                     style="background-color: var(--cds-interactive);">
+                    <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 4L6 9v6c0 7.18 4.26 13.9 10 16 5.74-2.1 10-8.82 10-16V9L16 4z"
+                              stroke="white" stroke-width="2" fill="none"/>
+                        <path d="M12 16l3 3 5-6" stroke="white" stroke-width="2.2"
+                              stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-semibold leading-tight"
+                        style="color: var(--cds-text-primary);">
+                        <span data-i18n="login.title">Spider Admin</span>
+                    </h1>
+                    <p class="text-xs mt-0.5"
+                       style="color: var(--cds-text-secondary);">
+                        <span data-i18n="login.subtitle">&#44288;&#47532; &#49884;&#49828;&#53596;</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error message -->
+        <div th:if="${param.error}"
+             class="mx-8 mt-2 p-3 rounded-sm flex items-start gap-2 text-sm"
+             style="background-color: rgba(218, 30, 40, 0.08); border-left: 3px solid var(--cds-support-error); color: var(--cds-text-error);">
+            <svg class="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2zm5.4 21L16 17.6 10.6 23 9 21.4l5.4-5.4L9 10.6 10.6 9l5.4 5.4L21.4 9 23 10.6l-5.4 5.4L23 21.4z"/>
+            </svg>
+            <span data-i18n="login.error">&#50500;&#51060;&#46356; &#46608;&#45716; &#48708;&#48128;&#48264;&#54840;&#44032; &#50732;&#48148;&#47476;&#51648; &#50506;&#49845;&#45768;&#45796;.</span>
+        </div>
+
+        <!-- Logout message -->
+        <div th:if="${param.logout}"
+             class="mx-8 mt-2 p-3 rounded-sm flex items-start gap-2 text-sm"
+             style="background-color: rgba(36, 161, 72, 0.08); border-left: 3px solid var(--cds-support-success); color: var(--cds-support-success);">
+            <svg class="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2zm-2 19.59l-5-5L10.59 15 14 18.41 21.41 11l1.596 1.586z"/>
+            </svg>
+            <span data-i18n="login.logout">&#47196;&#44536;&#50500;&#50883; &#46104;&#50632;&#49845;&#45768;&#45796;.</span>
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/login}" method="post" id="login-form" class="px-8 pt-6 pb-4 space-y-5">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <!-- User ID -->
+            <div>
+                <label for="username" class="block text-xs font-medium mb-2"
+                       style="color: var(--cds-text-secondary);">
+                    <span data-i18n="login.userId">&#49324;&#50857;&#51088; ID</span>
+                </label>
+                <input type="text" id="username" name="username"
+                       required autocomplete="username" autofocus
+                       class="input-field w-full"
+                       data-i18n="login.userId" data-i18n-attr="placeholder"
+                       placeholder="&#49324;&#50857;&#51088; ID">
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-xs font-medium mb-2"
+                       style="color: var(--cds-text-secondary);">
+                    <span data-i18n="login.password">&#48708;&#48128;&#48264;&#54840;</span>
+                </label>
+                <input type="password" id="password" name="password"
+                       required autocomplete="current-password"
+                       class="input-field w-full"
+                       data-i18n="login.password" data-i18n-attr="placeholder"
+                       placeholder="&#48708;&#48128;&#48264;&#54840;">
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-2">
+                <button type="submit" class="btn btn-primary w-full">
+                    <span data-i18n="login.submit">&#47196;&#44536;&#51064;</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Footer -->
+        <div class="px-8 pb-6 text-center">
+            <p class="text-xs" style="color: var(--cds-text-helper);">
+                &copy; 2024 Spider Admin V2
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/common/spider-core.js}"></script>
+    <script th:src="@{/js/common/toast.js}"></script>
+    <script th:src="@{/js/core/theme.js}"></script>
+    <script th:src="@{/js/i18n/i18n.js}"></script>
+    <script th:src="@{/js/pages/auth/login.js}"></script>
+</body>
+</html>

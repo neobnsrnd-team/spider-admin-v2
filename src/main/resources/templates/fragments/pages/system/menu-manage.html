@@ -1,0 +1,88 @@
+<!-- Menu Management (Template B: Tree + Form) -->
+<div th:fragment="content" id="menu-manage" class="flex h-full gap-4 p-4">
+
+    <!-- Left: Tree Panel -->
+    <div class="w-80 shrink-0 flex flex-col border border-[var(--cds-border-subtle-00)] bg-[var(--cds-layer-02)]">
+        <!-- Tree Toolbar -->
+        <div id="menu-tree-toolbar" class="px-3 border-b border-[var(--cds-border-subtle-00)]"></div>
+
+        <!-- Tree Container -->
+        <div id="menu-tree" class="flex-1 overflow-y-auto p-2"></div>
+    </div>
+
+    <!-- Right: Detail Form -->
+    <div class="flex-1 flex flex-col border border-[var(--cds-border-subtle-00)] bg-[var(--cds-layer-02)]">
+        <!-- Form Toolbar -->
+        <div id="menu-form-toolbar" class="px-3 border-b border-[var(--cds-border-subtle-00)]"></div>
+
+        <!-- Form Body -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <form id="menu-detail-form" autocomplete="off">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-4 max-w-2xl">
+                    <!-- Menu ID -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.id">메뉴 ID</label>
+                        <input type="text" name="menuId" class="input-field"
+                               data-validate="required,maxLength:40" data-label="메뉴 ID">
+                    </div>
+
+                    <!-- Menu Name -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.name">메뉴명</label>
+                        <input type="text" name="menuName" class="input-field"
+                               data-validate="required,maxLength:100" data-label="메뉴명">
+                    </div>
+
+                    <!-- URL -->
+                    <div class="spider-panel-field col-span-2">
+                        <label data-i18n="menu.url">URL</label>
+                        <input type="text" name="menuUrl" class="input-field"
+                               data-validate="maxLength:200" data-label="URL">
+                    </div>
+
+                    <!-- Parent Menu -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.parent">상위 메뉴</label>
+                        <select name="priorMenuId" class="input-field">
+                            <option value="ROOT" data-i18n="menu.rootMenu">최상위</option>
+                        </select>
+                    </div>
+
+                    <!-- Icon -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.icon">아이콘</label>
+                        <input type="text" name="menuImage" class="input-field"
+                               data-validate="maxLength:50" data-label="아이콘">
+                    </div>
+
+                    <!-- Sort Order -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.sortOrder">정렬순서</label>
+                        <input type="number" name="sortOrder" class="input-field" value="0"
+                               data-validate="required,number" data-label="정렬순서">
+                    </div>
+
+                    <!-- Use YN -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.useYn">사용여부</label>
+                        <select name="useYn" class="input-field">
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
+
+                    <!-- Display YN -->
+                    <div class="spider-panel-field">
+                        <label data-i18n="menu.displayYn">표시여부</label>
+                        <select name="displayYn" class="input-field">
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/pages/system/menu-manage.js}"></script>
+</div>

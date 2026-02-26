@@ -1,0 +1,131 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "search": "Search",
+    "reset": "Reset",
+    "add": "Add",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "noData": "No data available.",
+    "required": "This field is required.",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information",
+    "totalCount": "Total {count} items",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "print": "Print",
+    "excel": "Download Excel",
+    "useYn": "Status",
+    "all": "All",
+    "searchPlaceholder": "Enter search keyword"
+  },
+  "login": {
+    "title": "Spider Admin",
+    "subtitle": "Management System",
+    "userId": "User ID",
+    "password": "Password",
+    "submit": "Sign In",
+    "error": "Invalid user ID or password.",
+    "logout": "You have been logged out.",
+    "sessionExpired": "Session expired. Please sign in again.",
+    "rememberMe": "Remember me"
+  },
+  "header": {
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "sidebar": {
+    "collapse": "Collapse menu",
+    "expand": "Expand menu",
+    "search": "Search menu"
+  },
+  "tab": {
+    "closeOthers": "Close other tabs",
+    "closeAll": "Close all tabs",
+    "closeRight": "Close tabs to the right"
+  },
+  "validation": {
+    "required": "{field} is required.",
+    "minLength": "{field} must be at least {min} characters.",
+    "maxLength": "{field} must not exceed {max} characters.",
+    "pattern": "{field} format is invalid.",
+    "email": "Invalid email format.",
+    "number": "Only numbers are allowed.",
+    "date": "Invalid date format."
+  },
+  "dialog": {
+    "confirmTitle": "Confirm",
+    "confirmDelete": "Are you sure you want to delete?",
+    "confirmSave": "Do you want to save?",
+    "alertTitle": "Notice"
+  },
+  "toast": {
+    "saveSuccess": "Saved successfully.",
+    "deleteSuccess": "Deleted successfully.",
+    "saveFail": "Failed to save.",
+    "deleteFail": "Failed to delete."
+  },
+  "date": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "startAfterEnd": "Start date cannot be after end date.",
+    "endBeforeStart": "End date cannot be before start date."
+  },
+  "excel": {
+    "downloading": "Generating Excel file...",
+    "downloadSuccess": "Excel download complete.",
+    "downloadFail": "Excel download failed."
+  },
+  "pagination": {
+    "first": "First",
+    "prev": "Previous",
+    "next": "Next",
+    "last": "Last",
+    "pageOf": "Page {current} of {total}",
+    "itemRange": "{start}–{end} of {total}",
+    "pageSize": "Rows per page"
+  },
+  "table": {
+    "selectAll": "Select All",
+    "selected": "{count} selected",
+    "noData": "No data available.",
+    "loading": "Loading..."
+  },
+  "panel": {
+    "create": "Create",
+    "edit": "Edit",
+    "view": "Detail",
+    "close": "Close"
+  },
+  "tree": {
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "noChildren": "No items",
+    "root": "All"
+  },
+  "menu": {
+    "title": "Menu Management",
+    "name": "Menu Name",
+    "id": "Menu ID",
+    "url": "URL",
+    "icon": "Icon",
+    "parent": "Parent Menu",
+    "sortOrder": "Sort Order",
+    "useYn": "Active",
+    "displayYn": "Visible",
+    "addChild": "Add Child Menu",
+    "deleteConfirm": "Delete this menu?",
+    "hasChildren": "Cannot delete: has child menus.",
+    "rootMenu": "Root"
+  }
+}

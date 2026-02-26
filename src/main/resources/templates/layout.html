@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:name="${_csrf.parameterName}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Spider Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <div class="shell">
+        <!-- Sidebar (256px, collapsible to 48px) -->
+        <th:block th:replace="~{fragments/sidebar :: sidebar}" />
+
+        <!-- Main area: Header + Tab Bar + Content -->
+        <div class="shell-main">
+            <!-- Header (48px) -->
+            <th:block th:replace="~{fragments/header :: header}" />
+
+            <!-- Tab Bar (36px) -->
+            <th:block th:replace="~{fragments/tab-bar :: tabBar}" />
+
+            <!-- Content Area (remaining space) -->
+            <div id="content-area" class="content-area">
+                <!-- Tab panels are dynamically created by tab-manager.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SpiderConfig: server-to-client configuration -->
+    <script th:inline="javascript">
+        window.SpiderConfig = {
+            contextPath: '',
+            csrfToken: /*[[${_csrf.token}]]*/ '',
+            csrfHeader: /*[[${_csrf.headerName}]]*/ '',
+            userId: /*[[${userId}]]*/ '',
+            authorities: /*[[${authorities}]]*/ [],
+            locale: 'ko',
+            initialTab: /*[[${initialTab}]]*/ null,
+            menuTree: /*[[${menuTree}]]*/ []
+        };
+    </script>
+
+    <!-- Core utilities -->
+    <script th:src="@{/js/common/spider-core.js}"></script>
+    <script th:src="@{/js/common/toast.js}"></script>
+    <script th:src="@{/js/common/dialog.js}"></script>
+    <script th:src="@{/js/common/validation.js}"></script>
+
+    <!-- Core modules -->
+    <script th:src="@{/js/core/theme.js}"></script>
+    <script th:src="@{/js/i18n/i18n.js}"></script>
+    <script th:src="@{/js/core/permission.js}"></script>
+
+    <!-- UI Components -->
+    <script th:src="@{/js/components/data-table.js}"></script>
+    <script th:src="@{/js/components/pagination.js}"></script>
+    <script th:src="@{/js/components/search-panel.js}"></script>
+    <script th:src="@{/js/components/toolbar.js}"></script>
+    <script th:src="@{/js/components/detail-panel.js}"></script>
+    <script th:src="@{/js/components/tree.js}"></script>
+
+    <!-- Shell modules -->
+    <script th:src="@{/js/core/sidebar.js}"></script>
+    <script th:src="@{/js/core/tab-manager.js}"></script>
+    <script th:src="@{/js/core/app.js}"></script>
+</body>
+</html>

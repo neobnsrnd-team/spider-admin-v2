@@ -29,6 +29,9 @@
         return date;
     }
 
+    /* Track AbortControllers per element to prevent duplicate listeners */
+    const abortMap = new WeakMap();
+
     window.SpiderDateDefaults = {
         init: function (screenType, startSelector, endSelector) {
             const startDate = calcStartDate(screenType);
@@ -37,33 +40,43 @@
             }
 
             const endDate = new Date();
-            const $start = $(startSelector);
-            const $end = $(endSelector);
+            const start = qs(startSelector);
+            const end = qs(endSelector);
 
-            if ($start.length > 0) {
-                $start.val(formatDate(startDate));
+            if (start) {
+                start.value = formatDate(startDate);
             }
-            if ($end.length > 0) {
-                $end.val(formatDate(endDate));
+            if (end) {
+                end.value = formatDate(endDate);
             }
 
-            $start.off('change.spiderDate').on('change.spiderDate', function () {
-                const startVal = $start.val();
-                const endVal = $end.val();
-                if (startVal && endVal && startVal > endVal) {
-                    SpiderToast.warning('시작일이 종료일보다 클 수 없습니다.');
-                    $start.val(endVal);
-                }
-            });
+            if (start) {
+                if (abortMap.has(start)) abortMap.get(start).abort();
+                const ac = new AbortController();
+                abortMap.set(start, ac);
+                start.addEventListener('change', function () {
+                    const startVal = start.value;
+                    const endVal = end ? end.value : '';
+                    if (startVal && endVal && startVal > endVal) {
+                        SpiderToast.warning('시작일이 종료일보다 클 수 없습니다.');
+                        start.value = endVal;
+                    }
+                }, { signal: ac.signal });
+            }
 
-            $end.off('change.spiderDate').on('change.spiderDate', function () {
-                const startVal = $start.val();
-                const endVal = $end.val();
-                if (startVal && endVal && startVal > endVal) {
-                    SpiderToast.warning('종료일이 시작일보다 작을 수 없습니다.');
-                    $end.val(startVal);
-                }
-            });
+            if (end) {
+                if (abortMap.has(end)) abortMap.get(end).abort();
+                const ac = new AbortController();
+                abortMap.set(end, ac);
+                end.addEventListener('change', function () {
+                    const startVal = start ? start.value : '';
+                    const endVal = end.value;
+                    if (startVal && endVal && startVal > endVal) {
+                        SpiderToast.warning('종료일이 시작일보다 작을 수 없습니다.');
+                        end.value = startVal;
+                    }
+                }, { signal: ac.signal });
+            }
         }
     };
 })();
