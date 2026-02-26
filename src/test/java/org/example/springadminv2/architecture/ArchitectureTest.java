@@ -7,6 +7,7 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
@@ -85,6 +86,26 @@ class ArchitectureTest {
                 .should()
                 .haveSimpleNameEndingWith("VO")
                 .because("VO 클래스를 사용하지 않는다 — DTO로 통일")
+                .allowEmptyShould(true)
+                .check(classes);
+    }
+
+    // ── DTO는 Java Record ──
+
+    @Test
+    void dto_should_be_records() {
+        classes()
+                .that()
+                .resideInAPackage("..dto..")
+                .and()
+                .areTopLevelClasses()
+                .and()
+                .doNotHaveSimpleName("ApiResponse")
+                .and()
+                .doNotHaveSimpleName("ErrorDetail")
+                .should()
+                .beAssignableTo(Record.class)
+                .because("DTO는 Java Record로 작성한다 — ApiResponse, ErrorDetail 제외")
                 .allowEmptyShould(true)
                 .check(classes);
     }
