@@ -784,7 +784,7 @@ video {
 .menu-item {
     display: flex;
     align-items: center;
-    padding: 0.375rem 1rem 0.375rem 2.5rem; /* padding-left overridden by JS for depth */
+    padding: 0.375rem 1rem 0.375rem 2.5rem;
     font-size: var(--cds-body-01-size);
     color: var(--cds-sidebar-text);
     cursor: pointer;
