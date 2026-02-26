@@ -19,7 +19,7 @@ class CustomUserDetailsTest {
         Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("MENU:R"));
 
         // when
-        CustomUserDetails user = new CustomUserDetails("user01", "pwd", "1", 0, authorities);
+        CustomUserDetails user = new CustomUserDetails("user01", "pwd", "ROLE01", "1", 0, authorities);
 
         // then
         assertThat(user.getUsername()).isEqualTo("user01");
@@ -36,7 +36,7 @@ class CustomUserDetailsTest {
     @DisplayName("비활성 상태 코드의 사용자는 isEnabled가 false")
     void disabled_user_state_code() {
         // given & when
-        CustomUserDetails user = new CustomUserDetails("user02", "pwd", "0", 0, Set.of());
+        CustomUserDetails user = new CustomUserDetails("user02", "pwd", "ROLE01", "0", 0, Set.of());
 
         // then
         assertThat(user.isEnabled()).isFalse();
@@ -46,7 +46,7 @@ class CustomUserDetailsTest {
     @DisplayName("로그인 실패 5회 이상이면 계정 잠금")
     void locked_after_max_login_failures() {
         // given & when
-        CustomUserDetails user = new CustomUserDetails("user03", "pwd", "1", 5, Set.of());
+        CustomUserDetails user = new CustomUserDetails("user03", "pwd", "ROLE01", "1", 5, Set.of());
 
         // then
         assertThat(user.isAccountNonLocked()).isFalse();
@@ -56,7 +56,7 @@ class CustomUserDetailsTest {
     @DisplayName("로그인 실패 횟수가 최대치 미만이면 잠금되지 않는다")
     void not_locked_below_max_login_failures() {
         // given & when
-        CustomUserDetails user = new CustomUserDetails("user04", "pwd", "1", 4, Set.of());
+        CustomUserDetails user = new CustomUserDetails("user04", "pwd", "ROLE01", "1", 4, Set.of());
 
         // then
         assertThat(user.isAccountNonLocked()).isTrue();

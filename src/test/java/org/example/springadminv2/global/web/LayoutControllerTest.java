@@ -1,17 +1,15 @@
 package org.example.springadminv2.global.web;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.example.springadminv2.global.security.SecurityConfig;
-import org.example.springadminv2.global.security.dto.MenuPermission;
 import org.example.springadminv2.global.security.handler.CustomAccessDeniedHandler;
 import org.example.springadminv2.global.security.handler.CustomAuthenticationEntryPoint;
-import org.example.springadminv2.global.security.mapper.AuthorityMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,25 +40,16 @@ class LayoutControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AuthorityMapper authorityMapper;
+    private MenuService menuService;
 
     private static CustomUserDetails mockUser() {
         return new CustomUserDetails(
                 "testUser",
                 "pwd",
+                "ROLE01",
                 "1",
                 0,
                 Set.of(new SimpleGrantedAuthority("MENU:R"), new SimpleGrantedAuthority("MENU:W")));
-    }
-
-    private static Map<String, Object> menu(String menuId, String parentId, String name, String url, String image) {
-        Map<String, Object> m = new LinkedHashMap<>();
-        m.put("menuId", menuId);
-        m.put("priorMenuId", parentId);
-        m.put("menuName", name);
-        m.put("menuUrl", url);
-        m.put("menuImage", image);
-        return m;
     }
 
     @Nested
@@ -72,12 +61,10 @@ class LayoutControllerTest {
         void returns_layout_with_model() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            given(authorityMapper.selectMenuPermissionsByUserId("testUser"))
-                    .willReturn(List.of(new MenuPermission("v3_menu_manage", "RW")));
-            given(authorityMapper.selectAllMenus())
-                    .willReturn(List.of(
-                            menu("system", "ROOT", "시스템 관리", null, "settings"),
-                            menu("v3_menu_manage", "system", "메뉴 관리", "/system/menu", "list")));
+            List<UserMenuRow> menuTree = List.of(
+                    new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
+                    new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
             // when & then
             MvcResult result = mockMvc.perform(get("/").with(user(user)))
@@ -91,70 +78,40 @@ class LayoutControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/menus/tree (메뉴 트리 API)")
+    @DisplayName("GET /api/user-menus/tree (메뉴 트리 API)")
     class MenuTree {
 
         @Test
-        @DisplayName("권한 있는 리프 메뉴만 트리에 포함")
-        @SuppressWarnings("unchecked")
-        void returns_accessible_leaf_menus_only() throws Exception {
+        @DisplayName("사용자 메뉴 트리를 정상 반환한다")
+        void returns_user_menu_tree() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            given(authorityMapper.selectMenuPermissionsByUserId("testUser"))
-                    .willReturn(List.of(new MenuPermission("v3_menu_manage", "RW")));
-            given(authorityMapper.selectAllMenus())
-                    .willReturn(List.of(
-                            menu("system", "ROOT", "시스템 관리", null, "settings"),
-                            menu("v3_menu_manage", "system", "메뉴 관리", "/system/menu", "list"),
-                            menu("v3_role_manage", "system", "역할 관리", "/system/role", "people")));
+            List<UserMenuRow> menuTree = List.of(
+                    new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
+                    new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
-            // when & then – v3_menu_manage 만 권한 보유
-            mockMvc.perform(get("/api/menus/tree").with(user(user)))
+            // when & then
+            mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.length()").value(2))
                     .andExpect(jsonPath("$.data[0].menuId").value("system"))
-                    .andExpect(jsonPath("$.data[0].children[0].menuId").value("v3_menu_manage"))
-                    .andExpect(jsonPath("$.data[0].children.length()").value(1));
+                    .andExpect(jsonPath("$.data[1].menuId").value("v3_menu_manage"));
         }
 
         @Test
-        @DisplayName("접근 가능한 리프가 없는 카테고리는 제외")
-        void excludes_empty_categories() throws Exception {
+        @DisplayName("권한이 없으면 빈 리스트를 반환한다")
+        void returns_empty_when_no_permissions() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            given(authorityMapper.selectMenuPermissionsByUserId("testUser")).willReturn(List.of());
-            given(authorityMapper.selectAllMenus())
-                    .willReturn(List.of(
-                            menu("system", "ROOT", "시스템 관리", null, "settings"),
-                            menu("v3_menu_manage", "system", "메뉴 관리", "/system/menu", "list")));
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(List.of());
 
-            // when & then – 권한 없으면 빈 트리
-            mockMvc.perform(get("/api/menus/tree").with(user(user)))
+            // when & then
+            mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.length()").value(0));
-        }
-
-        @Test
-        @DisplayName("priorMenuId가 null이거나 빈 문자열인 메뉴를 ROOT로 처리")
-        void null_and_empty_parent_treated_as_root() throws Exception {
-            // given
-            CustomUserDetails user = mockUser();
-            given(authorityMapper.selectMenuPermissionsByUserId("testUser"))
-                    .willReturn(List.of(new MenuPermission("leaf1", "R"), new MenuPermission("leaf2", "R")));
-            given(authorityMapper.selectAllMenus())
-                    .willReturn(List.of(
-                            menu("cat1", null, "카테고리1", null, null),
-                            menu("cat2", "", "카테고리2", null, null),
-                            menu("leaf1", "cat1", "리프1", "/page1", null),
-                            menu("leaf2", "cat2", "리프2", "/page2", null)));
-
-            // when & then – 두 카테고리 모두 ROOT 레벨로 나타남
-            mockMvc.perform(get("/api/menus/tree").with(user(user)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.length()").value(2))
-                    .andExpect(jsonPath("$.data[0].menuId").value("cat1"))
-                    .andExpect(jsonPath("$.data[1].menuId").value("cat2"));
         }
     }
 }

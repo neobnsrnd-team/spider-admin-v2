@@ -48,6 +48,7 @@ class CustomUserDetailsServiceTest {
         // then
         assertThat(result.getUserId()).isEqualTo("admin");
         assertThat(result.getPassword()).isEqualTo("encPwd");
+        assertThat(result.getRoleId()).isEqualTo("ROLE_ADMIN");
         assertThat(result.isEnabled()).isTrue();
         assertThat(result.getAuthorities()).hasSize(1);
     }
