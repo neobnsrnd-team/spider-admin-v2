@@ -35,6 +35,10 @@ build/
 ### Environment ###
 .env
 
+### Frontend Build ###
+src/main/frontend/node/
+src/main/frontend/node_modules/
+
 ### Claude ###
 .claude/
 
