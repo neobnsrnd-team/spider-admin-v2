@@ -371,25 +371,35 @@ SPRING_PROFILES_ACTIVE=local-mysql mvn spring-boot:run
 # SPRING_PROFILES_ACTIVE=local-oracle   # (선택) 기본값: local-oracle | local-mysql
 
 # [DB 공통] ───────────────────────────────────────────────────────
-DB_HOST=          # DB 서버 호스트
-DB_USERNAME=      # DB 접속 사용자
-DB_PASSWORD=      # DB 접속 비밀번호
-# DB_PORT=        # (선택) Oracle 기본: 1521, MySQL 기본: 3306
+DB_HOST=localhost           # DB 서버 호스트 (Docker: localhost)
+DB_USERNAME=                # DB 접속 사용자
+DB_PASSWORD=                # DB 접속 비밀번호
+# DB_PORT=                  # (선택) Oracle 기본: 1521, MySQL 기본: 3306
 
 # [Oracle 전용] ───────────────────────────────────────────────────
-DB_SID=           # Oracle SID (local-oracle 프로파일 시 필수)
-DB_SCHEMA=        # Oracle 스키마 (HikariCP CURRENT_SCHEMA 설정에 사용)
+DB_SID=                     # Oracle SID (local-oracle 프로파일 시 필수)
+DB_SCHEMA=                  # Oracle 스키마 (HikariCP CURRENT_SCHEMA 설정에 사용)
 
 # [MySQL 전용] ────────────────────────────────────────────────────
-# DB_NAME=        # MySQL 데이터베이스 이름 (local-mysql 프로파일 시 필수)
+# DB_NAME=                  # (선택) MySQL 데이터베이스 이름 (기본: spider_admin)
 
-# [경로] ──────────────────────────────────────────────────────────
-# FILE_UPLOAD_DIR=    # (선택) 기본: {프로젝트루트}/uploads
-# XML_PROPERTY_DIR=   # (선택) 기본: {프로젝트루트}/xml-properties
+# [보안] ──────────────────────────────────────────────────────────
+AUTHORITY_SOURCE=USER_MENU  # USER_MENU | ROLE_MENU
+
+# [로깅 — 이벤트 로그] ───────────────────────────────────────────
+LOG_EVENT_RDB_ENABLED=true  # RDB(Oracle/MySQL) 이벤트 로그 저장
+LOG_EVENT_ES_ENABLED=false  # Elasticsearch 이벤트 로그 저장
+# LOG_EVENT_ES_URIS=http://localhost:9200  # (선택) ES 접속 URI (기본: http://localhost:9200)
+
+# [Docker Compose] ───────────────────────────────────────────────
+# DB_PORT_ORACLE=           # (선택) Oracle 호스트 포트 매핑 (기본: 1521)
+# DB_PORT_MYSQL=            # (선택) MySQL 호스트 포트 매핑 (기본: 3306)
+# ES_PORT=                  # (선택) Elasticsearch 호스트 포트 매핑 (기본: 9200)
+# KIBANA_PORT=              # (선택) Kibana 호스트 포트 매핑 (기본: 5601)
 
 # [테스트 계정] ───────────────────────────────────────────────────
-CI_TEST_USER_ID=      # E2E·API 테스트 로그인 계정 ID
-CI_TEST_PASSWORD=     # E2E·API 테스트 로그인 계정 비밀번호
+# CI_TEST_USER_ID=          # E2E·API 테스트 로그인 계정 ID
+# CI_TEST_PASSWORD=         # E2E·API 테스트 로그인 계정 비밀번호
 ```
 
 ### CI 환경 변수 목록
@@ -425,4 +435,4 @@ env:
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*
