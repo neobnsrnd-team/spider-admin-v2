@@ -1,0 +1,13 @@
+package org.example.springadminv2.global.exception;
+
+public enum ErrorCode {
+    RESOURCE_NOT_FOUND,
+    DUPLICATE_RESOURCE,
+    DATA_INTEGRITY_VIOLATION,
+    INVALID_INPUT,
+    BUSINESS_RULE_VIOLATED,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    EXTERNAL_SERVICE_ERROR,
+    INTERNAL_ERROR
+}
