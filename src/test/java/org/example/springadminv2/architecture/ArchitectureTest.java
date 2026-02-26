@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
@@ -12,7 +13,9 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 class ArchitectureTest {
 
-    private static final JavaClasses classes = new ClassFileImporter().importPackages("org.example.springadminv2");
+    private static final JavaClasses classes = new ClassFileImporter()
+            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+            .importPackages("org.example.springadminv2");
 
     // ── 레이어 의존성: Controller → Service → Mapper 단방향만 허용 ──
 

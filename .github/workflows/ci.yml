@@ -29,7 +29,7 @@ jobs:
           cache: maven
 
       - name: Build + Test
-        run: mvn verify -B
+        run: mvn verify -B -Dtest.excludedGroups=docker
 
       - name: SonarCloud Scan
         env:

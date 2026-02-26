@@ -27,3 +27,14 @@ pagehelper:
   reasonable: true
   support-methods-arguments: true
   params: count=countSql
+
+security:
+  access:
+    authority-source: ${AUTHORITY_SOURCE:USER_MENU}
+
+log:
+  event:
+    rdb:
+      enabled: ${LOG_EVENT_RDB_ENABLED:false}
+    elasticsearch:
+      enabled: ${LOG_EVENT_ES_ENABLED:false}

@@ -6,3 +6,8 @@ logging:
   level:
     org.example.springadminv2: DEBUG
     org.mybatis: DEBUG
+
+log:
+  event:
+    rdb:
+      enabled: true

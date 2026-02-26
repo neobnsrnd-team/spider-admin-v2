@@ -1,9 +1,14 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/h2/ddl/security.sql
+      data-locations: classpath:db/h2/dml/security.sql
   thymeleaf:
     check-template-location: false
   security:
@@ -15,3 +20,14 @@ mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+security:
+  access:
+    authority-source: USER_MENU
+
+log:
+  event:
+    rdb:
+      enabled: true
+    elasticsearch:
+      enabled: false
