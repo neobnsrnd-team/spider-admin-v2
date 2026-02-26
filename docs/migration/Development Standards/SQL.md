@@ -11,26 +11,31 @@ Spring Boot + MyBatis 환경에서의 SQL 작성 표준을 정의한다. 멀티 
 ### 2.1 공통 설정
 
 ```yaml
+# application-base.yml (공통)
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.example.dto
+  type-handlers-package: org.example.springadminv2.global.typehandler
   configuration:
     map-underscore-to-camel-case: true      # DB: USER_NAME → Java: userName 자동 매핑
-    arg-name-based-constructor-auto-mapping: true  # Record DTO 생성자 자동 매핑
-    jdbc-type-for-null: NULL                # null 파라미터의 JDBC 타입
-    lazy-loading-enabled: false             # 지연 로딩 비활성화
-    cache-enabled: true                     # 2단계 캐시 활성화
-    auto-mapping-behavior: PARTIAL          # 명시된 컬럼만 매핑
+
+# application-oracle.yml (프로파일별)
+mybatis:
+  mapper-locations: classpath:mapper/oracle/**/*.xml
+
+# application-mysql.yml (프로파일별)
+mybatis:
+  mapper-locations: classpath:mapper/mysql/**/*.xml
 ```
+
+> **참고:** `mapper-locations`는 프로파일별 설정 파일에서 DB 디렉터리를 지정한다. 공통 설정(`application-base.yml`)에는 `type-handlers-package`와 `map-underscore-to-camel-case`만 포함된다. Multi-DB 3.1절 참고.
 
 ---
 
 ## 3. Mapper 파일 구조
 
-도메인별로 **Mapper XML 1개**로 관리한다.
+도메인별로 **Mapper XML 1개**로 관리한다. DB별 디렉터리 분리에 대해서는 Multi-DB 3.1절 참고.
 
 ```
-resources/mapper/{domain}/
+resources/mapper/{db}/{domain}/
 └── {Entity}Mapper.xml           ← CRUD + 조회 + 검색 + ResultMap + Fragment 전부
 ```
 
@@ -47,7 +52,7 @@ resources/mapper/{domain}/
 ### 3.1 네임스페이스 규칙
 
 ```xml
-<mapper namespace="com.spider.admin.domain.{domain}.mapper.{Domain}Mapper">
+<mapper namespace="org.example.springadminv2.domain.{domain}.mapper.{Domain}Mapper">
 ```
 
 > 네임스페이스는 Java Mapper 인터페이스의 FQCN과 **정확히 일치**해야 한다.
@@ -184,10 +189,10 @@ SQL Fragment(`<sql>`)는 **3곳 이상에서 동일하게 반복되는 경우에
 <include refid="baseColumns"/>
 
         <!-- 다른 Mapper의 Fragment 참조 -->
-<include refid="com.example.domain.user.mapper.UserMapper.baseColumns"/>
+<include refid="org.example.springadminv2.domain.user.mapper.UserMapper.baseColumns"/>
 ```
 
-> DB별 문법 차이(LIKE 등)는 Fragment가 아닌 `databaseId` 분기로 처리한다. → Multi-DB 3절 참고
+> DB별 문법 차이(LIKE 등)는 Fragment가 아닌 디렉터리 분리(주 전략) 또는 `databaseId` 분기(보조 전략)로 처리한다. → Multi-DB 3절 참고
 
 ---
 
@@ -223,7 +228,7 @@ SQL Fragment(`<sql>`)는 **3곳 이상에서 동일하게 반복되는 경우에
 <if test="...">AND ...</if>
 ```
 
-> **참고:** LIKE의 `||` 연산자는 Oracle 문법이다. DB 전환 시 `databaseId` 분기가 필요하다. → Multi-DB 3절 참고
+> **참고:** LIKE의 `||` 연산자는 Oracle 문법이다. DB 전환 시 디렉터리별로 분리된 XML에 각 DB 문법으로 작성한다. → Multi-DB 3절 참고
 
 ### 7.2 동적 정렬
 
@@ -245,11 +250,11 @@ ORDER BY
 
 ### 7.3 Batch Insert
 
-DB별로 Batch Insert 문법이 다르므로 `databaseId`로 분기한다.
+DB별로 Batch Insert 문법이 다르므로 디렉터리별로 분리된 XML에 각 DB 문법으로 작성한다.
 
 ```xml
-<!-- Oracle -->
-<insert id="insertBatch" databaseId="oracle">
+<!-- mapper/oracle/.../Mapper.xml -->
+<insert id="insertBatch">
     INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
     SELECT A.* FROM (
     <foreach collection="list" item="item" separator=" UNION ALL ">
@@ -259,13 +264,13 @@ DB별로 Batch Insert 문법이 다르므로 `databaseId`로 분기한다.
     ) A
 </insert>
 
-        <!-- MySQL -->
-<insert id="insertBatch" databaseId="mysql">
-INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
-VALUES
-<foreach collection="list" item="item" separator=",">
-    (#{item.roleId}, #{item.menuId}, #{item.authCode})
-</foreach>
+<!-- mapper/mysql/.../Mapper.xml -->
+<insert id="insertBatch">
+    INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+        (#{item.roleId}, #{item.menuId}, #{item.authCode})
+    </foreach>
 </insert>
 ```
 
@@ -345,7 +350,7 @@ Enum 컬럼은 반드시 TypeHandler를 지정한다.
 - [ ]  `<where>` 태그를 사용했는가 (WHERE 1=1 금지)
 - [ ]  정렬에 `${}` 대신 `<choose>` 를 사용했는가
 - [ ]  Enum 컬럼에 TypeHandler를 지정했는가
-- [ ]  DB별 문법 차이가 있는 SQL에 `databaseId`를 지정했는가
+- [ ]  DB별 문법 차이가 있는 SQL을 디렉터리별(`mapper/{db}/`)로 분리 작성했는가
 
 ---
 

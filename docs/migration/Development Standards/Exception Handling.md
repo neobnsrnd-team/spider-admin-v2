@@ -245,8 +245,8 @@ public class GlobalExceptionHandler {
         String message = ex.getMostSpecificCause().getMessage();
         log.warn("[{}] DataIntegrityViolationException: {}", traceId, message);
 
-        // ORA-00001: unique constraint violated → 중복 키
-        if (message != null && message.contains("ORA-00001")) {
+        // ORA-00001: unique constraint violated (Oracle) / Duplicate entry (MySQL) → 중복 키
+        if (message != null && (message.contains("ORA-00001") || message.toLowerCase().contains("duplicate entry"))) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(ApiResponse.error(ErrorDetail.builder()
@@ -266,7 +266,18 @@ public class GlobalExceptionHandler {
                         .build()));
     }
 
-    // ─── 4순위: 최후 방어선 ──────────────────────────────────────
+    // ─── Security 예외 → Spring Security에 위임 ────────────────
+    @ExceptionHandler(AccessDeniedException.class)
+    public void handleAccessDenied(AccessDeniedException ex) throws AccessDeniedException {
+        throw ex;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public void handleAuthentication(AuthenticationException ex) throws AuthenticationException {
+        throw ex;
+    }
+
+    // ─── 최후 방어선 ──────────────────────────────────────────────
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
         String traceId = currentTraceId();
@@ -284,10 +295,11 @@ public class GlobalExceptionHandler {
     private void logByType(ErrorType type, String traceId, Exception ex) {
         String fmt = "[{}] {}: {}";
         switch (type.getLogLevel()) {
-            case DEBUG -> log.debug(fmt, traceId, type.name(), ex.getMessage());
-            case INFO  -> log.info(fmt, traceId, type.name(), ex.getMessage());
-            case WARN  -> log.warn(fmt, traceId, type.name(), ex.getMessage());
-            case ERROR -> log.error(fmt, traceId, type.name(), ex.getMessage(), ex);
+            case TRACE, DEBUG -> log.debug(fmt, traceId, type.name(), ex.getMessage());
+            case INFO         -> log.info(fmt, traceId, type.name(), ex.getMessage());
+            case WARN         -> log.warn(fmt, traceId, type.name(), ex.getMessage());
+            case ERROR, FATAL -> log.error(fmt, traceId, type.name(), ex.getMessage(), ex);
+            case OFF          -> { }
         }
     }
 
@@ -309,7 +321,6 @@ src/main/java/{base-package}/
 ├── global/exception/
 │   ├── ErrorCode.java              # ErrorCode enum — 클라이언트 계약
 │   ├── ErrorType.java              # ErrorType enum — 내부 정의
-│   ├── LogLevel.java               # LogLevel enum
 │   ├── BusinessException.java
 │   └── GlobalExceptionHandler.java
 │
@@ -407,16 +418,22 @@ public PaymentResult charge(PaymentRequest req) {
 ```java
 @Configuration
 @EnableAsync
-public class AsyncConfig implements AsyncConfigurer {
+public class AsyncConfig {
 
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return (ex, method, params) ->
-            log.error("Async task failed — method={}, params={}: {}",
-                      method.getName(), Arrays.toString(params), ex.getMessage(), ex);
+    @Bean
+    public Executor logEventExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("log-event-");
+        executor.initialize();
+        return executor;
     }
 }
 ```
+
+> `AsyncConfigurer`를 구현하지 않고, 비동기 작업용 `Executor` 빈만 선언한다. `@Async("logEventExecutor")`로 사용한다.
 
 ### 7.2 @Scheduled
 
@@ -569,4 +586,4 @@ class OrderControllerTest {
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

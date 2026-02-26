@@ -51,17 +51,37 @@ spring:
 
 ---
 
-## 3. DatabaseIdProvider를 이용한 SQL 공통화
+## 3. Mapper XML DB별 분리 전략
 
-### 3.1 개념
+### 3.1 주 전략: 디렉터리 기반 분리
 
-MyBatis 내장 기능으로, **하나의 XML 파일 안에서 DB별 SQL을 분기**할 수 있다.
+DB별로 **별도 디렉터리**에 Mapper XML을 관리하고, 프로파일별 `mybatis.mapper-locations`로 해당 DB의 XML만 로딩한다.
 
-- `databaseId` 없는 SQL → 모든 DB에서 사용 (공통)
-- `databaseId="oracle"` → Oracle에서만 사용
-- `databaseId="mysql"` → MySQL에서만 사용
+```
+resources/mapper/
+├── oracle/
+│   ├── log/AccessLogMapper.xml
+│   └── security/AuthorityMapper.xml
+└── mysql/
+    ├── log/AccessLogMapper.xml
+    └── security/AuthorityMapper.xml
+```
 
-### 3.2 설정
+```yaml
+# application-oracle.yml
+mybatis:
+  mapper-locations: classpath:mapper/oracle/**/*.xml
+
+# application-mysql.yml
+mybatis:
+  mapper-locations: classpath:mapper/mysql/**/*.xml
+```
+
+> **장점:** DB별 SQL이 물리적으로 분리되어 있어 혼동이 없고, 각 XML 파일에 `databaseId` 속성을 붙일 필요가 없다.
+
+### 3.2 보조 전략: DatabaseIdProvider
+
+`MyBatisConfig.java`에 `DatabaseIdProvider` Bean이 등록되어 있다. 디렉터리 분리가 주 전략이지만, 하나의 XML 안에서 개별 SQL만 DB별로 분기해야 할 경우 `databaseId` 속성을 보조적으로 사용할 수 있다.
 
 ```java
 @Configuration
@@ -80,17 +100,35 @@ public class MyBatisConfig {
 }
 ```
 
-### 3.3 SQL 작성 규칙
+- `databaseId` 없는 SQL → 모든 DB에서 사용 (공통)
+- `databaseId="oracle"` → Oracle에서만 사용
+- `databaseId="mysql"` → MySQL에서만 사용
 
-표준 SQL은 `databaseId`를 붙이지 않는다. DB별 문법 차이가 있는 경우에만 같은 SQL ID로 DB별 버전을 각각 작성한다. MyBatis가 현재 DB에 맞는 것을 자동 선택한다.
+### 3.3 DB별 SQL 작성 예시
 
-### 3.4 DB별 분기 예시
+디렉터리가 분리되어 있으므로, 각 DB 디렉터리의 XML에 해당 DB 문법으로 직접 작성한다.
 
 **Batch Insert:**
 
 ```xml
-<insert id="insertBatch" databaseId="oracle">...</insert>
-<insert id="insertBatch" databaseId="mysql">...</insert>
+<!-- mapper/oracle/.../Mapper.xml -->
+<insert id="insertBatch">
+    INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
+    SELECT A.* FROM (
+    <foreach collection="list" item="item" separator=" UNION ALL ">
+        SELECT #{item.roleId}, #{item.menuId}, #{item.authCode} FROM DUAL
+    </foreach>
+    ) A
+</insert>
+
+<!-- mapper/mysql/.../Mapper.xml -->
+<insert id="insertBatch">
+    INSERT INTO ROLE_MENUS (ROLE_ID, MENU_ID, AUTH_CODE)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+        (#{item.roleId}, #{item.menuId}, #{item.authCode})
+    </foreach>
+</insert>
 ```
 
 > Batch Insert 전체 코드는 SQL 7.3절 참고.
@@ -98,30 +136,30 @@ public class MyBatisConfig {
 **NULL 대체 함수:**
 
 ```xml
-<!-- Oracle -->
-<select id="getNextSeq" databaseId="oracle" resultType="int">
+<!-- mapper/oracle/.../Mapper.xml -->
+<select id="getNextSeq" resultType="int">
     SELECT NVL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
 </select>
 
-        <!-- MySQL -->
-<select id="getNextSeq" databaseId="mysql" resultType="int">
-SELECT IFNULL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
+<!-- mapper/mysql/.../Mapper.xml -->
+<select id="getNextSeq" resultType="int">
+    SELECT IFNULL(MAX(seq), 0) + 1 FROM history WHERE app_id = #{appId}
 </select>
 ```
 
 **LIKE 검색 (문자열 결합):**
 
 ```xml
-<!-- Oracle -->
-<select id="search" databaseId="oracle" resultType="UserDTO">
+<!-- mapper/oracle/.../Mapper.xml -->
+<select id="search" resultType="UserDTO">
     SELECT id, name FROM users
     WHERE name LIKE '%' || #{keyword} || '%'
 </select>
 
-        <!-- MySQL -->
-<select id="search" databaseId="mysql" resultType="UserDTO">
-SELECT id, name FROM users
-WHERE name LIKE CONCAT('%', #{keyword}, '%')
+<!-- mapper/mysql/.../Mapper.xml -->
+<select id="search" resultType="UserDTO">
+    SELECT id, name FROM users
+    WHERE name LIKE CONCAT('%', #{keyword}, '%')
 </select>
 ```
 
@@ -143,14 +181,14 @@ WHERE name LIKE CONCAT('%', #{keyword}, '%')
 
 ---
 
-## 5. 체크리스트
+## 6. 체크리스트
 
 DB 전환 시 확인 항목:
 
 - [ ]  `spring.profiles.active` 변경
-- [ ]  `application-{db}.yml` 설정 완료 (DataSource, HikariCP)
-- [ ]  DatabaseIdProvider Bean 등록 확인
-- [ ]  모든 DB 전용 SQL에 `databaseId` 지정 확인
+- [ ]  `application-{db}.yml` 설정 완료 (DataSource, HikariCP, mapper-locations, pagehelper dialect)
+- [ ]  `mapper/{db}/` 디렉터리에 해당 DB용 Mapper XML 작성 완료
+- [ ]  DatabaseIdProvider Bean 등록 확인 (보조 전략 사용 시)
 - [ ]  DDL 스크립트로 테이블/초기 데이터 생성 완료
 - [ ]  기본 CRUD + 주요 조회 화면 동작 검증 완료
 

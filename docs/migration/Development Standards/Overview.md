@@ -12,7 +12,7 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | 단방향 레이어 | Controller → Service → Mapper, 역방향·우회 금지 |
 | 인터페이스 없는 Service | 내부 소비자만 존재 — ServiceImpl 추상화 불필요 |
 | PUT 전용 (PATCH 없음) | 부분 수정도 전체 필드 전송으로 통일 |
-| 단일 DB 추상화 | `databaseId`로 SQL 분기, Java 코드 변경 없이 DB 전환 |
+| 단일 DB 추상화 | 디렉터리 기반 Mapper XML 분리 + PageHelper로 DB 전환 |
 
 **문서 맵:**
 
@@ -25,7 +25,7 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | §4 | Code Convention | 포맷팅, 네이밍, Enum & TypeHandler |
 | §5 | API Design | URL·HTTP 메서드, 응답 구조, Controller·DTO |
 | §6 | SQL | MyBatis XML 매핑, 동적 SQL, 페이징 |
-| §7 | Multi-DB | databaseId 기반 DB별 SQL 분기 |
+| §7 | Multi-DB | 디렉터리 기반 Mapper XML 분리 + PageHelper DB 전환 |
 | §8 | Exception Handling | ErrorType, BusinessException, Guard Clause |
 | §9 | Authentication & Authorization | 세션 인증, 메뉴 기반 인가 |
 | §10 | Security | SecurityFilterChain, CSRF, CORS, 보안 헤더 |
@@ -59,7 +59,7 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 | 빌드 | Maven | 3.x |
 | CSS | Tailwind CSS | 3.4.x |
 | JS 유틸 | jQuery | 3.7.x |
-| 코드 품질 | SonarCloud / ESLint / HTMLHint / Husky | — / 9.x / 1.x / 9.x |
+| 코드 품질 | SonarCloud / ESLint | — / 9.x |
 
 전체 의존성 목록과 버전 관리 원칙은 Tech Stack 문서를 참고한다.
 
@@ -122,8 +122,7 @@ src/main/java/{base-package}/
 │   ├── typehandler/             # CodeEnum TypeHandler
 │   └── ...
 │
-└── resources/mapper/            # MyBatis XML
-    └── {domain}/
+└── resources/mapper/{db}/{domain}/  # MyBatis XML (DB별 디렉터리 분리)
 ```
 
 최상위는 `domain/`(비즈니스)과 `global/`(횡단) 두 개뿐이다. `util/`, `helper/` 같은 별도 최상위 패키지를 만들지 않는다. 의존성 주입은 `@RequiredArgsConstructor` + `private final` 전용이며, `@Autowired` 필드 주입은 금지다.
@@ -339,19 +338,15 @@ Mapper interface와 XML이 1:1로 대응한다. SQL 결과는 `resultType`으로
 
 ## 7. 멀티 DB
 
-`databaseId`로 동일 Statement ID에 DB별 SQL을 분기한다. Java 코드는 변경하지 않는다.
+디렉터리 기반 Mapper XML 분리와 PageHelper로 DB를 전환한다. Java 코드는 변경하지 않는다.
 
-```xml
-<select id="selectNextId" resultType="string" databaseId="oracle">
-    SELECT SEQ_USER.NEXTVAL FROM DUAL
-</select>
-
-<select id="selectNextId" resultType="string" databaseId="mysql">
-    SELECT NULL    <!-- AUTO_INCREMENT 사용 -->
-</select>
+```
+resources/mapper/
+├── oracle/{domain}/   # Oracle 전용 SQL (시퀀스, ROWNUM 등)
+└── mysql/{domain}/    # MySQL 전용 SQL (AUTO_INCREMENT 등)
 ```
 
-페이징 SQL은 `databaseId`로 분기하여 MyBatis XML에서 직접 처리한다.
+활성 프로파일(`oracle` / `mysql`)에 따라 `mybatis.mapper-locations`가 해당 DB 디렉터리를 가리킨다. 페이징은 **PageHelper**가 활성 DB에 맞는 방언(dialect)을 자동 적용하므로 SQL에 직접 페이징 구문을 작성하지 않는다.
 
 > 상세: Multi-DB
 
@@ -488,7 +483,7 @@ Postman 컬렉션으로 API를 검증한다. 컬렉션은 **Setup → Create →
 
 ## 15. CI
 
-GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된다. Oracle과 MySQL **양쪽에서 독립적으로** 전체 테스트를 수행하며, **둘 다 통과해야** 병합 가능하다.
+GitHub Actions로 PR이 열리거나 업데이트될 때마다 자동 실행된다. 단일 `build` Job에서 유닛 테스트(`-Dtest.excludedGroups=docker`)와 SonarCloud 분석을 수행하며, 통과해야 병합 가능하다. E2E 테스트(Playwright, Newman)는 향후 추가 예정이다.
 
 **자동 강제 항목:**
 
@@ -570,7 +565,7 @@ IBM Carbon Design System을 기반으로 레이아웃(8pt 그리드), 색상(시
 
 ## 20. 테스트 전략
 
-테스트 계층별 커버리지 목표와 검증 항목을 정의한다. Security/Logging/Util은 100%, Mapper는 100%, Controller는 70%, Service는 50%를 목표로 한다. CI에서 커버리지 미달 시 빌드를 실패시킨다.
+테스트 계층별 커버리지 목표와 검증 항목을 정의한다. Security 90%, Logging 90%, Util 90%, Controller 60%, Service 35%, Overall 55%를 목표로 한다.
 
 > 상세: Test Strategy
 

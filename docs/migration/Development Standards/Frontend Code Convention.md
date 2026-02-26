@@ -45,7 +45,7 @@ JavaScript 코드 품질을 강제한다. CI 빌드를 차단한다.
 import globals from 'globals';
 
 export default [{
-  files: ['src/main/resources/static/js/**/*.js'],
+  files: ['../resources/static/js/**/*.js'],   // src/main/frontend/ 기준 상대 경로
   languageOptions: {
     globals: {
       ...globals.browser,

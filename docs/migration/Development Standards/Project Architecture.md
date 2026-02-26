@@ -229,47 +229,75 @@ src/main/java/{base-package}/
 ### 8.2 레이어 규칙
 
 ```java
-@AnalyzeClasses(packages = "{base-package}")
+@AnalyzeClasses(packages = "org.example.springadminv2")
 class ArchitectureTest {
 
-    @ArchTest
-    static final ArchRule layer_dependencies = layeredArchitecture()
-            .consideringOnlyDependenciesInLayers()
-            .layer("Controller").definedBy("..controller..")
-            .layer("Service").definedBy("..service..")
-            .layer("Mapper").definedBy("..mapper..")
-            .whereLayer("Controller").mayOnlyBeAccessedByLayers()
-            .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller", "Service")
-            .whereLayer("Mapper").mayOnlyBeAccessedByLayers("Service");
+    private final JavaClasses classes = new ClassFileImporter()
+            .importPackages("org.example.springadminv2");
+
+    @Test
+    void layer_dependencies() {
+        layeredArchitecture()
+                .consideringOnlyDependenciesInLayers()
+                .layer("Controller").definedBy("..controller..")
+                .layer("Service").definedBy("..service..")
+                .layer("Mapper").definedBy("..mapper..")
+                .whereLayer("Controller").mayNotBeAccessedByAnyLayer()
+                .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller", "Service")
+                .whereLayer("Mapper").mayOnlyBeAccessedByLayers("Service")
+                .check(classes);
+    }
 }
 ```
 
 ### 8.3 금지 클래스 규칙
 
 ```java
-@ArchTest
-static final ArchRule no_entity_classes =
-        noClasses().that().resideInAPackage("..domain..")
-                .should().haveSimpleNameEndingWith("Entity");
+@Test
+void no_entity_classes() {
+    noClasses().that().resideInAPackage("..domain..")
+            .should().haveSimpleNameEndingWith("Entity")
+            .check(classes);
+}
 
-@ArchTest
-static final ArchRule no_converter_classes =
-        noClasses().that().resideInAPackage("..domain..")
-                .should().haveSimpleNameEndingWith("Converter");
+@Test
+void no_converter_classes() {
+    noClasses().that().resideInAPackage("..domain..")
+            .should().haveSimpleNameEndingWith("Converter")
+            .check(classes);
+}
 
-@ArchTest
-static final ArchRule no_service_impl =
-        noClasses().that().resideInAPackage("..service..")
-                .should().haveSimpleNameEndingWith("ServiceImpl");
+@Test
+void no_service_impl() {
+    noClasses().that().resideInAPackage("..service..")
+            .should().haveSimpleNameEndingWith("ServiceImpl")
+            .check(classes);
+}
+
+@Test
+void no_vo_classes() {
+    noClasses().that().resideInAPackage("..domain..")
+            .should().haveSimpleNameEndingWith("VO")
+            .check(classes);
+}
+
+@Test
+void dto_should_be_records() {
+    classes().that().haveSimpleNameEndingWith("DTO")
+            .should().beRecords()
+            .check(classes);
+}
 ```
 
 ### 8.4 DI 규칙
 
 ```java
-@ArchTest
-static final ArchRule no_autowired =
-        noFields().should().beAnnotatedWith(Autowired.class)
-                .because("@RequiredArgsConstructor + private final을 사용한다");
+@Test
+void no_autowired() {
+    noFields().should().beAnnotatedWith(Autowired.class)
+            .because("@RequiredArgsConstructor + private final을 사용한다")
+            .check(classes);
+}
 ```
 
 ---
@@ -297,4 +325,4 @@ static final ArchRule no_autowired =
 
 ---
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-02-26*

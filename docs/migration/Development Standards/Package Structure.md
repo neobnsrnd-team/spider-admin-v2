@@ -58,14 +58,15 @@
 
 | 패키지 | 설명 |
 |--------|------|
-| global/config | @Configuration 클래스 |
+| global/config | @Configuration 클래스 (MyBatisConfig, AsyncConfig) |
 | global/exception | 예외 핸들러 |
-| global/dto | ApiResponse, PageRequest 등 공통 DTO |
+| global/dto | ApiResponse, ErrorDetail, DateRangeResult, ExcelColumnDefinition 등 공통 DTO |
 | global/security | 인증/인가 (로그인 API 포함) |
+| global/log | 로그 이벤트 (event, listener, mapper) |
+| global/util | TraceIdUtil, ExcelExportUtil, DateRangeUtil, ScreenDateType 등 유틸리티 |
 | global/filter | 서블릿 필터 |
 | global/interceptor | 인터셉터 |
 | global/typehandler | MyBatis TypeHandler |
-| global/util | 유틸리티 |
 
 ---
 
@@ -773,56 +774,73 @@ domain/
 
 ```
 global/
-├── config/                                 ← @Configuration
+├── config/                                 ← @Configuration (MyBatisConfig, AsyncConfig)
 ├── exception/                              ← 예외 핸들러
-├── dto/                                    ← ApiResponse, PageRequest 등
-├── security/                               ← 인증/인가 (로그인 API 포함)
-├── filter/                                 ← 서블릿 필터
-├── interceptor/                            ← 인터셉터
-├── typehandler/                            ← MyBatis TypeHandler
-└── util/                                   ← 유틸리티
+├── dto/                                    ← ApiResponse, ErrorDetail, DateRangeResult, ExcelColumnDefinition
+├── security/                               ← 인증/인가
+├── log/                                    ← 로그 이벤트
+│   ├── event/                              ← LogEvent, AccessLogEvent, AuditLogEvent, SecurityLogEvent
+│   ├── listener/                           ← AccessLogEventListener, SecurityLogEventListener
+│   └── mapper/                             ← AccessLogMapper
+├── util/                                   ← TraceIdUtil, ExcelExportUtil, DateRangeUtil, ScreenDateType
+└── typehandler/                            ← (설정 완료, 구현 예정)
 ```
 
 ### 3.3 Mapper XML
 
 > 기본 경로: `src/main/resources/mapper/`
-> DDL-Backed 도메인(A) 33개에 대응하는 MyBatis SQL XML 파일
+> DB별 디렉터리로 분리되며, `mybatis.mapper-locations`가 프로파일에 따라 경로를 선택한다.
+> - Oracle: `classpath:mapper/oracle/**/*.xml`
+> - MySQL: `classpath:mapper/mysql/**/*.xml`
 
 ```
 mapper/
-├── user/             └── UserMapper.xml
-├── menu/             └── MenuMapper.xml
-├── role/             └── RoleMapper.xml
-├── codegroup/        └── CodeGroupMapper.xml
-├── code/             └── CodeMapper.xml
-├── bizgroup/         └── BizGroupMapper.xml
-├── wasgroup/         └── WasGroupMapper.xml
-├── wasinstance/      └── WasInstanceMapper.xml
-├── property/         └── PropertyMapper.xml
-├── wasproperty/      └── WasPropertyMapper.xml
-├── org/              └── OrgMapper.xml
-├── gateway/          └── GatewayMapper.xml
-├── gwsystem/         └── GwSystemMapper.xml
-├── transport/        └── TransportMapper.xml
-├── listener/         └── ListenerMapper.xml
-├── listenertrx/      └── ListenerTrxMapper.xml
-├── messagehandler/   └── MessageHandlerMapper.xml
-├── message/          └── MessageMapper.xml
-├── messagefield/     └── MessageFieldMapper.xml
-├── transaction/      └── TransactionMapper.xml
-├── trxmessage/       └── TrxMessageMapper.xml
-├── validator/        └── ValidatorMapper.xml
-├── messagetest/      └── MessageTestMapper.xml
-├── messageinstance/  └── MessageInstanceMapper.xml
-├── batch/            └── BatchMapper.xml
-├── errorcode/        └── ErrorCodeMapper.xml
-├── errorhandle/      └── ErrorHandleMapper.xml
-├── errorhistory/     └── ErrorHistoryMapper.xml
-├── monitor/          └── MonitorMapper.xml
-├── adminhistory/     └── AdminHistoryMapper.xml
-├── transdata/        └── TransDataMapper.xml
-├── board/            └── BoardMapper.xml
-└── article/          └── ArticleMapper.xml
+├── oracle/                                 ← Oracle 전용 SQL
+│   ├── log/          └── AccessLogMapper.xml
+│   ├── security/     └── AuthorityMapper.xml
+│   ├── user/         └── UserMapper.xml
+│   ├── menu/         └── MenuMapper.xml
+│   ├── role/         └── RoleMapper.xml
+│   ├── codegroup/    └── CodeGroupMapper.xml
+│   ├── code/         └── CodeMapper.xml
+│   ├── bizgroup/     └── BizGroupMapper.xml
+│   ├── wasgroup/     └── WasGroupMapper.xml
+│   ├── wasinstance/  └── WasInstanceMapper.xml
+│   ├── property/     └── PropertyMapper.xml
+│   ├── wasproperty/  └── WasPropertyMapper.xml
+│   ├── org/          └── OrgMapper.xml
+│   ├── gateway/      └── GatewayMapper.xml
+│   ├── gwsystem/     └── GwSystemMapper.xml
+│   ├── transport/    └── TransportMapper.xml
+│   ├── listener/     └── ListenerMapper.xml
+│   ├── listenertrx/  └── ListenerTrxMapper.xml
+│   ├── messagehandler/ └── MessageHandlerMapper.xml
+│   ├── message/      └── MessageMapper.xml
+│   ├── messagefield/ └── MessageFieldMapper.xml
+│   ├── transaction/  └── TransactionMapper.xml
+│   ├── trxmessage/   └── TrxMessageMapper.xml
+│   ├── validator/    └── ValidatorMapper.xml
+│   ├── messagetest/  └── MessageTestMapper.xml
+│   ├── messageinstance/ └── MessageInstanceMapper.xml
+│   ├── batch/        └── BatchMapper.xml
+│   ├── errorcode/    └── ErrorCodeMapper.xml
+│   ├── errorhandle/  └── ErrorHandleMapper.xml
+│   ├── errorhistory/ └── ErrorHistoryMapper.xml
+│   ├── monitor/      └── MonitorMapper.xml
+│   ├── adminhistory/ └── AdminHistoryMapper.xml
+│   ├── transdata/    └── TransDataMapper.xml
+│   ├── board/        └── BoardMapper.xml
+│   └── article/      └── ArticleMapper.xml
+│
+└── mysql/                                  ← MySQL 전용 SQL
+    ├── log/          └── AccessLogMapper.xml
+    ├── security/     └── AuthorityMapper.xml
+    ├── user/         └── UserMapper.xml
+    ├── menu/         └── MenuMapper.xml
+    ├── role/         └── RoleMapper.xml
+    │   ... (oracle과 동일 구조)
+    ├── board/        └── BoardMapper.xml
+    └── article/      └── ArticleMapper.xml
 ```
 
 ---
