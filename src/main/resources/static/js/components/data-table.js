@@ -124,6 +124,7 @@
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
+            height: '100%',
             border: '1px solid var(--cds-border-subtle-00)',
             background: 'var(--cds-layer-02)',
             fontSize: 'var(--cds-body-01-size)',

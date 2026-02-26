@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.domain.wasinstance.mapper.WasInstanceMapper">
+
+    <select id="selectAllInstances"
+            resultType="org.example.springadminv2.domain.wasinstance.dto.WasInstanceResponse">
+        SELECT INSTANCE_ID   AS instanceId,
+               INSTANCE_NAME AS instanceName,
+               INSTANCE_DESC AS instanceDesc,
+               IP            AS ip,
+               PORT          AS port
+          FROM FWK_WAS_INSTANCE
+         ORDER BY INSTANCE_ID
+    </select>
+
+</mapper>

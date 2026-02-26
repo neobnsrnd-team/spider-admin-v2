@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.domain.wasproperty.mapper.WasPropertyMapper">
+
+    <select id="selectWasProperties"
+            resultType="org.example.springadminv2.domain.wasproperty.dto.WasPropertyResponse">
+        SELECT wi.INSTANCE_ID   AS instanceId,
+               wi.INSTANCE_NAME AS instanceName,
+               wp.PROPERTY_VALUE AS propertyValue,
+               wp.PROPERTY_DESC  AS propertyDesc
+          FROM FWK_WAS_INSTANCE wi
+          LEFT JOIN FWK_WAS_PROPERTY wp
+            ON wi.INSTANCE_ID = wp.INSTANCE_ID
+           AND wp.PROPERTY_GROUP_ID = #{groupId}
+           AND wp.PROPERTY_ID = #{propertyId}
+         ORDER BY wi.INSTANCE_ID
+    </select>
+
+    <insert id="mergeWasProperty">
+        INSERT INTO FWK_WAS_PROPERTY (
+            INSTANCE_ID, PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_VALUE, PROPERTY_DESC
+        ) VALUES (
+            #{instanceId}, #{groupId}, #{propertyId}, #{value}, #{desc}
+        )
+        ON DUPLICATE KEY UPDATE
+            PROPERTY_VALUE = #{value},
+            PROPERTY_DESC  = #{desc}
+    </insert>
+
+    <select id="selectWasMaxVersion" resultType="int">
+        SELECT COALESCE(MAX(VERSION), 0)
+          FROM FWK_WAS_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+    </select>
+
+    <insert id="insertBatchWasHistory">
+        INSERT INTO FWK_WAS_PROPERTY_HISTORY (
+            INSTANCE_ID, PROPERTY_GROUP_ID, PROPERTY_ID, VERSION,
+            PROPERTY_VALUE, PROPERTY_DESC, REASON,
+            LAST_UPDATE_USER_ID, LAST_UPDATE_DTIME
+        )
+        SELECT INSTANCE_ID, PROPERTY_GROUP_ID, PROPERTY_ID, #{version},
+               PROPERTY_VALUE, PROPERTY_DESC, #{reason},
+               #{lastUpdateUserId}, #{lastUpdateDtime}
+          FROM FWK_WAS_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+    </insert>
+
+    <select id="selectWasHistoryVersions"
+            resultType="org.example.springadminv2.domain.wasproperty.dto.WasPropertyHistoryVersionResponse">
+        SELECT VERSION              AS version,
+               MAX(REASON)          AS reason,
+               MAX(LAST_UPDATE_USER_ID) AS lastUpdateUserId,
+               MAX(LAST_UPDATE_DTIME)   AS lastUpdateDtime
+          FROM FWK_WAS_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+         GROUP BY VERSION
+         ORDER BY VERSION DESC
+    </select>
+
+    <select id="selectWasHistoryByVersion"
+            resultType="org.example.springadminv2.domain.wasproperty.dto.WasPropertyHistoryResponse">
+        SELECT PROPERTY_ID    AS propertyId,
+               PROPERTY_VALUE AS propertyValue,
+               PROPERTY_DESC  AS propertyDesc
+          FROM FWK_WAS_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+           AND VERSION = #{version}
+         ORDER BY PROPERTY_ID
+    </select>
+
+    <select id="selectCurrentWasProperties"
+            resultType="org.example.springadminv2.domain.wasproperty.dto.WasPropertyResponse">
+        SELECT wp.INSTANCE_ID    AS instanceId,
+               wi.INSTANCE_NAME  AS instanceName,
+               wp.PROPERTY_VALUE AS propertyValue,
+               wp.PROPERTY_DESC  AS propertyDesc
+          FROM FWK_WAS_PROPERTY wp
+          JOIN FWK_WAS_INSTANCE wi ON wp.INSTANCE_ID = wi.INSTANCE_ID
+         WHERE wp.PROPERTY_GROUP_ID = #{groupId}
+           AND wp.INSTANCE_ID = #{instanceId}
+         ORDER BY wp.PROPERTY_ID
+    </select>
+
+    <delete id="deleteWasPropertiesByInstanceAndGroup">
+        DELETE FROM FWK_WAS_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+    </delete>
+
+    <insert id="restoreWasFromHistory">
+        INSERT INTO FWK_WAS_PROPERTY (
+            INSTANCE_ID, PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_VALUE, PROPERTY_DESC
+        )
+        SELECT INSTANCE_ID, PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_VALUE, PROPERTY_DESC
+          FROM FWK_WAS_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND INSTANCE_ID = #{instanceId}
+           AND VERSION = #{version}
+    </insert>
+
+    <delete id="deleteWasPropertiesByGroupId">
+        DELETE FROM FWK_WAS_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </delete>
+
+</mapper>
