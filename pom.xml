@@ -30,7 +30,7 @@
         <sonar.projectKey>neobnsrnd-team_spider-admin-v2</sonar.projectKey>
         <!-- Test -->
         <archunit.version>1.3.0</archunit.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
     <dependencies>

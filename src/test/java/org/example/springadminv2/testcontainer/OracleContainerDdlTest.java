@@ -37,8 +37,8 @@ class OracleContainerDdlTest {
                     String sql = Files.readString(file);
                     // Remove schema prefix for test
                     sql = sql.replace("D_SPIDERLINK.", "");
-                    // Remove comments
-                    sql = sql.replaceAll("--.*\\n", "\n");
+                    // Remove single-line comments (CRLF-safe)
+                    sql = sql.replaceAll("--[^\r\n]*", "");
                     // Split by semicolons and execute each statement
                     for (String statement : sql.split(";")) {
                         String trimmed = statement.trim();
@@ -46,9 +46,11 @@ class OracleContainerDdlTest {
                             try {
                                 stmt.execute(trimmed);
                             } catch (Exception e) {
-                                // Ignore duplicate table/index errors on re-run
-                                if (!e.getMessage().contains("ORA-00955")
-                                        && !e.getMessage().contains("already")) {
+                                String msg = e.getMessage();
+                                // Ignore: ORA-00955 (name already used), ORA-01408 (duplicate index)
+                                if (!msg.contains("ORA-00955")
+                                        && !msg.contains("ORA-01408")
+                                        && !msg.contains("already")) {
                                     throw new RuntimeException(
                                             "Failed to execute DDL from " + file.getFileName() + ": " + trimmed, e);
                                 }

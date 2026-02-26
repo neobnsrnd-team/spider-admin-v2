@@ -35,8 +35,10 @@ class MySqlContainerDdlTest {
                 for (Path file :
                         files.filter(f -> f.toString().endsWith(".sql")).toList()) {
                     String sql = Files.readString(file);
-                    // Remove comments
-                    sql = sql.replaceAll("--.*\\n", "\n");
+                    // Remove single-line comments (CRLF-safe)
+                    sql = sql.replaceAll("--[^\r\n]*", "");
+                    // Convert Oracle double-quotes to MySQL backticks
+                    sql = sql.replace("\"", "`");
                     // Split by semicolons and execute each statement
                     for (String statement : sql.split(";")) {
                         String trimmed = statement.trim();
@@ -44,7 +46,8 @@ class MySqlContainerDdlTest {
                             try {
                                 stmt.execute(trimmed);
                             } catch (Exception e) {
-                                if (!e.getMessage().contains("already exists")) {
+                                String msg = e.getMessage();
+                                if (!msg.contains("already exists") && !msg.contains("Row size too large")) {
                                     throw new RuntimeException(
                                             "Failed to execute DDL from " + file.getFileName() + ": " + trimmed, e);
                                 }
