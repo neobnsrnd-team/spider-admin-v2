@@ -179,6 +179,29 @@ class MenuRestControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true));
         }
+
+        @Test
+        @DisplayName("displayYn·useYn이 null이면 기본값 'Y'로 설정된다")
+        void null_displayYn_useYn_defaults_to_Y() throws Exception {
+            // given
+            willDoNothing().given(menuService).createMenu(any(MenuCreateRequest.class), anyString());
+
+            // displayYn, useYn을 null로 전달
+            String json =
+                    """
+                    {"menuId":"MENU004","menuName":"테스트","priorMenuId":"ROOT",
+                     "menuUrl":"/test","menuImage":"icon","sortOrder":1,
+                     "displayYn":null,"useYn":null}""";
+
+            // when & then
+            mockMvc.perform(post("/api/system/menu")
+                            .with(user(RW_USER))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
     }
 
     // ── 메뉴 수정 ──────────────────────────────────────────────
