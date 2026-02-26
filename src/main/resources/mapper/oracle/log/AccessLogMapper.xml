@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.global.log.mapper.AccessLogMapper">
+
+    <insert id="insertAccessLog" parameterType="org.example.springadminv2.global.log.event.AccessLogEvent">
+        INSERT INTO FWK_USER_ACCESS_HIS (USER_ID, ACCESS_DTIME, ACCESS_IP, ACCESS_URL, INPUT_DATA, RESULT_MESSAGE)
+        VALUES (#{userId}, #{accessDtime}, #{accessIp}, #{accessUrl}, #{inputData}, #{resultMessage})
+    </insert>
+
+</mapper>

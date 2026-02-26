@@ -18,7 +18,6 @@ server:
       force: true
 
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
   type-handlers-package: org.example.springadminv2.global.typehandler
   configuration:
     map-underscore-to-camel-case: true

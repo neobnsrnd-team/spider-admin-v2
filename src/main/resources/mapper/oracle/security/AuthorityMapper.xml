@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.global.security.mapper.AuthorityMapper">
+
+    <select id="selectMenuPermissionsByUserId"
+            parameterType="string"
+            resultType="org.example.springadminv2.global.security.dto.MenuPermission">
+        SELECT MENU_ID, AUTH_CODE
+          FROM FWK_USER_MENU
+         WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="selectMenuPermissionsByRoleId"
+            parameterType="string"
+            resultType="org.example.springadminv2.global.security.dto.MenuPermission">
+        SELECT MENU_ID, AUTH_CODE
+          FROM FWK_ROLE_MENU
+         WHERE ROLE_ID = #{roleId}
+    </select>
+
+    <select id="selectUserById"
+            parameterType="string"
+            resultType="org.example.springadminv2.global.security.dto.AuthenticatedUser">
+        SELECT USER_ID,
+               PASSWD AS password,
+               ROLE_ID,
+               USER_STATE_CODE,
+               LOGIN_FAIL_COUNT
+          FROM FWK_USER
+         WHERE USER_ID = #{userId}
+    </select>
+
+</mapper>
