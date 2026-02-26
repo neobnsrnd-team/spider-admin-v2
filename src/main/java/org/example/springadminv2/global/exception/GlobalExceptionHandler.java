@@ -3,12 +3,12 @@ package org.example.springadminv2.global.exception;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.UUID;
 
 import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
 import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
 import org.example.springadminv2.global.log.event.ErrorLogEvent;
+import org.example.springadminv2.global.util.TraceIdUtil;
 import org.slf4j.MDC;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -84,7 +84,8 @@ public class GlobalExceptionHandler {
         String message = ex.getMostSpecificCause().getMessage();
         log.warn("[{}] DataIntegrityViolationException: {}", traceId, message);
 
-        if (message != null && message.contains("ORA-00001")) {
+        if (message != null
+                && (message.contains("ORA-00001") || message.toLowerCase().contains("duplicate entry"))) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiResponse.error(ErrorDetail.builder()
                             .code(ErrorCode.DUPLICATE_RESOURCE.name())
@@ -140,8 +141,7 @@ public class GlobalExceptionHandler {
     }
 
     private String currentTraceId() {
-        String id = MDC.get("traceId");
-        return (id != null) ? id : UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        return TraceIdUtil.getOrGenerate();
     }
 
     private void recordErrorEvent(String traceId, String errorCode, Exception ex) {

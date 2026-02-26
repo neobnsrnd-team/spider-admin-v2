@@ -1,7 +1,6 @@
 package org.example.springadminv2.global.security.handler;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
@@ -9,7 +8,7 @@ import org.example.springadminv2.global.exception.ErrorCode;
 import org.example.springadminv2.global.exception.ErrorType;
 import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
 import org.example.springadminv2.global.log.event.SecurityLogEvent;
-import org.slf4j.MDC;
+import org.example.springadminv2.global.util.TraceIdUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -61,10 +60,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private void recordSecurityEvent(HttpServletRequest request, AccessDeniedException ex) {
         try {
-            String traceId = MDC.get("traceId");
-            if (traceId == null) {
-                traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-            }
+            String traceId = TraceIdUtil.getOrGenerate();
 
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String userId = (auth != null && auth.getName() != null) ? auth.getName() : "ANONYMOUS";

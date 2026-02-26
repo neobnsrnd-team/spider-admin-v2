@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -112,6 +113,60 @@ class GlobalExceptionHandlerTest {
         verify(logEventAdapter).record(any(ErrorLogEvent.class));
     }
 
+    @Test
+    @DisplayName("DataIntegrityViolation ORA-00001 → 409 DUPLICATE_RESOURCE")
+    void dataIntegrityOra_returnsDuplicate() throws Exception {
+        mockMvc.perform(get("/test-exception/data-integrity-oracle"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"));
+    }
+
+    @Test
+    @DisplayName("DataIntegrityViolation MySQL Duplicate entry → 409 DUPLICATE_RESOURCE")
+    void dataIntegrityMysql_returnsDuplicate() throws Exception {
+        mockMvc.perform(get("/test-exception/data-integrity-mysql"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"));
+    }
+
+    @Test
+    @DisplayName("DataIntegrityViolation 일반 → 400 DATA_INTEGRITY_VIOLATION")
+    void dataIntegrityGeneric_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/test-exception/data-integrity-generic"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("DATA_INTEGRITY_VIOLATION"));
+    }
+
+    @Test
+    @DisplayName("BusinessException INTERNAL_ERROR (5xx) → ERROR 이벤트 기록 + logByType ERROR")
+    void businessException_internalError_logsError() throws Exception {
+        mockMvc.perform(get("/test-exception/internal-error"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error.code").value("INTERNAL_ERROR"));
+
+        verify(logEventAdapter).record(any(ErrorLogEvent.class));
+    }
+
+    @Test
+    @DisplayName("BusinessException INVALID_INPUT → 400, logByType DEBUG")
+    void businessException_invalidInput_logsDebug() throws Exception {
+        mockMvc.perform(get("/test-exception/invalid-input"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("INVALID_INPUT"));
+
+        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
+    }
+
+    @Test
+    @DisplayName("BusinessException INVALID_STATE → 409, logByType INFO")
+    void businessException_invalidState_logsInfo() throws Exception {
+        mockMvc.perform(get("/test-exception/invalid-state"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("BUSINESS_RULE_VIOLATED"));
+
+        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
+    }
+
     // ─── 테스트 전용 컨트롤러 ─────────────────────────────────────
     @RestController
     @RequestMapping("/test-exception")
@@ -141,6 +196,39 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/unexpected")
         public ApiResponse<String> unexpected() {
             throw new RuntimeException("unexpected error");
+        }
+
+        @GetMapping("/data-integrity-oracle")
+        public ApiResponse<String> dataIntegrityOracle() {
+            throw new DataIntegrityViolationException(
+                    "could not execute statement", new RuntimeException("ORA-00001: unique constraint violated"));
+        }
+
+        @GetMapping("/data-integrity-mysql")
+        public ApiResponse<String> dataIntegrityMysql() {
+            throw new DataIntegrityViolationException(
+                    "could not execute statement", new RuntimeException("Duplicate entry 'foo' for key 'UK_name'"));
+        }
+
+        @GetMapping("/data-integrity-generic")
+        public ApiResponse<String> dataIntegrityGeneric() {
+            throw new DataIntegrityViolationException(
+                    "could not execute statement", new RuntimeException("NOT NULL constraint failed"));
+        }
+
+        @GetMapping("/internal-error")
+        public ApiResponse<String> internalError() {
+            throw new BusinessException(ErrorType.INTERNAL_ERROR);
+        }
+
+        @GetMapping("/invalid-input")
+        public ApiResponse<String> invalidInput() {
+            throw new BusinessException(ErrorType.INVALID_INPUT);
+        }
+
+        @GetMapping("/invalid-state")
+        public ApiResponse<String> invalidState() {
+            throw new BusinessException(ErrorType.INVALID_STATE);
         }
     }
 

@@ -59,4 +59,11 @@ class SecurityExceptionHandlerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
     }
+
+    @Test
+    @DisplayName("권한 없음 일반 요청 → 403 에러")
+    @WithMockUser(authorities = "MENU999:R")
+    void forbiddenNormal_returns403() throws Exception {
+        mockMvc.perform(post("/test/menu001").with(csrf())).andExpect(status().isForbidden());
+    }
 }
