@@ -1,12 +1,13 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.controller;
 
 import java.util.List;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuSortUpdateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuSortUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
 import org.example.springadminv2.global.security.CustomUserDetails;
@@ -29,10 +30,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/system/menu")
 @RequiredArgsConstructor
-public class MenuRestController {
+public class MenuController {
 
     private final MenuService menuService;
-
     /**
      * 전체 메뉴 트리 조회.
      */

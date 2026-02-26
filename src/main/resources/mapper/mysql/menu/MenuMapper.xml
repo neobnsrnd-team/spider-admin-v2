@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.example.springadminv2.domain.system.menu.MenuMapper">
+<mapper namespace="org.example.springadminv2.domain.menu.mapper.MenuMapper">
 
     <select id="selectAllMenus"
-            resultType="org.example.springadminv2.domain.system.menu.dto.MenuResponse">
+            resultType="org.example.springadminv2.domain.menu.dto.MenuResponse">
         SELECT MENU_ID          AS menuId,
                PRIOR_MENU_ID    AS priorMenuId,
                SORT_ORDER       AS sortOrder,
@@ -21,7 +21,7 @@
 
     <select id="selectMenuById"
             parameterType="string"
-            resultType="org.example.springadminv2.domain.system.menu.dto.MenuResponse">
+            resultType="org.example.springadminv2.domain.menu.dto.MenuResponse">
         SELECT MENU_ID          AS menuId,
                PRIOR_MENU_ID    AS priorMenuId,
                SORT_ORDER       AS sortOrder,
@@ -95,5 +95,35 @@
                LAST_UPDATE_USER_ID   = #{lastUpdateUserId}
          WHERE MENU_ID = #{menuId}
     </update>
+
+    <select id="selectUserMenuTree"
+            parameterType="string"
+            resultType="org.example.springadminv2.domain.menu.dto.UserMenuRow">
+        WITH RECURSIVE authorized_tree AS (
+            SELECT m.MENU_ID, m.PRIOR_MENU_ID, m.SORT_ORDER,
+                   m.MENU_NAME, m.MENU_URL, m.MENU_IMAGE, um.AUTH_CODE
+              FROM FWK_MENU m
+              JOIN FWK_USER_MENU um ON m.MENU_ID = um.MENU_ID AND um.USER_ID = #{userId}
+             WHERE m.USE_YN = 'Y' AND m.DISPLAY_YN = 'Y'
+
+            UNION
+
+            SELECT p.MENU_ID, p.PRIOR_MENU_ID, p.SORT_ORDER,
+                   p.MENU_NAME, p.MENU_URL, p.MENU_IMAGE, NULL
+              FROM FWK_MENU p
+              JOIN authorized_tree c ON p.MENU_ID = c.PRIOR_MENU_ID
+             WHERE p.USE_YN = 'Y' AND p.DISPLAY_YN = 'Y'
+        )
+        SELECT MENU_ID       AS menuId,
+               PRIOR_MENU_ID AS priorMenuId,
+               SORT_ORDER    AS sortOrder,
+               MENU_NAME     AS menuName,
+               MENU_URL      AS menuUrl,
+               MENU_IMAGE    AS menuImage,
+               MAX(AUTH_CODE) AS authCode
+          FROM authorized_tree
+         GROUP BY MENU_ID, PRIOR_MENU_ID, SORT_ORDER, MENU_NAME, MENU_URL, MENU_IMAGE
+         ORDER BY SORT_ORDER
+    </select>
 
 </mapper>

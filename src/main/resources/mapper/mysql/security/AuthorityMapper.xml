@@ -31,17 +31,4 @@
          WHERE USER_ID = #{userId}
     </select>
 
-    <select id="selectAllMenus" resultType="java.util.LinkedHashMap">
-        SELECT MENU_ID       AS "menuId",
-               PRIOR_MENU_ID AS "priorMenuId",
-               SORT_ORDER    AS "sortOrder",
-               MENU_NAME     AS "menuName",
-               MENU_URL      AS "menuUrl",
-               MENU_IMAGE    AS "menuImage"
-          FROM FWK_MENU
-         WHERE USE_YN = 'Y'
-           AND DISPLAY_YN = 'Y'
-         ORDER BY SORT_ORDER
-    </select>
-
 </mapper>

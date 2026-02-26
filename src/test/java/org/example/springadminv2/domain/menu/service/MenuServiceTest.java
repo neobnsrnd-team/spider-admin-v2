@@ -1,11 +1,13 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.service;
 
 import java.util.List;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.mapper.MenuMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -214,6 +216,44 @@ class MenuServiceTest {
 
             // then
             then(menuMapper).should().updateSortOrder(eq("MENU"), eq(3), eq("SYS"), eq("admin"), anyString());
+        }
+    }
+
+    // ── getUserMenuTree ────────────────────────────────────
+
+    @Nested
+    @DisplayName("getUserMenuTree")
+    class GetUserMenuTree {
+
+        @Test
+        @DisplayName("Mapper가 반환한 사용자 메뉴 트리를 그대로 전달한다")
+        void delegates_to_mapper() {
+            // given
+            List<UserMenuRow> expected = List.of(
+                    new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null),
+                    new UserMenuRow("MENU", "SYS", 1, "메뉴관리", "/system/menu", "list", "RW"));
+            given(menuMapper.selectUserMenuTree("testUser")).willReturn(expected);
+
+            // when
+            List<UserMenuRow> result = menuService.getUserMenuTree("testUser");
+
+            // then
+            assertThat(result).isEqualTo(expected);
+            assertThat(result).hasSize(2);
+            then(menuMapper).should().selectUserMenuTree("testUser");
+        }
+
+        @Test
+        @DisplayName("권한이 없으면 빈 리스트를 반환한다")
+        void returns_empty_when_no_permissions() {
+            // given
+            given(menuMapper.selectUserMenuTree("noPermUser")).willReturn(List.of());
+
+            // when
+            List<UserMenuRow> result = menuService.getUserMenuTree("noPermUser");
+
+            // then
+            assertThat(result).isEmpty();
         }
     }
 }

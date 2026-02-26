@@ -2,6 +2,7 @@ package org.example.springadminv2.global.web;
 
 import java.util.Set;
 
+import org.example.springadminv2.domain.menu.controller.MenuPageController;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -168,14 +169,14 @@ class WebControllerTest {
 
     // ═════════════════════════════════════════════════════════════════
     @Nested
-    @DisplayName("MenuController 테스트")
-    class MenuControllerTest {
+    @DisplayName("MenuPageController 테스트")
+    class MenuPageControllerTest {
 
         private MockMvc mockMvc;
 
         @BeforeEach
         void setUp() {
-            mockMvc = MockMvcBuilders.standaloneSetup(new MenuController())
+            mockMvc = MockMvcBuilders.standaloneSetup(new MenuPageController())
                     .setViewResolvers(viewResolver())
                     .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                     .build();

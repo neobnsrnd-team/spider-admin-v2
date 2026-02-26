@@ -1,4 +1,4 @@
-package org.example.springadminv2.domain.system.menu.dto;
+package org.example.springadminv2.domain.menu.dto;
 
 import java.util.List;
 

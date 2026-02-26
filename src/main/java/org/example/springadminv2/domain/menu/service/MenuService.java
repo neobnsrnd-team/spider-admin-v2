@@ -1,4 +1,4 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.mapper.MenuMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +82,15 @@ public class MenuService {
     public void updateSortOrder(String menuId, int sortOrder, String priorMenuId, String userId) {
         String now = LocalDateTime.now().format(TIMESTAMP_FMT);
         menuMapper.updateSortOrder(menuId, sortOrder, priorMenuId, userId, now);
+    }
+
+    /**
+     * 사용자 권한 기반 메뉴 트리 조회.
+     * 계층 조회 + 권한 필터링은 SQL에서 처리하고, Service는 결과를 그대로 전달한다.
+     */
+    @Transactional(readOnly = true)
+    public List<UserMenuRow> getUserMenuTree(String userId) {
+        return menuMapper.selectUserMenuTree(userId);
     }
 
     // ── 트리 빌드 ──────────────────────────────────────────

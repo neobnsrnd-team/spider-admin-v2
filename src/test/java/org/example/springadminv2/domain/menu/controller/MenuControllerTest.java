@@ -1,13 +1,14 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.controller;
 
 import java.util.List;
 import java.util.Set;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuSortUpdateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuSortUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.example.springadminv2.global.security.SecurityConfig;
@@ -43,14 +44,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = MenuRestController.class)
+@WebMvcTest(controllers = MenuController.class)
 @Import({
     SecurityConfig.class,
     CustomAuthenticationEntryPoint.class,
     CustomAccessDeniedHandler.class,
     SecurityLogEventListener.class
 })
-class MenuRestControllerTest {
+class MenuControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

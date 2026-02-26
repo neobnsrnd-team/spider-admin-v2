@@ -1,12 +1,13 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.UserMenuRow;
 
 @Mapper
 public interface MenuMapper {
@@ -36,4 +37,6 @@ public interface MenuMapper {
             @Param("priorMenuId") String priorMenuId,
             @Param("lastUpdateUserId") String userId,
             @Param("lastUpdateDtime") String dtime);
+
+    List<UserMenuRow> selectUserMenuTree(String userId);
 }
