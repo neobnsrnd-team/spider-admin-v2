@@ -51,18 +51,24 @@
         <appender-ref ref="AUDIT_FILE"/>
     </logger>
 
+    <!-- default (dev, local, test) : CONSOLE 만 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 
+    <!-- staging : CONSOLE + APP_FILE -->
     <springProfile name="prod | staging">
         <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
             <appender-ref ref="APP_FILE"/>
         </root>
     </springProfile>
 
+    <!-- prod : CONSOLE + APP_FILE + JSON_FILE -->
     <springProfile name="prod">
         <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="APP_FILE"/>
             <appender-ref ref="JSON_FILE"/>
         </root>
     </springProfile>

@@ -113,10 +113,11 @@ public class GlobalExceptionHandler {
     private void logByType(ErrorType type, String traceId, Exception ex) {
         String fmt = "[{}] {}: {}";
         switch (type.getLogLevel()) {
-            case DEBUG -> log.debug(fmt, traceId, type.name(), ex.getMessage());
+            case TRACE, DEBUG -> log.debug(fmt, traceId, type.name(), ex.getMessage());
             case INFO -> log.info(fmt, traceId, type.name(), ex.getMessage());
             case WARN -> log.warn(fmt, traceId, type.name(), ex.getMessage());
-            case ERROR -> log.error(fmt, traceId, type.name(), ex.getMessage(), ex);
+            case ERROR, FATAL -> log.error(fmt, traceId, type.name(), ex.getMessage(), ex);
+            case OFF -> {}
         }
     }
 
