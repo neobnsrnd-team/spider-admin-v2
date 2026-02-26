@@ -52,13 +52,13 @@ Request
 
 ### 3.1 경로 분류
 
+공개 경로는 별도 상수 없이 `SecurityFilterChain` 내에서 인라인으로 선언한다.
+
 ```java
-private static final String[] PUBLIC_PATHS = {
-    "/login", "/error",
-    "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico",
-    "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-    "/actuator/health"
-};
+http.authorizeHttpRequests(auth -> auth
+    .requestMatchers("/login", "/css/**", "/js/**", "/images/**")
+    .permitAll()
+    .anyRequest().authenticated())
 ```
 
 - 인증 없이 접근해야 하는 경로**만** 추가한다.
@@ -70,35 +70,33 @@ private static final String[] PUBLIC_PATHS = {
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .formLogin(form ->
+                        form.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(authenticationEntryPoint)
+                                .accessDeniedHandler(accessDeniedHandler))
+                .sessionManagement(session -> session.sessionFixation().migrateSession());
 
-            // ─── CSRF ─────────────────────────────────────────────
-            // 렌더링 방식에 따라 전략 결정 (3.3절 참조)
+        return http.build();
+    }
 
-            // ─── Headers ──────────────────────────────────────────
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
-                .contentSecurityPolicy(csp ->
-                    csp.policyDirectives("default-src 'self'; script-src 'self'")))
-
-            // ─── Authorization Rules ──────────────────────────────
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(PUBLIC_PATHS).permitAll()
-                .anyRequest().authenticated())
-
-            // ─── 인증 방식 ────────────────────────────────────────
-            // 프로젝트에 맞는 인증 방식 선택 (4절 참조)
-
-            // ─── Exception Handling ───────────────────────────────
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(...)
-                .accessDeniedHandler(...))
-
-            .build();
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
     }
 }
 ```
@@ -144,12 +142,13 @@ public class SecurityConfig {
 
 ```java
 .sessionManagement(session -> session
-    .sessionFixation().changeSessionId())       // 세션 고정 공격 방지 — 필수
+    .sessionFixation().migrateSession())       // 세션 고정 공격 방지 — 필수
 ```
 
 | 옵션 | 허용 |
 |------|------|
-| `changeSessionId()` | **필수** |
+| `migrateSession()` | **현재 사용** — 세션 속성 복사 후 새 ID 발급 |
+| `changeSessionId()` | 허용 — Servlet 3.1+ 기본값 |
 | `none()` | 금지 — 세션 고정 공격 취약 |
 
 동시 세션 수(`maximumSessions`)는 서비스 요구사항에 따라 결정한다.
@@ -324,7 +323,7 @@ public SecurityFilterChain devConsoleFilterChain(HttpSecurity http) throws Excep
 □ 7. Security Headers: 기본값 유지 + CSP 추가
       → X-Frame-Options, X-Content-Type-Options 약화 없음
 
-□ 8. Session: sessionFixation().changeSessionId()
+□ 8. Session: sessionFixation().migrateSession()
       → 로그인 후 세션 ID 변경 확인
 
 □ 9. 환경 분리: 개발 전용 설정 @Profile 제한

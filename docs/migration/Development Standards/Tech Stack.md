@@ -27,7 +27,6 @@
 | MyBatis Spring Boot Starter | 3.0.3 | SQL 매핑 |
 | Caffeine | Spring Boot 관리 | 인메모리 캐시 (Caching 참고) |
 | H2 | Spring Boot 관리 | DBAppender 로그 저장 |
-| PostgreSQL | Spring Boot 관리 | RAG 전용 |
 
 ---
 
@@ -58,6 +57,7 @@
 | Lombok | 1.18.34 | 보일러플레이트 제거, `provided` 스코프 |
 | Logstash Logback Encoder | 8.0 | ELK 연동 JSON 로그 |
 | Logback Classic DB | 1.2.11.1 | DB 로그 어펜더 |
+| Apache POI (poi-ooxml) | 5.2.5 | Excel 파일 생성 |
 
 ---
 

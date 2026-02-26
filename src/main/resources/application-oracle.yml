@@ -16,5 +16,3 @@ spring:
       max-lifetime: 1800000
       connection-init-sql: ALTER SESSION SET CURRENT_SCHEMA = ${DB_SCHEMA}
 
-pagehelper:
-  helper-dialect: oracle
