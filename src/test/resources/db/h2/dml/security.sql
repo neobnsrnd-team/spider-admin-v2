@@ -24,23 +24,23 @@ INSERT INTO FWK_USER (USER_ID, USER_NAME, PASSWORD, ROLE_ID, USER_STATE_CODE, LO
 VALUES ('disabled', 'Disabled User', 'password', 'USER', '0', 0,
         '20240101000000', 'system', '$2a$10$dummyhashfortest');
 
--- Test menus
+-- Test menus (real YAML menu IDs)
 INSERT INTO FWK_MENU (MENU_ID, PRIOR_MENU_ID, SORT_ORDER, MENU_NAME, MENU_URL,
                       DISPLAY_YN, USE_YN, LAST_UPDATE_DTIME, LAST_UPDATE_USER_ID)
-VALUES ('MENU001', 'ROOT', 1, 'User Management', '/user', 'Y', 'Y', '20240101000000', 'system');
+VALUES ('v3_menu_manage', 'ROOT', 1, 'Menu Management', '/menu', 'Y', 'Y', '20240101000000', 'system');
 INSERT INTO FWK_MENU (MENU_ID, PRIOR_MENU_ID, SORT_ORDER, MENU_NAME, MENU_URL,
                       DISPLAY_YN, USE_YN, LAST_UPDATE_DTIME, LAST_UPDATE_USER_ID)
-VALUES ('MENU002', 'ROOT', 2, 'Role Management', '/role', 'Y', 'Y', '20240101000000', 'system');
+VALUES ('v3_role_manage', 'ROOT', 2, 'Role Management', '/role', 'Y', 'Y', '20240101000000', 'system');
 
--- User-Menu permissions (admin: WRITE on both, user01: READ on MENU001 only)
+-- User-Menu permissions (admin: WRITE on both, user01: READ on v3_menu_manage only)
 INSERT INTO FWK_USER_MENU (USER_ID, MENU_ID, AUTH_CODE, LAST_UPDATE_DTIME, LAST_UPDATE_USER_ID, FAVOR_MENU_ORDER)
-VALUES ('admin', 'MENU001', 'W', '20240101000000', 'system', 0);
+VALUES ('admin', 'v3_menu_manage', 'W', '20240101000000', 'system', 0);
 INSERT INTO FWK_USER_MENU (USER_ID, MENU_ID, AUTH_CODE, LAST_UPDATE_DTIME, LAST_UPDATE_USER_ID, FAVOR_MENU_ORDER)
-VALUES ('admin', 'MENU002', 'W', '20240101000000', 'system', 0);
+VALUES ('admin', 'v3_role_manage', 'W', '20240101000000', 'system', 0);
 INSERT INTO FWK_USER_MENU (USER_ID, MENU_ID, AUTH_CODE, LAST_UPDATE_DTIME, LAST_UPDATE_USER_ID, FAVOR_MENU_ORDER)
-VALUES ('user01', 'MENU001', 'R', '20240101000000', 'system', 0);
+VALUES ('user01', 'v3_menu_manage', 'R', '20240101000000', 'system', 0);
 
--- Role-Menu permissions (ADMIN role: WRITE on both, USER role: READ on MENU001)
-INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('ADMIN', 'MENU001', 'W');
-INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('ADMIN', 'MENU002', 'W');
-INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('USER', 'MENU001', 'R');
+-- Role-Menu permissions (ADMIN role: WRITE on both, USER role: READ on v3_menu_manage)
+INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('ADMIN', 'v3_menu_manage', 'W');
+INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('ADMIN', 'v3_role_manage', 'W');
+INSERT INTO FWK_ROLE_MENU (ROLE_ID, MENU_ID, AUTH_CODE) VALUES ('USER', 'v3_menu_manage', 'R');

@@ -26,11 +26,6 @@ public class AuthorityConverter {
             MenuAccessLevel level = MenuAccessLevel.fromCode(permission.authCode());
             String menuId = permission.menuId();
 
-            authorities.add(new SimpleGrantedAuthority(menuId + ":" + MenuAccessLevel.READ.getCode()));
-            if (level == MenuAccessLevel.WRITE) {
-                authorities.add(new SimpleGrantedAuthority(menuId + ":" + MenuAccessLevel.WRITE.getCode()));
-            }
-
             Set<String> derivedResources = menuResourcePermissions.getDerivedResourceAuthorities(menuId, level);
             for (String resource : derivedResources) {
                 authorities.add(new SimpleGrantedAuthority(resource));

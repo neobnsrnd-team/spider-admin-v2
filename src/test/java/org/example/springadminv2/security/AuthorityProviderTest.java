@@ -19,37 +19,37 @@ class AuthorityProviderTest {
     private AuthorityProvider authorityProvider;
 
     @Test
-    @DisplayName("USER_MENU 기반: userId로 권한 로딩")
+    @DisplayName("USER_MENU 기반: userId로 리소스 권한 로딩")
     void loadAuthoritiesByUserId() {
         Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("admin", "ADMIN");
 
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
-        assertThat(authorityStrings).contains("MENU001:R", "MENU001:W", "MENU002:R", "MENU002:W");
+        assertThat(authorityStrings).contains("MENU:R", "MENU:W", "ROLE:R", "ROLE:W");
     }
 
     @Test
-    @DisplayName("WRITE → READ + WRITE 자동 확장")
+    @DisplayName("WRITE → READ + WRITE 리소스 자동 확장")
     void writeIncludesRead() {
         Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("admin", "ADMIN");
 
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
-        assertThat(authorityStrings).contains("MENU001:R", "MENU001:W");
+        assertThat(authorityStrings).contains("MENU:R", "MENU:W");
     }
 
     @Test
-    @DisplayName("READ 전용 사용자: READ만 포함, WRITE 미포함")
+    @DisplayName("READ 전용 사용자: READ 리소스만 포함, WRITE 미포함")
     void readOnlyUser() {
         Set<GrantedAuthority> authorities = authorityProvider.getAuthorities("user01", "USER");
 
         Set<String> authorityStrings =
                 authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
-        assertThat(authorityStrings).contains("MENU001:R");
-        assertThat(authorityStrings).doesNotContain("MENU001:W");
+        assertThat(authorityStrings).contains("MENU:R");
+        assertThat(authorityStrings).doesNotContain("MENU:W");
     }
 
     @Test

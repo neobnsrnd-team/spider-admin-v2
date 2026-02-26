@@ -29,29 +29,27 @@ class AuthorityConverterTest {
     AuthorityConverter converter;
 
     @Test
-    @DisplayName("READ 권한 변환 시 메뉴 READ + 파생 리소스를 반환한다")
-    void convert_read_returns_menu_read_and_derived_resources() {
+    @DisplayName("READ 권한 변환 시 파생 리소스만 반환한다")
+    void convert_read_returns_derived_resources_only() {
         // given
         List<MenuPermission> permissions = List.of(new MenuPermission("v3_menu_manage", "R"));
         given(menuResourcePermissions.getDerivedResourceAuthorities("v3_menu_manage", MenuAccessLevel.READ))
-                .willReturn(Set.of("RES_MENU:R"));
+                .willReturn(Set.of("MENU:R"));
 
         // when
         Set<GrantedAuthority> result = converter.convert(permissions);
 
         // then
-        assertThat(result)
-                .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("v3_menu_manage:R", "RES_MENU:R");
+        assertThat(result).extracting(GrantedAuthority::getAuthority).containsExactlyInAnyOrder("MENU:R");
     }
 
     @Test
-    @DisplayName("WRITE 권한 변환 시 메뉴 READ+WRITE + 파생 리소스를 반환한다")
-    void convert_write_returns_menu_read_write_and_derived_resources() {
+    @DisplayName("WRITE 권한 변환 시 READ + WRITE 파생 리소스를 반환한다")
+    void convert_write_returns_read_and_write_derived_resources() {
         // given
         List<MenuPermission> permissions = List.of(new MenuPermission("v3_role_manage", "W"));
         given(menuResourcePermissions.getDerivedResourceAuthorities("v3_role_manage", MenuAccessLevel.WRITE))
-                .willReturn(Set.of("RES_ROLE:R", "RES_ROLE:W", "RES_MENU:R"));
+                .willReturn(Set.of("ROLE:R", "ROLE:W", "MENU:R"));
 
         // when
         Set<GrantedAuthority> result = converter.convert(permissions);
@@ -59,8 +57,7 @@ class AuthorityConverterTest {
         // then
         assertThat(result)
                 .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder(
-                        "v3_role_manage:R", "v3_role_manage:W", "RES_ROLE:R", "RES_ROLE:W", "RES_MENU:R");
+                .containsExactlyInAnyOrder("ROLE:R", "ROLE:W", "MENU:R");
     }
 
     @Test
@@ -77,8 +74,8 @@ class AuthorityConverterTest {
     }
 
     @Test
-    @DisplayName("YAML에 정의되지 않은 메뉴는 메뉴 권한만 반환한다")
-    void convert_unknown_menu_returns_only_menu_authorities() {
+    @DisplayName("YAML에 정의되지 않은 메뉴는 빈 Set을 반환한다")
+    void convert_unknown_menu_returns_empty() {
         // given
         List<MenuPermission> permissions = List.of(new MenuPermission("UNKNOWN_MENU", "W"));
         given(menuResourcePermissions.getDerivedResourceAuthorities("UNKNOWN_MENU", MenuAccessLevel.WRITE))
@@ -88,9 +85,7 @@ class AuthorityConverterTest {
         Set<GrantedAuthority> result = converter.convert(permissions);
 
         // then
-        assertThat(result)
-                .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("UNKNOWN_MENU:R", "UNKNOWN_MENU:W");
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -100,9 +95,9 @@ class AuthorityConverterTest {
         List<MenuPermission> permissions =
                 List.of(new MenuPermission("v3_menu_manage", "R"), new MenuPermission("v3_role_manage", "W"));
         given(menuResourcePermissions.getDerivedResourceAuthorities("v3_menu_manage", MenuAccessLevel.READ))
-                .willReturn(Set.of("RES_MENU:R"));
+                .willReturn(Set.of("MENU:R"));
         given(menuResourcePermissions.getDerivedResourceAuthorities("v3_role_manage", MenuAccessLevel.WRITE))
-                .willReturn(Set.of("RES_ROLE:R", "RES_ROLE:W", "RES_MENU:R"));
+                .willReturn(Set.of("ROLE:R", "ROLE:W", "MENU:R"));
 
         // when
         Set<GrantedAuthority> result = converter.convert(permissions);
@@ -110,12 +105,6 @@ class AuthorityConverterTest {
         // then
         assertThat(result)
                 .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder(
-                        "v3_menu_manage:R",
-                        "v3_role_manage:R",
-                        "v3_role_manage:W",
-                        "RES_MENU:R",
-                        "RES_ROLE:R",
-                        "RES_ROLE:W");
+                .containsExactlyInAnyOrder("MENU:R", "ROLE:R", "ROLE:W");
     }
 }

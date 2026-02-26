@@ -6,7 +6,7 @@ import java.util.Set;
 import org.example.springadminv2.global.security.converter.AuthorityConverter;
 import org.example.springadminv2.global.security.dto.MenuPermission;
 import org.example.springadminv2.global.security.mapper.AuthorityMapper;
-import org.example.springadminv2.global.security.provider.RoleMenuAuthorityProvider;
+import org.example.springadminv2.global.security.provider.UserMenuAuthorityProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class RoleMenuAuthorityProviderTest {
+class UserMenuAuthorityProviderTest {
 
     @Mock
     AuthorityMapper authorityMapper;
@@ -29,28 +29,24 @@ class RoleMenuAuthorityProviderTest {
     AuthorityConverter authorityConverter;
 
     @InjectMocks
-    RoleMenuAuthorityProvider provider;
+    UserMenuAuthorityProvider provider;
 
     @Test
-    @DisplayName("역할 기반 권한 조회 시 AuthorityConverter로 변환한 결과를 반환한다")
-    void get_authorities_delegates_to_converter() {
+    @DisplayName("사용자 기반 권한 조회 시 selectMenuPermissionsByUserId로 위임한다")
+    void get_authorities_delegates_to_user_permissions() {
         // given
-        List<MenuPermission> permissions = List.of(new MenuPermission("v3_role_manage", "W"));
-        Set<GrantedAuthority> expected = Set.of(
-                new SimpleGrantedAuthority("ROLE:R"),
-                new SimpleGrantedAuthority("ROLE:W"),
-                new SimpleGrantedAuthority("MENU:R"));
+        List<MenuPermission> permissions = List.of(new MenuPermission("v3_menu_manage", "W"));
+        Set<GrantedAuthority> expected =
+                Set.of(new SimpleGrantedAuthority("MENU:R"), new SimpleGrantedAuthority("MENU:W"));
 
-        given(authorityMapper.selectMenuPermissionsByRoleId("ROLE_ADMIN")).willReturn(permissions);
+        given(authorityMapper.selectMenuPermissionsByUserId("admin")).willReturn(permissions);
         given(authorityConverter.convert(permissions)).willReturn(expected);
 
         // when
-        Set<GrantedAuthority> result = provider.getAuthorities("user01", "ROLE_ADMIN");
+        Set<GrantedAuthority> result = provider.getAuthorities("admin", "ADMIN");
 
         // then
-        assertThat(result)
-                .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("ROLE:R", "ROLE:W", "MENU:R");
+        assertThat(result).extracting(GrantedAuthority::getAuthority).containsExactlyInAnyOrder("MENU:R", "MENU:W");
     }
 
     @Test
@@ -58,11 +54,11 @@ class RoleMenuAuthorityProviderTest {
     void get_authorities_empty_permissions_returns_empty() {
         // given
         List<MenuPermission> permissions = List.of();
-        given(authorityMapper.selectMenuPermissionsByRoleId("ROLE_NONE")).willReturn(permissions);
+        given(authorityMapper.selectMenuPermissionsByUserId("unknown")).willReturn(permissions);
         given(authorityConverter.convert(permissions)).willReturn(Set.of());
 
         // when
-        Set<GrantedAuthority> result = provider.getAuthorities("user01", "ROLE_NONE");
+        Set<GrantedAuthority> result = provider.getAuthorities("unknown", "USER");
 
         // then
         assertThat(result).isEmpty();

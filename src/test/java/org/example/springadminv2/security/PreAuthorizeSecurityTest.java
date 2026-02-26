@@ -31,8 +31,8 @@ class PreAuthorizeSecurityTest {
     private MockMvc mockMvc;
 
     @Nested
-    @DisplayName("메뉴 직접 권한")
-    class MenuDirectAuthority {
+    @DisplayName("리소스 기반 권한")
+    class ResourceAuthority {
 
         @Test
         @DisplayName("인증 없음 → 로그인 리다이렉트")
@@ -46,9 +46,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("READ 권한 → GET 성공")
-        @WithMockUser(authorities = "MENU001:R")
+        @WithMockUser(authorities = "SAMPLE:R")
         void read_authority_allows_get() throws Exception {
-            // given – MENU001:R 권한 보유
+            // given – SAMPLE:R 권한 보유
 
             // when & then
             mockMvc.perform(get("/test/menu001")).andExpect(status().isOk());
@@ -56,9 +56,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("READ 권한 → POST 403")
-        @WithMockUser(authorities = "MENU001:R")
+        @WithMockUser(authorities = "SAMPLE:R")
         void read_authority_denies_post() throws Exception {
-            // given – MENU001:R 권한만 보유
+            // given – SAMPLE:R 권한만 보유
 
             // when & then
             mockMvc.perform(post("/test/menu001").with(csrf())).andExpect(status().isForbidden());
@@ -66,9 +66,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("READ 권한 → PUT 403")
-        @WithMockUser(authorities = "MENU001:R")
+        @WithMockUser(authorities = "SAMPLE:R")
         void read_authority_denies_put() throws Exception {
-            // given – MENU001:R 권한만 보유
+            // given – SAMPLE:R 권한만 보유
 
             // when & then
             mockMvc.perform(put("/test/menu001").with(csrf())).andExpect(status().isForbidden());
@@ -76,9 +76,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("READ 권한 → DELETE 403")
-        @WithMockUser(authorities = "MENU001:R")
+        @WithMockUser(authorities = "SAMPLE:R")
         void read_authority_denies_delete() throws Exception {
-            // given – MENU001:R 권한만 보유
+            // given – SAMPLE:R 권한만 보유
 
             // when & then
             mockMvc.perform(delete("/test/menu001").with(csrf())).andExpect(status().isForbidden());
@@ -86,9 +86,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("WRITE 권한 → GET 성공")
-        @WithMockUser(authorities = {"MENU001:R", "MENU001:W"})
+        @WithMockUser(authorities = {"SAMPLE:R", "SAMPLE:W"})
         void write_authority_allows_get() throws Exception {
-            // given – MENU001:R, MENU001:W 권한 보유
+            // given – SAMPLE:R, SAMPLE:W 권한 보유
 
             // when & then
             mockMvc.perform(get("/test/menu001")).andExpect(status().isOk());
@@ -96,9 +96,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("WRITE 권한 → POST 성공")
-        @WithMockUser(authorities = {"MENU001:R", "MENU001:W"})
+        @WithMockUser(authorities = {"SAMPLE:R", "SAMPLE:W"})
         void write_authority_allows_post() throws Exception {
-            // given – MENU001:R, MENU001:W 권한 보유
+            // given – SAMPLE:R, SAMPLE:W 권한 보유
 
             // when & then
             mockMvc.perform(post("/test/menu001").with(csrf())).andExpect(status().isOk());
@@ -106,9 +106,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("WRITE 권한 → PUT 성공")
-        @WithMockUser(authorities = {"MENU001:R", "MENU001:W"})
+        @WithMockUser(authorities = {"SAMPLE:R", "SAMPLE:W"})
         void write_authority_allows_put() throws Exception {
-            // given – MENU001:R, MENU001:W 권한 보유
+            // given – SAMPLE:R, SAMPLE:W 권한 보유
 
             // when & then
             mockMvc.perform(put("/test/menu001").with(csrf())).andExpect(status().isOk());
@@ -116,19 +116,19 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("WRITE 권한 → DELETE 성공")
-        @WithMockUser(authorities = {"MENU001:R", "MENU001:W"})
+        @WithMockUser(authorities = {"SAMPLE:R", "SAMPLE:W"})
         void write_authority_allows_delete() throws Exception {
-            // given – MENU001:R, MENU001:W 권한 보유
+            // given – SAMPLE:R, SAMPLE:W 권한 보유
 
             // when & then
             mockMvc.perform(delete("/test/menu001").with(csrf())).andExpect(status().isOk());
         }
 
         @Test
-        @DisplayName("다른 메뉴 권한 → 403")
-        @WithMockUser(authorities = "MENU999:R")
-        void wrong_menu_authority_returns_forbidden() throws Exception {
-            // given – 다른 메뉴 권한만 보유
+        @DisplayName("다른 리소스 권한 → 403")
+        @WithMockUser(authorities = "OTHER:R")
+        void wrong_resource_authority_returns_forbidden() throws Exception {
+            // given – 다른 리소스 권한만 보유
 
             // when & then
             mockMvc.perform(get("/test/menu001")).andExpect(status().isForbidden());
@@ -140,30 +140,20 @@ class PreAuthorizeSecurityTest {
     class CrossResourceAuthority {
 
         @Test
-        @DisplayName("직접 메뉴 권한으로 크로스 리소스 GET 성공")
-        @WithMockUser(authorities = "v3_was_instance:R")
-        void direct_menu_authority_allows_cross_resource_get() throws Exception {
-            // given – v3_was_instance:R 직접 메뉴 권한 보유
+        @DisplayName("리소스 권한으로 크로스 리소스 GET 성공")
+        @WithMockUser(authorities = "WASINSTANCE:R")
+        void resource_authority_allows_cross_resource_get() throws Exception {
+            // given – WASINSTANCE:R 리소스 권한 보유
 
             // when & then
             mockMvc.perform(get("/test/cross-resource")).andExpect(status().isOk());
         }
 
         @Test
-        @DisplayName("파생 리소스 권한으로 크로스 리소스 GET 성공")
-        @WithMockUser(authorities = "RES_WASINSTANCE:R")
-        void derived_resource_authority_allows_cross_resource_get() throws Exception {
-            // given – RES_WASINSTANCE:R 파생 리소스 권한 보유
-
-            // when & then
-            mockMvc.perform(get("/test/cross-resource")).andExpect(status().isOk());
-        }
-
-        @Test
-        @DisplayName("파생 리소스 WRITE 권한으로 크로스 리소스 POST 성공")
-        @WithMockUser(authorities = "RES_WASINSTANCE:W")
-        void derived_resource_write_allows_cross_resource_post() throws Exception {
-            // given – RES_WASINSTANCE:W 파생 리소스 권한 보유
+        @DisplayName("WRITE 리소스 권한으로 크로스 리소스 POST 성공")
+        @WithMockUser(authorities = "WASINSTANCE:W")
+        void resource_write_allows_cross_resource_post() throws Exception {
+            // given – WASINSTANCE:W 리소스 권한 보유
 
             // when & then
             mockMvc.perform(post("/test/cross-resource").with(csrf())).andExpect(status().isOk());
@@ -171,7 +161,7 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("관련 없는 권한으로 크로스 리소스 GET 403")
-        @WithMockUser(authorities = "MENU999:R")
+        @WithMockUser(authorities = "OTHER:R")
         void unrelated_authority_denies_cross_resource_get() throws Exception {
             // given – 관련 없는 권한만 보유
 
@@ -181,9 +171,9 @@ class PreAuthorizeSecurityTest {
 
         @Test
         @DisplayName("READ 리소스 권한으로 크로스 리소스 POST 403")
-        @WithMockUser(authorities = "RES_WASINSTANCE:R")
+        @WithMockUser(authorities = "WASINSTANCE:R")
         void read_resource_denies_cross_resource_post() throws Exception {
-            // given – RES_WASINSTANCE:R만 보유 (WRITE 없음)
+            // given – WASINSTANCE:R만 보유 (WRITE 없음)
 
             // when & then
             mockMvc.perform(post("/test/cross-resource").with(csrf())).andExpect(status().isForbidden());
