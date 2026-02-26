@@ -35,7 +35,10 @@ class SecurityExceptionHandlerTest {
     @Test
     @DisplayName("미인증 AJAX 요청 → 401 JSON")
     @WithAnonymousUser
-    void unauthenticatedAjax_returns401Json() throws Exception {
+    void unauthenticated_ajax_returns_401_json() throws Exception {
+        // given – 미인증 AJAX 요청
+
+        // when & then
         mockMvc.perform(get("/test/menu001").header("X-Requested-With", "XMLHttpRequest"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
@@ -45,7 +48,10 @@ class SecurityExceptionHandlerTest {
     @Test
     @DisplayName("미인증 일반 요청 → /login 리다이렉트")
     @WithAnonymousUser
-    void unauthenticatedNormal_redirectsToLogin() throws Exception {
+    void unauthenticated_normal_redirects_to_login() throws Exception {
+        // given – 미인증 일반 요청
+
+        // when & then
         mockMvc.perform(get("/test/menu001"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
@@ -53,8 +59,11 @@ class SecurityExceptionHandlerTest {
 
     @Test
     @DisplayName("권한 없음 AJAX 요청 → 403 JSON")
-    @WithMockUser(authorities = "MENU999:R")
-    void forbiddenAjax_returns403Json() throws Exception {
+    @WithMockUser(authorities = "OTHER:R")
+    void forbidden_ajax_returns_403_json() throws Exception {
+        // given – 권한 없는 사용자의 AJAX 요청
+
+        // when & then
         mockMvc.perform(post("/test/menu001").with(csrf()).header("X-Requested-With", "XMLHttpRequest"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false))
@@ -63,8 +72,11 @@ class SecurityExceptionHandlerTest {
 
     @Test
     @DisplayName("권한 없음 일반 요청 → 403 에러")
-    @WithMockUser(authorities = "MENU999:R")
-    void forbiddenNormal_returns403() throws Exception {
+    @WithMockUser(authorities = "OTHER:R")
+    void forbidden_normal_returns_403() throws Exception {
+        // given – 권한 없는 사용자의 일반 요청
+
+        // when & then
         mockMvc.perform(post("/test/menu001").with(csrf())).andExpect(status().isForbidden());
     }
 }
