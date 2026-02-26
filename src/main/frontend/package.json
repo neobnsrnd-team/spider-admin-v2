@@ -1,0 +1,19 @@
+{
+  "name": "spider-admin-v2-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run lint && npm run css:build",
+    "css:build": "postcss src/input.css -o ../resources/static/css/app.css",
+    "css:watch": "postcss src/input.css -o ../resources/static/css/app.css --watch",
+    "lint": "eslint --no-error-on-unmatched-pattern ../resources/static/js/"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0"
+  }
+}

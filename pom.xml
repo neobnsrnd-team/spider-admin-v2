@@ -22,6 +22,9 @@
         <springdoc.version>2.3.0</springdoc.version>
         <logstash-logback.version>8.0</logstash-logback.version>
         <logback-classic-db.version>1.2.11.1</logback-classic-db.version>
+        <!-- Frontend Build -->
+        <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
+        <node.version>v20.11.0</node.version>
         <!-- Code Quality Plugins -->
         <spotless.version>2.44.0</spotless.version>
         <palantir-java-format.version>2.50.0</palantir-java-format.version>
@@ -208,6 +211,34 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <!-- ── Frontend (Node.js + npm) ── -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${frontend-maven-plugin.version}</version>
+                <configuration>
+                    <nodeVersion>${node.version}</nodeVersion>
+                    <workingDirectory>src/main/frontend</workingDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals><goal>install-node-and-npm</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>npm-install</id>
+                        <goals><goal>npm</goal></goals>
+                        <configuration><arguments>install</arguments></configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-build</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration><arguments>run build</arguments></configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- ── Surefire (Test Execution) ── -->
