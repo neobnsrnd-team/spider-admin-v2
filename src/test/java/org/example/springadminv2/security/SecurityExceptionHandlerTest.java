@@ -1,0 +1,62 @@
+package org.example.springadminv2.security;
+
+import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
+import org.example.springadminv2.global.security.SecurityConfig;
+import org.example.springadminv2.global.security.handler.CustomAccessDeniedHandler;
+import org.example.springadminv2.global.security.handler.CustomAuthenticationEntryPoint;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(controllers = SampleSecuredController.class)
+@Import({SecurityConfig.class, CustomAuthenticationEntryPoint.class, CustomAccessDeniedHandler.class})
+class SecurityExceptionHandlerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private CompositeLogEventAdapter logEventAdapter;
+
+    @Test
+    @DisplayName("미인증 AJAX 요청 → 401 JSON")
+    @WithAnonymousUser
+    void unauthenticatedAjax_returns401Json() throws Exception {
+        mockMvc.perform(get("/test/menu001").header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    @DisplayName("미인증 일반 요청 → /login 리다이렉트")
+    @WithAnonymousUser
+    void unauthenticatedNormal_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/test/menu001"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @DisplayName("권한 없음 AJAX 요청 → 403 JSON")
+    @WithMockUser(authorities = "MENU999:R")
+    void forbiddenAjax_returns403Json() throws Exception {
+        mockMvc.perform(post("/test/menu001").with(csrf()).header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
+    }
+}
