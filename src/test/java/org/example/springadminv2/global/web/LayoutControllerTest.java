@@ -46,6 +46,7 @@ class LayoutControllerTest {
         return new CustomUserDetails(
                 "testUser",
                 "pwd",
+                "ROLE01",
                 "1",
                 0,
                 Set.of(new SimpleGrantedAuthority("MENU:R"), new SimpleGrantedAuthority("MENU:W")));
@@ -63,7 +64,7 @@ class LayoutControllerTest {
             List<UserMenuRow> menuTree = List.of(
                     new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
                     new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
-            given(menuService.getUserMenuTree("testUser")).willReturn(menuTree);
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
             // when & then
             MvcResult result = mockMvc.perform(get("/").with(user(user)))
@@ -88,7 +89,7 @@ class LayoutControllerTest {
             List<UserMenuRow> menuTree = List.of(
                     new UserMenuRow("system", "ROOT", 1, "시스템 관리", null, "settings", null),
                     new UserMenuRow("v3_menu_manage", "system", 2, "메뉴 관리", "/system/menu", "list", "RW"));
-            given(menuService.getUserMenuTree("testUser")).willReturn(menuTree);
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(menuTree);
 
             // when & then
             mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
@@ -104,7 +105,7 @@ class LayoutControllerTest {
         void returns_empty_when_no_permissions() throws Exception {
             // given
             CustomUserDetails user = mockUser();
-            given(menuService.getUserMenuTree("testUser")).willReturn(List.of());
+            given(menuService.getAuthorizedMenuTree("testUser", "ROLE01")).willReturn(List.of());
 
             // when & then
             mockMvc.perform(get("/api/user-menus/tree").with(user(user)))

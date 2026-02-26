@@ -98,7 +98,7 @@ class WebControllerTest {
             // given
             Set<GrantedAuthority> authorities =
                     Set.of(new SimpleGrantedAuthority("MENU:R"), new SimpleGrantedAuthority("MENU:W"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");
@@ -112,7 +112,7 @@ class WebControllerTest {
         void determineAccessLevel_withReadOnly_returnsR() {
             // given
             Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("MENU:R"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");
@@ -136,7 +136,7 @@ class WebControllerTest {
         void determineAccessLevel_noMatchingAuthority_returnsNone() {
             // given
             Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("OTHER:W"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");

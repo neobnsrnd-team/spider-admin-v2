@@ -120,4 +120,28 @@
          ORDER BY m.SORT_ORDER
     </select>
 
+    <select id="selectRoleMenuTree"
+            parameterType="string"
+            resultType="org.example.springadminv2.domain.menu.dto.UserMenuRow">
+        SELECT m.MENU_ID       AS menuId,
+               m.PRIOR_MENU_ID AS priorMenuId,
+               m.SORT_ORDER    AS sortOrder,
+               m.MENU_NAME     AS menuName,
+               m.MENU_URL      AS menuUrl,
+               m.MENU_IMAGE    AS menuImage,
+               (SELECT rm.AUTH_CODE
+                  FROM FWK_ROLE_MENU rm
+                 WHERE rm.MENU_ID = m.MENU_ID AND rm.ROLE_ID = #{roleId}) AS authCode
+          FROM FWK_MENU m
+         WHERE m.USE_YN = 'Y' AND m.DISPLAY_YN = 'Y'
+           AND m.MENU_ID IN (
+               SELECT MENU_ID FROM FWK_MENU
+                START WITH MENU_ID IN (
+                    SELECT MENU_ID FROM FWK_ROLE_MENU WHERE ROLE_ID = #{roleId}
+                )
+               CONNECT BY MENU_ID = PRIOR PRIOR_MENU_ID
+           )
+         ORDER BY m.SORT_ORDER
+    </select>
+
 </mapper>

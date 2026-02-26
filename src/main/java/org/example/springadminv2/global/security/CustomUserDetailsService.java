@@ -30,6 +30,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         Set<GrantedAuthority> authorities = authorityProvider.getAuthorities(user.userId(), user.roleId());
 
         return new CustomUserDetails(
-                user.userId(), user.password(), user.userStateCode(), user.loginFailCount(), authorities);
+                user.userId(),
+                user.password(),
+                user.roleId(),
+                user.userStateCode(),
+                user.loginFailCount(),
+                authorities);
     }
 }

@@ -39,4 +39,6 @@ public interface MenuMapper {
             @Param("lastUpdateDtime") String dtime);
 
     List<UserMenuRow> selectUserMenuTree(String userId);
+
+    List<UserMenuRow> selectRoleMenuTree(String roleId);
 }

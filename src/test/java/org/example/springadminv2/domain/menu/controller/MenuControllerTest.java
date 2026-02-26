@@ -69,7 +69,7 @@ class MenuControllerTest {
         for (String a : authorities) {
             auths.add(new SimpleGrantedAuthority(a));
         }
-        return new CustomUserDetails("testuser", "password", "1", 0, Set.copyOf(auths));
+        return new CustomUserDetails("testuser", "password", "ROLE01", "1", 0, Set.copyOf(auths));
     }
 
     private static final CustomUserDetails RW_USER = mockUser("MENU:R", "MENU:W");

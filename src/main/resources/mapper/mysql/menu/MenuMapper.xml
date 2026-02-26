@@ -126,4 +126,34 @@
          ORDER BY SORT_ORDER
     </select>
 
+    <select id="selectRoleMenuTree"
+            parameterType="string"
+            resultType="org.example.springadminv2.domain.menu.dto.UserMenuRow">
+        WITH RECURSIVE authorized_tree AS (
+            SELECT m.MENU_ID, m.PRIOR_MENU_ID, m.SORT_ORDER,
+                   m.MENU_NAME, m.MENU_URL, m.MENU_IMAGE, rm.AUTH_CODE
+              FROM FWK_MENU m
+              JOIN FWK_ROLE_MENU rm ON m.MENU_ID = rm.MENU_ID AND rm.ROLE_ID = #{roleId}
+             WHERE m.USE_YN = 'Y' AND m.DISPLAY_YN = 'Y'
+
+            UNION
+
+            SELECT p.MENU_ID, p.PRIOR_MENU_ID, p.SORT_ORDER,
+                   p.MENU_NAME, p.MENU_URL, p.MENU_IMAGE, NULL
+              FROM FWK_MENU p
+              JOIN authorized_tree c ON p.MENU_ID = c.PRIOR_MENU_ID
+             WHERE p.USE_YN = 'Y' AND p.DISPLAY_YN = 'Y'
+        )
+        SELECT MENU_ID       AS menuId,
+               PRIOR_MENU_ID AS priorMenuId,
+               SORT_ORDER    AS sortOrder,
+               MENU_NAME     AS menuName,
+               MENU_URL      AS menuUrl,
+               MENU_IMAGE    AS menuImage,
+               MAX(AUTH_CODE) AS authCode
+          FROM authorized_tree
+         GROUP BY MENU_ID, PRIOR_MENU_ID, SORT_ORDER, MENU_NAME, MENU_URL, MENU_IMAGE
+         ORDER BY SORT_ORDER
+    </select>
+
 </mapper>

@@ -14,6 +14,7 @@ import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.dto.UserMenuRow;
 import org.example.springadminv2.domain.menu.mapper.MenuMapper;
+import org.example.springadminv2.global.security.config.SecurityAccessProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class MenuService {
     private static final DateTimeFormatter TIMESTAMP_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final MenuMapper menuMapper;
+    private final SecurityAccessProperties securityAccessProperties;
 
     /**
      * 전체 메뉴를 조회하여 트리 구조로 반환한다.
@@ -86,10 +88,14 @@ public class MenuService {
 
     /**
      * 사용자 권한 기반 메뉴 트리 조회.
+     * authority-source 설정에 따라 FWK_USER_MENU 또는 FWK_ROLE_MENU에서 조회한다.
      * 계층 조회 + 권한 필터링은 SQL에서 처리하고, Service는 결과를 그대로 전달한다.
      */
     @Transactional(readOnly = true)
-    public List<UserMenuRow> getUserMenuTree(String userId) {
+    public List<UserMenuRow> getAuthorizedMenuTree(String userId, String roleId) {
+        if ("ROLE_MENU".equals(securityAccessProperties.getAuthoritySource())) {
+            return menuMapper.selectRoleMenuTree(roleId);
+        }
         return menuMapper.selectUserMenuTree(userId);
     }
 

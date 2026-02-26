@@ -15,6 +15,7 @@ public class CustomUserDetails implements UserDetails {
 
     private final String userId;
     private final String password;
+    private final String roleId;
     private final String userStateCode;
     private final int loginFailCount;
     private final Set<GrantedAuthority> authorities;
@@ -22,11 +23,13 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(
             String userId,
             String password,
+            String roleId,
             String userStateCode,
             int loginFailCount,
             Set<GrantedAuthority> authorities) {
         this.userId = userId;
         this.password = password;
+        this.roleId = roleId;
         this.userStateCode = userStateCode;
         this.loginFailCount = loginFailCount;
         this.authorities = authorities;

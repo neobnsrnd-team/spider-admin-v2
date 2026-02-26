@@ -34,7 +34,7 @@ public class LayoutController {
                 user.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()));
-        model.addAttribute("menuTree", menuService.getUserMenuTree(user.getUserId()));
+        model.addAttribute("menuTree", menuService.getAuthorizedMenuTree(user.getUserId(), user.getRoleId()));
         model.addAttribute("initialTab", null);
         return "layout";
     }
@@ -46,6 +46,6 @@ public class LayoutController {
     @GetMapping("/api/user-menus/tree")
     @ResponseBody
     public ApiResponse<List<UserMenuRow>> menuTree(@AuthenticationPrincipal CustomUserDetails user) {
-        return ApiResponse.success(menuService.getUserMenuTree(user.getUserId()));
+        return ApiResponse.success(menuService.getAuthorizedMenuTree(user.getUserId(), user.getRoleId()));
     }
 }
