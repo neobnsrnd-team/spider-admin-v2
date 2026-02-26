@@ -21,7 +21,7 @@ import org.example.springadminv2.global.dto.ExcelColumnDefinition;
 
 public final class ExcelExportUtil {
 
-    public static final int MAX_ROW_LIMIT = 10_000;
+    public static final int MAX_ROW_LIMIT = 50_000;
 
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 

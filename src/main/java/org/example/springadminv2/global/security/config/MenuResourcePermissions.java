@@ -1,10 +1,9 @@
 package org.example.springadminv2.global.security.config;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.example.springadminv2.global.security.constant.MenuAccessLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,14 +24,26 @@ public class MenuResourcePermissions {
     public Set<String> getDerivedResourceAuthorities(String menuId, MenuAccessLevel level) {
         Map<String, String> entry = permissions.getOrDefault(menuId, Collections.emptyMap());
 
-        String readValue = entry.getOrDefault("R", "");
-        String writeValue = level == MenuAccessLevel.WRITE ? entry.getOrDefault("W", "") : "";
+        Set<String> authorities = new LinkedHashSet<>();
+        authorities.addAll(splitAuthorities(entry.getOrDefault("R", "")));
+        if (level == MenuAccessLevel.WRITE) {
+            authorities.addAll(splitAuthorities(entry.getOrDefault("W", "")));
+        }
 
-        String combined = readValue + "," + writeValue;
+        return authorities;
+    }
 
-        return Arrays.stream(combined.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toSet());
+    private Set<String> splitAuthorities(String value) {
+        if (value == null || value.isBlank()) {
+            return Collections.emptySet();
+        }
+        Set<String> result = new LinkedHashSet<>();
+        for (String token : value.split(",")) {
+            String trimmed = token.trim();
+            if (!trimmed.isEmpty()) {
+                result.add(trimmed);
+            }
+        }
+        return result;
     }
 }
