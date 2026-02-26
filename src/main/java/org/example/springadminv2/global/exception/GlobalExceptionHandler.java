@@ -1,15 +1,10 @@
 package org.example.springadminv2.global.exception;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
-import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
-import org.example.springadminv2.global.log.event.ErrorLogEvent;
 import org.example.springadminv2.global.util.TraceIdUtil;
-import org.slf4j.MDC;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,20 +13,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
-@RequiredArgsConstructor
 public class GlobalExceptionHandler {
-
-    private final CompositeLogEventAdapter logEventAdapter;
 
     // ─── 1순위: BusinessException ─────────────────────────────────
     @ExceptionHandler(BusinessException.class)
@@ -40,11 +27,6 @@ public class GlobalExceptionHandler {
         String traceId = currentTraceId();
 
         logByType(type, traceId, ex);
-
-        // 5xx 상태인 경우에만 ERROR 이벤트 기록
-        if (type.getHttpStatus().is5xxServerError()) {
-            recordErrorEvent(traceId, type.getErrorCode().name(), ex);
-        }
 
         return ResponseEntity.status(type.getHttpStatus())
                 .body(ApiResponse.error(ErrorDetail.builder()
@@ -119,8 +101,6 @@ public class GlobalExceptionHandler {
         String traceId = currentTraceId();
         log.error("[{}] Unexpected error: {}", traceId, ex.getMessage(), ex);
 
-        recordErrorEvent(traceId, ErrorCode.INTERNAL_ERROR.name(), ex);
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ErrorDetail.builder()
                         .code(ErrorCode.INTERNAL_ERROR.name())
@@ -142,41 +122,5 @@ public class GlobalExceptionHandler {
 
     private String currentTraceId() {
         return TraceIdUtil.getOrGenerate();
-    }
-
-    private void recordErrorEvent(String traceId, String errorCode, Exception ex) {
-        try {
-            HttpServletRequest request = currentRequest();
-            String uri = (request != null) ? request.getRequestURI() : "unknown";
-            String httpMethod = (request != null) ? request.getMethod() : "unknown";
-            String userId = MDC.get("userId");
-
-            logEventAdapter.record(new ErrorLogEvent(
-                    traceId,
-                    (userId != null) ? userId : "ANONYMOUS",
-                    errorCode,
-                    ex.getClass().getName(),
-                    ex.getMessage(),
-                    getStackTrace(ex),
-                    uri,
-                    httpMethod));
-        } catch (Exception e) {
-            log.warn("Failed to record error event: {}", e.getMessage());
-        }
-    }
-
-    private HttpServletRequest currentRequest() {
-        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
-        if (attrs instanceof ServletRequestAttributes servletAttrs) {
-            return servletAttrs.getRequest();
-        }
-        return null;
-    }
-
-    private String getStackTrace(Exception ex) {
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new PrintWriter(sw));
-        String trace = sw.toString();
-        return (trace.length() > 2000) ? trace.substring(0, 2000) : trace;
     }
 }

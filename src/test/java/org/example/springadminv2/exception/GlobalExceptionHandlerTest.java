@@ -4,14 +4,9 @@ import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.exception.BusinessException;
 import org.example.springadminv2.global.exception.ErrorType;
 import org.example.springadminv2.global.exception.GlobalExceptionHandler;
-import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
-import org.example.springadminv2.global.log.event.ErrorLogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,26 +23,19 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
     private MockMvc mockMvc;
 
-    @Mock
-    private CompositeLogEventAdapter logEventAdapter;
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
-                .setControllerAdvice(new GlobalExceptionHandler(logEventAdapter))
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 
@@ -60,29 +48,22 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"))
                 .andExpect(jsonPath("$.error.message").value(ErrorType.RESOURCE_NOT_FOUND.getMessage()))
                 .andExpect(jsonPath("$.error.traceId").isNotEmpty());
-
-        // 4xx는 ERROR 이벤트를 기록하지 않는다
-        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
     }
 
     @Test
-    @DisplayName("BusinessException FORBIDDEN → 403, ERROR 이벤트 미기록")
+    @DisplayName("BusinessException FORBIDDEN → 403")
     void businessException_forbidden() throws Exception {
         mockMvc.perform(get("/test-exception/forbidden"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
-
-        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
     }
 
     @Test
-    @DisplayName("BusinessException 5xx → ERROR 이벤트 기록")
-    void businessException_5xx_recordsErrorEvent() throws Exception {
+    @DisplayName("BusinessException 5xx → 502 응답")
+    void businessException_5xx_returnsCorrectStatus() throws Exception {
         mockMvc.perform(get("/test-exception/external-error"))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.error.code").value("EXTERNAL_SERVICE_ERROR"));
-
-        verify(logEventAdapter).record(any(ErrorLogEvent.class));
     }
 
     @Test
@@ -102,15 +83,13 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("최후 방어선 Exception → 500 + ERROR 이벤트 기록")
+    @DisplayName("최후 방어선 Exception → 500")
     void unexpectedException_returnsInternalServerError() throws Exception {
         mockMvc.perform(get("/test-exception/unexpected"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.error.traceId").isNotEmpty());
-
-        verify(logEventAdapter).record(any(ErrorLogEvent.class));
     }
 
     @Test
@@ -138,33 +117,27 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("BusinessException INTERNAL_ERROR (5xx) → ERROR 이벤트 기록 + logByType ERROR")
-    void businessException_internalError_logsError() throws Exception {
+    @DisplayName("BusinessException INTERNAL_ERROR (5xx) → 500")
+    void businessException_internalError() throws Exception {
         mockMvc.perform(get("/test-exception/internal-error"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_ERROR"));
-
-        verify(logEventAdapter).record(any(ErrorLogEvent.class));
     }
 
     @Test
-    @DisplayName("BusinessException INVALID_INPUT → 400, logByType DEBUG")
-    void businessException_invalidInput_logsDebug() throws Exception {
+    @DisplayName("BusinessException INVALID_INPUT → 400")
+    void businessException_invalidInput() throws Exception {
         mockMvc.perform(get("/test-exception/invalid-input"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("INVALID_INPUT"));
-
-        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
     }
 
     @Test
-    @DisplayName("BusinessException INVALID_STATE → 409, logByType INFO")
-    void businessException_invalidState_logsInfo() throws Exception {
+    @DisplayName("BusinessException INVALID_STATE → 409")
+    void businessException_invalidState() throws Exception {
         mockMvc.perform(get("/test-exception/invalid-state"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("BUSINESS_RULE_VIOLATED"));
-
-        verify(logEventAdapter, never()).record(any(ErrorLogEvent.class));
     }
 
     // ─── 테스트 전용 컨트롤러 ─────────────────────────────────────

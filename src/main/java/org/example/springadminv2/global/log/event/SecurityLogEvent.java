@@ -6,7 +6,6 @@ public record SecurityLogEvent(
         String traceId,
         String userId,
         Instant timestamp,
-        LogEventType type,
         String action,
         boolean success,
         String clientIp,
@@ -15,6 +14,6 @@ public record SecurityLogEvent(
 
     public SecurityLogEvent(
             String traceId, String userId, String action, boolean success, String clientIp, String detail) {
-        this(traceId, userId, Instant.now(), LogEventType.SECURITY, action, success, clientIp, detail);
+        this(traceId, userId, Instant.now(), action, success, clientIp, detail);
     }
 }

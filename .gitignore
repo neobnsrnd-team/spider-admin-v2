@@ -43,4 +43,4 @@ src/main/frontend/node_modules/
 .claude/
 
 ### Claude Task Plan ##
-docs/plan/
+docs/plan/logs/

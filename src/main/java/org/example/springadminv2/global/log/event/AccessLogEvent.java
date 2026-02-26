@@ -8,7 +8,6 @@ public record AccessLogEvent(
         String traceId,
         String userId,
         Instant timestamp,
-        LogEventType type,
         String accessIp,
         String accessUrl,
         String inputData,

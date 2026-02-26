@@ -6,9 +6,9 @@ import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
 import org.example.springadminv2.global.exception.ErrorCode;
 import org.example.springadminv2.global.exception.ErrorType;
-import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
 import org.example.springadminv2.global.log.event.SecurityLogEvent;
 import org.example.springadminv2.global.util.TraceIdUtil;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,11 +28,11 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
-    private final CompositeLogEventAdapter logEventAdapter;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public CustomAccessDeniedHandler(ObjectMapper objectMapper, CompositeLogEventAdapter logEventAdapter) {
+    public CustomAccessDeniedHandler(ObjectMapper objectMapper, ApplicationEventPublisher eventPublisher) {
         this.objectMapper = objectMapper;
-        this.logEventAdapter = logEventAdapter;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String userId = (auth != null && auth.getName() != null) ? auth.getName() : "ANONYMOUS";
 
-            logEventAdapter.record(new SecurityLogEvent(
+            eventPublisher.publishEvent(new SecurityLogEvent(
                     traceId,
                     userId,
                     "ACCESS_DENIED",
