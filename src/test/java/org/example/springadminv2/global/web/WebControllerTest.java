@@ -2,6 +2,7 @@ package org.example.springadminv2.global.web;
 
 import java.util.Set;
 
+import org.example.springadminv2.domain.menu.controller.MenuPageController;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -97,7 +98,7 @@ class WebControllerTest {
             // given
             Set<GrantedAuthority> authorities =
                     Set.of(new SimpleGrantedAuthority("MENU:R"), new SimpleGrantedAuthority("MENU:W"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");
@@ -111,7 +112,7 @@ class WebControllerTest {
         void determineAccessLevel_withReadOnly_returnsR() {
             // given
             Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("MENU:R"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");
@@ -135,7 +136,7 @@ class WebControllerTest {
         void determineAccessLevel_noMatchingAuthority_returnsNone() {
             // given
             Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("OTHER:W"));
-            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "1", 0, authorities);
+            CustomUserDetails user = new CustomUserDetails("testUser", "pwd", "ROLE01", "1", 0, authorities);
 
             // when
             String level = controller.callDetermineAccessLevel(user, "MENU");
@@ -168,14 +169,14 @@ class WebControllerTest {
 
     // ═════════════════════════════════════════════════════════════════
     @Nested
-    @DisplayName("MenuController 테스트")
-    class MenuControllerTest {
+    @DisplayName("MenuPageController 테스트")
+    class MenuPageControllerTest {
 
         private MockMvc mockMvc;
 
         @BeforeEach
         void setUp() {
-            mockMvc = MockMvcBuilders.standaloneSetup(new MenuController())
+            mockMvc = MockMvcBuilders.standaloneSetup(new MenuPageController())
                     .setViewResolvers(viewResolver())
                     .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                     .build();

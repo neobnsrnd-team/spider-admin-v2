@@ -1,11 +1,14 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.service;
 
 import java.util.List;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.UserMenuRow;
+import org.example.springadminv2.domain.menu.mapper.MenuMapper;
+import org.example.springadminv2.global.security.config.SecurityAccessProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,9 @@ class MenuServiceTest {
 
     @Mock
     MenuMapper menuMapper;
+
+    @Mock
+    SecurityAccessProperties securityAccessProperties;
 
     @InjectMocks
     MenuService menuService;
@@ -214,6 +220,63 @@ class MenuServiceTest {
 
             // then
             then(menuMapper).should().updateSortOrder(eq("MENU"), eq(3), eq("SYS"), eq("admin"), anyString());
+        }
+    }
+
+    // ── getAuthorizedMenuTree ────────────────────────────────
+
+    @Nested
+    @DisplayName("getAuthorizedMenuTree")
+    class GetAuthorizedMenuTree {
+
+        @Test
+        @DisplayName("USER_MENU 모드일 때 selectUserMenuTree를 호출한다")
+        void user_menu_mode_delegates_to_selectUserMenuTree() {
+            // given
+            given(securityAccessProperties.getAuthoritySource()).willReturn("USER_MENU");
+            List<UserMenuRow> expected = List.of(
+                    new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null),
+                    new UserMenuRow("MENU", "SYS", 1, "메뉴관리", "/system/menu", "list", "RW"));
+            given(menuMapper.selectUserMenuTree("testUser")).willReturn(expected);
+
+            // when
+            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
+
+            // then
+            assertThat(result).isEqualTo(expected);
+            then(menuMapper).should().selectUserMenuTree("testUser");
+            then(menuMapper).shouldHaveNoMoreInteractions();
+        }
+
+        @Test
+        @DisplayName("ROLE_MENU 모드일 때 selectRoleMenuTree를 호출한다")
+        void role_menu_mode_delegates_to_selectRoleMenuTree() {
+            // given
+            given(securityAccessProperties.getAuthoritySource()).willReturn("ROLE_MENU");
+            List<UserMenuRow> expected = List.of(new UserMenuRow("SYS", "ROOT", 1, "시스템관리", null, "settings", null));
+            given(menuMapper.selectRoleMenuTree("ROLE01")).willReturn(expected);
+
+            // when
+            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("testUser", "ROLE01");
+
+            // then
+            assertThat(result).isEqualTo(expected);
+            then(menuMapper).should().selectRoleMenuTree("ROLE01");
+            then(menuMapper).shouldHaveNoMoreInteractions();
+        }
+
+        @Test
+        @DisplayName("권한이 없으면 빈 리스트를 반환한다")
+        void returns_empty_when_no_permissions() {
+            // given
+            given(securityAccessProperties.getAuthoritySource()).willReturn("USER_MENU");
+            given(menuMapper.selectUserMenuTree("noPermUser")).willReturn(List.of());
+
+            // when
+            List<UserMenuRow> result = menuService.getAuthorizedMenuTree("noPermUser", "ROLE01");
+
+            // then
+            assertThat(result).isEmpty();
         }
     }
 }

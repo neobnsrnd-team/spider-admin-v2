@@ -1,13 +1,14 @@
-package org.example.springadminv2.domain.system.menu;
+package org.example.springadminv2.domain.menu.controller;
 
 import java.util.List;
 import java.util.Set;
 
-import org.example.springadminv2.domain.system.menu.dto.MenuCreateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuResponse;
-import org.example.springadminv2.domain.system.menu.dto.MenuSortUpdateRequest;
-import org.example.springadminv2.domain.system.menu.dto.MenuTreeNode;
-import org.example.springadminv2.domain.system.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuCreateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuResponse;
+import org.example.springadminv2.domain.menu.dto.MenuSortUpdateRequest;
+import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
+import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
+import org.example.springadminv2.domain.menu.service.MenuService;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.example.springadminv2.global.security.SecurityConfig;
@@ -43,14 +44,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = MenuRestController.class)
+@WebMvcTest(controllers = MenuController.class)
 @Import({
     SecurityConfig.class,
     CustomAuthenticationEntryPoint.class,
     CustomAccessDeniedHandler.class,
     SecurityLogEventListener.class
 })
-class MenuRestControllerTest {
+class MenuControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,7 +69,7 @@ class MenuRestControllerTest {
         for (String a : authorities) {
             auths.add(new SimpleGrantedAuthority(a));
         }
-        return new CustomUserDetails("testuser", "password", "1", 0, Set.copyOf(auths));
+        return new CustomUserDetails("testuser", "password", "ROLE01", "1", 0, Set.copyOf(auths));
     }
 
     private static final CustomUserDetails RW_USER = mockUser("MENU:R", "MENU:W");
@@ -99,7 +100,7 @@ class MenuRestControllerTest {
     // ── 메뉴 트리 조회 ─────────────────────────────────────────
 
     @Nested
-    @DisplayName("GET /api/system/menu/tree - 메뉴 트리 조회")
+    @DisplayName("GET /api/menus/tree - 메뉴 트리 조회")
     class GetMenuTree {
 
         @Test
@@ -110,7 +111,7 @@ class MenuRestControllerTest {
             given(menuService.getMenuTree()).willReturn(List.of(sampleTreeNode()));
 
             // when & then
-            mockMvc.perform(get("/api/system/menu/tree"))
+            mockMvc.perform(get("/api/menus/tree"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data").isArray())
@@ -122,7 +123,7 @@ class MenuRestControllerTest {
     // ── 메뉴 상세 조회 ─────────────────────────────────────────
 
     @Nested
-    @DisplayName("GET /api/system/menu/{menuId} - 메뉴 상세 조회")
+    @DisplayName("GET /api/menus/{menuId} - 메뉴 상세 조회")
     class GetMenuDetail {
 
         @Test
@@ -133,7 +134,7 @@ class MenuRestControllerTest {
             given(menuService.getMenuDetail("MENU001")).willReturn(sampleMenu());
 
             // when & then
-            mockMvc.perform(get("/api/system/menu/MENU001"))
+            mockMvc.perform(get("/api/menus/MENU001"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.menuId").value("MENU001"))
@@ -148,7 +149,7 @@ class MenuRestControllerTest {
             given(menuService.getMenuDetail("UNKNOWN")).willReturn(null);
 
             // when & then
-            mockMvc.perform(get("/api/system/menu/UNKNOWN"))
+            mockMvc.perform(get("/api/menus/UNKNOWN"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
@@ -158,7 +159,7 @@ class MenuRestControllerTest {
     // ── 메뉴 생성 ──────────────────────────────────────────────
 
     @Nested
-    @DisplayName("POST /api/system/menu - 메뉴 생성")
+    @DisplayName("POST /api/menus - 메뉴 생성")
     class CreateMenu {
 
         @Test
@@ -171,7 +172,7 @@ class MenuRestControllerTest {
                     new MenuCreateRequest("MENU003", "대시보드", "ROOT", "/dashboard", "icon-dashboard", 3, "Y", "Y");
 
             // when & then
-            mockMvc.perform(post("/api/system/menu")
+            mockMvc.perform(post("/api/menus")
                             .with(user(RW_USER))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -194,7 +195,7 @@ class MenuRestControllerTest {
                      "displayYn":null,"useYn":null}""";
 
             // when & then
-            mockMvc.perform(post("/api/system/menu")
+            mockMvc.perform(post("/api/menus")
                             .with(user(RW_USER))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -207,7 +208,7 @@ class MenuRestControllerTest {
     // ── 메뉴 수정 ──────────────────────────────────────────────
 
     @Nested
-    @DisplayName("PUT /api/system/menu/{menuId} - 메뉴 수정")
+    @DisplayName("PUT /api/menus/{menuId} - 메뉴 수정")
     class UpdateMenu {
 
         @Test
@@ -220,7 +221,7 @@ class MenuRestControllerTest {
                     new MenuUpdateRequest("시스템관리(수정)", "ROOT", "/system", "icon-system", 1, "Y", "Y");
 
             // when & then
-            mockMvc.perform(put("/api/system/menu/MENU001")
+            mockMvc.perform(put("/api/menus/MENU001")
                             .with(user(RW_USER))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -233,7 +234,7 @@ class MenuRestControllerTest {
     // ── 메뉴 삭제 ──────────────────────────────────────────────
 
     @Nested
-    @DisplayName("DELETE /api/system/menu/{menuId} - 메뉴 삭제")
+    @DisplayName("DELETE /api/menus/{menuId} - 메뉴 삭제")
     class DeleteMenu {
 
         @Test
@@ -244,7 +245,7 @@ class MenuRestControllerTest {
             willDoNothing().given(menuService).deleteMenu("MENU001");
 
             // when & then
-            mockMvc.perform(delete("/api/system/menu/MENU001").with(csrf()))
+            mockMvc.perform(delete("/api/menus/MENU001").with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
         }
@@ -259,7 +260,7 @@ class MenuRestControllerTest {
                     .deleteMenu("MENU001");
 
             // when & then
-            mockMvc.perform(delete("/api/system/menu/MENU001").with(csrf()))
+            mockMvc.perform(delete("/api/menus/MENU001").with(csrf()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.error.code").value("HAS_CHILDREN"))
@@ -270,7 +271,7 @@ class MenuRestControllerTest {
     // ── 메뉴 순서 변경 ─────────────────────────────────────────
 
     @Nested
-    @DisplayName("PUT /api/system/menu/{menuId}/sort - 메뉴 순서 변경")
+    @DisplayName("PUT /api/menus/{menuId}/sort - 메뉴 순서 변경")
     class UpdateSortOrder {
 
         @Test
@@ -282,7 +283,7 @@ class MenuRestControllerTest {
             MenuSortUpdateRequest request = new MenuSortUpdateRequest(2, "ROOT");
 
             // when & then
-            mockMvc.perform(put("/api/system/menu/MENU001/sort")
+            mockMvc.perform(put("/api/menus/MENU001/sort")
                             .with(user(RW_USER))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -307,7 +308,7 @@ class MenuRestControllerTest {
                     new MenuCreateRequest("MENU003", "대시보드", "ROOT", "/dashboard", "icon-dashboard", 3, "Y", "Y");
 
             // when & then
-            mockMvc.perform(post("/api/system/menu")
+            mockMvc.perform(post("/api/menus")
                             .with(user(READ_ONLY_USER))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
