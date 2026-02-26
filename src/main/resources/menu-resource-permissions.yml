@@ -4,187 +4,177 @@
 #
 # 각 화면의 권한 수준별 필요 리소스 목록
 #
-# - 화면명     : Product Requirements/00-overview.md 기준
-# - RES_XXX    : Package Structure.md 도메인 패키지명 (대문자)
-# - _READ      : 조회 시 필요한 리소스
-# - _WRITE     : 등록/수정/삭제 시 필요한 리소스
+# - 키           : v3-menu-insert.sql MENU_ID 기준
+# - RES_XXX      : Package Structure.md 도메인 패키지명 (대문자)
+# - _READ        : 조회 시 필요한 리소스
+# - _WRITE       : 등록/수정/삭제 시 필요한 리소스
 # - _WRITE 미정의 = 조회 전용 (Template B/C)
 # ==============================================================================
 
 
 # ── 인증 (2개) ────────────────────────────────────────────────────────────────
 
-로그인: permitAll
-개인정보 수정: isAuthenticated                            # 본인 정보만 (Principal 기반)
+login: permitAll
+v3_my_info_manage: isAuthenticated                         # 본인 정보만 (Principal 기반)
 
 
 # ── 홈 (1개) ──────────────────────────────────────────────────────────────────
 
-대시보드: isAuthenticated                                 # 전용 집계 API
+dashboard: isAuthenticated                                 # 전용 집계 API
 
 
-# ── 시스템 관리 (6개) ─────────────────────────────────────────────────────────
+# ── 시스템 관리 (5개) ─────────────────────────────────────────────────────────
 
-메뉴 관리_READ: RES_MENU_READ
-메뉴 관리_WRITE: RES_MENU_WRITE
+v3_menu_manage_READ: RES_MENU_READ
+v3_menu_manage_WRITE: RES_MENU_WRITE
 
-역할 관리_READ: RES_ROLE_READ, RES_MENU_READ
-역할 관리_WRITE: RES_ROLE_WRITE, RES_MENU_READ
+v3_role_manage_READ: RES_ROLE_READ, RES_MENU_READ
+v3_role_manage_WRITE: RES_ROLE_WRITE, RES_MENU_READ
 
-사용자 관리_READ: RES_USER_READ, RES_ROLE_READ
-사용자 관리_WRITE: RES_USER_WRITE, RES_ROLE_READ
+v3_user_manage_READ: RES_USER_READ, RES_ROLE_READ
+v3_user_manage_WRITE: RES_USER_WRITE, RES_ROLE_READ
 
-코드 그룹 관리_READ: RES_CODEGROUP_READ
-코드 그룹 관리_WRITE: RES_CODEGROUP_WRITE
+v3_neb_code_group_manage_READ: RES_CODEGROUP_READ
+v3_neb_code_group_manage_WRITE: RES_CODEGROUP_WRITE
 
-코드 관리_READ: RES_CODE_READ, RES_CODEGROUP_READ
-코드 관리_WRITE: RES_CODE_WRITE, RES_CODEGROUP_READ
-
-업무분류 관리_READ: RES_BIZGROUP_READ
-업무분류 관리_WRITE: RES_BIZGROUP_WRITE
+v3_code_manage_READ: RES_CODE_READ, RES_CODEGROUP_READ
+v3_code_manage_WRITE: RES_CODE_WRITE, RES_CODEGROUP_READ
 
 
 # ── 인프라 관리 (5개) ─────────────────────────────────────────────────────────
 
-WAS 그룹 관리_READ: RES_WASGROUP_READ
-WAS 그룹 관리_WRITE: RES_WASGROUP_WRITE
+v3_was_group_manage_READ: RES_WASGROUP_READ
+v3_was_group_manage_WRITE: RES_WASGROUP_WRITE
 
-WAS 인스턴스 관리_READ: RES_WASINSTANCE_READ, RES_WASGROUP_READ
-WAS 인스턴스 관리_WRITE: RES_WASINSTANCE_WRITE, RES_WASGROUP_READ
+v3_was_instance_READ: RES_WASINSTANCE_READ, RES_WASGROUP_READ
+v3_was_instance_WRITE: RES_WASINSTANCE_WRITE, RES_WASGROUP_READ
 
-속성 관리_READ: RES_PROPERTY_READ, RES_WASINSTANCE_READ
-속성 관리_WRITE: RES_PROPERTY_WRITE, RES_WASINSTANCE_READ
+v3_property_db_manage_READ: RES_PROPERTY_READ, RES_WASINSTANCE_READ
+v3_property_db_manage_WRITE: RES_PROPERTY_WRITE, RES_WASINSTANCE_READ
 
-XML 속성 관리_READ: RES_XMLPROPERTY_READ, RES_WASINSTANCE_READ
-XML 속성 관리_WRITE: RES_XMLPROPERTY_WRITE, RES_WASINSTANCE_READ
+v3_xml_property_manage_READ: RES_XMLPROPERTY_READ, RES_WASINSTANCE_READ
+v3_xml_property_manage_WRITE: RES_XMLPROPERTY_WRITE, RES_WASINSTANCE_READ
 
-운영정보 Reload_READ: RES_RELOAD_READ, RES_WASINSTANCE_READ
-운영정보 Reload_WRITE: RES_RELOAD_WRITE, RES_WASINSTANCE_READ
+v3_system_oper_manage_READ: RES_RELOAD_READ, RES_WASINSTANCE_READ
+v3_system_oper_manage_WRITE: RES_RELOAD_WRITE, RES_WASINSTANCE_READ
 
 
-# ── 연계 관리 (8개) ──────────────────────────────────────────────────────────
+# ── 연계 관리 (7개) ──────────────────────────────────────────────────────────
 
-기관 관리_READ: RES_ORG_READ, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
-기관 관리_WRITE: RES_ORG_WRITE, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
+v3_connect_org_manage_READ: RES_ORG_READ, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
+v3_connect_org_manage_WRITE: RES_ORG_WRITE, RES_GATEWAY_READ, RES_MESSAGEHANDLER_READ
 
-코드 맵핑 관리_READ: RES_CODE_READ, RES_ORG_READ, RES_CODEGROUP_READ    # TODO: Package Structure에 codemapping 패키지 미정의 → code 패키지 임시 사용
-코드 맵핑 관리_WRITE: RES_CODE_WRITE, RES_ORG_READ, RES_CODEGROUP_READ
+v3_code_mapping_manage_READ: RES_CODE_READ, RES_ORG_READ, RES_CODEGROUP_READ
+v3_code_mapping_manage_WRITE: RES_CODE_WRITE, RES_ORG_READ, RES_CODEGROUP_READ
 
-게이트웨이 관리_READ: RES_GATEWAY_READ, RES_ORG_READ
-게이트웨이 관리_WRITE: RES_GATEWAY_WRITE, RES_ORG_READ
+v3_gw_manage_READ: RES_GATEWAY_READ, RES_ORG_READ
+v3_gw_manage_WRITE: RES_GATEWAY_WRITE, RES_ORG_READ
 
-게이트웨이 맵핑 관리_READ: RES_GWSYSTEM_READ, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
-게이트웨이 맵핑 관리_WRITE: RES_GWSYSTEM_WRITE, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
+v3_org_trans_manage_READ: RES_GWSYSTEM_READ, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
+v3_org_trans_manage_WRITE: RES_GWSYSTEM_WRITE, RES_GATEWAY_READ, RES_ORG_READ, RES_TRANSACTION_READ
 
-요청처리 APP 맵핑 관리_READ: RES_TRANSPORT_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ
-요청처리 APP 맵핑 관리_WRITE: RES_TRANSPORT_WRITE, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ, RES_RELOAD_WRITE
+v3_app_mapping_manage_READ: RES_TRANSPORT_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ
+v3_app_mapping_manage_WRITE: RES_TRANSPORT_WRITE, RES_TRANSACTION_READ, RES_WASINSTANCE_READ, RES_GATEWAY_READ, RES_RELOAD_WRITE
 
-리스너/응답커넥터 맵핑 관리_READ: RES_LISTENERTRX_READ, RES_GATEWAY_READ
-리스너/응답커넥터 맵핑 관리_WRITE: RES_LISTENERTRX_WRITE, RES_GATEWAY_READ
+v3_listener_connector_manage_READ: RES_LISTENERTRX_READ, RES_GATEWAY_READ
+v3_listener_connector_manage_WRITE: RES_LISTENERTRX_WRITE, RES_GATEWAY_READ
 
-전문처리핸들러 관리_READ: RES_MESSAGEHANDLER_READ
-전문처리핸들러 관리_WRITE: RES_MESSAGEHANDLER_WRITE
+v3_msg_handle_manage_READ: RES_MESSAGEHANDLER_READ
+v3_msg_handle_manage_WRITE: RES_MESSAGEHANDLER_WRITE
 
-# ── 거래/전문 관리 (8개) ──────────────────────────────────────────────────────
 
-전문 관리_READ: RES_MESSAGE_READ, RES_ORG_READ
-전문 관리_WRITE: RES_MESSAGE_WRITE, RES_ORG_READ
+# ── 거래/전문 관리 (7개) ──────────────────────────────────────────────────────
 
-거래 관리_READ: RES_TRANSACTION_READ, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
-거래 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
+v3_message_manage_READ: RES_MESSAGE_READ, RES_ORG_READ
+v3_message_manage_WRITE: RES_MESSAGE_WRITE, RES_ORG_READ
 
-거래 Validator 관리_READ: RES_VALIDATOR_READ, RES_TRANSACTION_READ
-거래 Validator 관리_WRITE: RES_VALIDATOR_WRITE, RES_TRANSACTION_READ
+v3_msg_trx_manage_READ: RES_TRANSACTION_READ, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
+v3_msg_trx_manage_WRITE: RES_TRANSACTION_WRITE, RES_WASGROUP_READ, RES_WASINSTANCE_READ, RES_ORG_READ, RES_MESSAGE_READ
 
-거래 중지 관리_READ: RES_TRANSACTION_READ
-거래 중지 관리_WRITE: RES_TRANSACTION_WRITE, RES_WASINSTANCE_READ, RES_RELOAD_WRITE
+v3_trx_validator_READ: RES_VALIDATOR_READ, RES_TRANSACTION_READ
+v3_trx_validator_WRITE: RES_VALIDATOR_WRITE, RES_TRANSACTION_READ
 
-전문 테스트_READ: RES_MESSAGETEST_READ, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
-전문 테스트_WRITE: RES_MESSAGETEST_WRITE, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
+v3_trx_READ: RES_TRANSACTION_READ
+v3_trx_WRITE: RES_TRANSACTION_WRITE, RES_WASINSTANCE_READ, RES_RELOAD_WRITE
 
-당발 대응답 관리_READ: RES_PROXYRESPONSE_READ, RES_TRANSACTION_READ
-당발 대응답 관리_WRITE: RES_PROXYRESPONSE_WRITE, RES_TRANSACTION_READ
+v3_req_message_test_READ: RES_MESSAGETEST_READ, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
+v3_req_message_test_WRITE: RES_MESSAGETEST_WRITE, RES_ORG_READ, RES_TRANSACTION_READ, RES_WASINSTANCE_READ
 
-거래 추적 로그 조회_READ: RES_MESSAGEINSTANCE_READ, RES_ORG_READ
+v3_proxy_testdata_READ: RES_PROXYRESPONSE_READ, RES_TRANSACTION_READ
+v3_proxy_testdata_WRITE: RES_PROXYRESPONSE_WRITE, RES_TRANSACTION_READ
 
-공통필드매핑 관리_READ: RES_MESSAGEFIELD_READ
-공통필드매핑 관리_WRITE: RES_MESSAGEFIELD_WRITE
+v3_db_log_READ: RES_MESSAGEINSTANCE_READ, RES_ORG_READ    # 로그 관리 > 전문로그 조회(DB) 공유
 
 
 # ── 배치 관리 (3개) ──────────────────────────────────────────────────────────
 
-배치 APP 관리_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
-배치 APP 관리_WRITE: RES_BATCH_WRITE, RES_WASINSTANCE_READ
+v3_batch_app_manage_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
+v3_batch_app_manage_WRITE: RES_BATCH_WRITE, RES_WASINSTANCE_READ
 
-배치 수행 내역_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
+v3_batch_his_list_READ: RES_BATCH_READ, RES_WASINSTANCE_READ
 
-실행 중인 배치_READ: RES_BATCH_READ
+v3_executing_batch_READ: RES_BATCH_READ
 
 
-# ── 오류 관리 (3개) ──────────────────────────────────────────────────────────
+# ── 오류 관리 (2개) ──────────────────────────────────────────────────────────
 
-오류코드 관리_READ: RES_ERRORCODE_READ
-오류코드 관리_WRITE: RES_ERRORCODE_WRITE
+v3_error_code_READ: RES_ERRORCODE_READ
+v3_error_code_WRITE: RES_ERRORCODE_WRITE
 
-에러 내역 통계_READ: RES_ERRORHISTORY_READ, RES_ORG_READ
-
-오류 발생 현황_READ: RES_ERRORHISTORY_READ
+v3_error_cause_his_READ: RES_ERRORHISTORY_READ
 
 
 # ── 모니터링 (3개) ───────────────────────────────────────────────────────────
 
-현황판 관리_READ: RES_MONITOR_READ
-현황판 관리_WRITE: RES_MONITOR_WRITE
+v3_system_biz_reg_READ: RES_MONITOR_READ
+v3_system_biz_reg_WRITE: RES_MONITOR_WRITE
 
-WAS별 Gateway 정보_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
+v3_was_status_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
 
-WAS별 Gateway 모니터링_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
+v3_was_status_monitor_READ: RES_MONITOR_READ, RES_WASINSTANCE_READ
 
 
 # ── 이력/감사 (2개) ──────────────────────────────────────────────────────────
 
-관리자 작업 이력_READ: RES_ADMINHISTORY_READ, RES_USER_READ
+v3_user_page_log_READ: RES_ADMINHISTORY_READ, RES_USER_READ
 
-거래 중지 이력_READ: RES_TRANSACTION_READ
+v3_trx_stop_his_READ: RES_TRANSACTION_READ
 
 
 # ── 로그 관리 (1개) ──────────────────────────────────────────────────────────
 
-전문로그 조회(DB)_READ: RES_MESSAGEINSTANCE_READ, RES_ORG_READ
+# v3_db_log — 거래/전문 관리 섹션에서 정의 (거래추적로그조회(DB) = 전문로그 조회(DB))
 
 
-# ── 게시판 (5개) ─────────────────────────────────────────────────────────────
+# ── 게시판 (4개) ─────────────────────────────────────────────────────────────
 
-게시판 관리_READ: RES_BOARD_READ
-게시판 관리_WRITE: RES_BOARD_WRITE
+v3_board_manage_READ: RES_BOARD_READ
+v3_board_manage_WRITE: RES_BOARD_WRITE
 
-게시판 권한 관리_READ: RES_BOARD_READ, RES_USER_READ
-게시판 권한 관리_WRITE: RES_BOARD_WRITE, RES_USER_READ
+v3_BOARD_AUTH_READ: RES_BOARD_READ, RES_USER_READ
+v3_BOARD_AUTH_WRITE: RES_BOARD_WRITE, RES_USER_READ
 
-게시판 열람/작성_READ: RES_ARTICLE_READ
-게시판 열람/작성_WRITE: RES_ARTICLE_WRITE
+v3_FWKB_NOTICE_BOARD_READ: RES_ARTICLE_READ
+v3_FWKB_NOTICE_BOARD_WRITE: RES_ARTICLE_WRITE
 
-긴급공지 관리_READ: RES_BOARD_READ
-긴급공지 관리_WRITE: RES_BOARD_WRITE
-
-페이지별 공지사항 관리_READ: RES_BOARD_READ, RES_MENU_READ
-페이지별 공지사항 관리_WRITE: RES_BOARD_WRITE, RES_MENU_READ
+v3_FWKB_TEST_BOARD_READ: RES_ARTICLE_READ
+v3_FWKB_TEST_BOARD_WRITE: RES_ARTICLE_WRITE
 
 
 # ── 전송 데이터 (3개) ────────────────────────────────────────────────────────
 
-전송 데이터 관리_READ: RES_TRANSDATA_READ, RES_ORG_READ
-전송 데이터 관리_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
+v3_trans_data_exec_READ: RES_TRANSDATA_READ, RES_ORG_READ
+v3_trans_data_exec_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
 
-전송 데이터 생성_READ: RES_TRANSDATA_READ, RES_ORG_READ
-전송 데이터 생성_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
+v3_trans_data_popup_READ: RES_TRANSDATA_READ, RES_ORG_READ
+v3_trans_data_popup_WRITE: RES_TRANSDATA_WRITE, RES_ORG_READ
 
-전송 데이터 파일_READ: RES_TRANSDATA_READ
-전송 데이터 파일_WRITE: RES_TRANSDATA_WRITE
+v3_trans_data_list_READ: RES_TRANSDATA_READ
+v3_trans_data_list_WRITE: RES_TRANSDATA_WRITE
 
 
 # ── 개발 관리 (2개) ──────────────────────────────────────────────────────────
 
-전문로그 파싱_READ: RES_MESSAGEPARSING_READ, RES_ORG_READ, RES_MESSAGE_READ
+v3_message_parsing_test_READ: RES_MESSAGEPARSING_READ, RES_ORG_READ, RES_MESSAGE_READ
 
-전문로그 조회(JSON)_READ: RES_MESSAGEPARSING_READ
+v3_message_parsing_json_READ: RES_MESSAGEPARSING_READ

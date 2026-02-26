@@ -42,10 +42,10 @@ Client → Controller → Service → Mapper → DB
 
 ### 3.1 Entity를 사용하지 않는 이유
 
-MyBatis는 ResultMap으로 SQL 결과를 임의 클래스에 매핑할 수 있다. 별도 Entity 클래스를 거치면 Entity ↔ DTO 변환 코드가 불필요하게 증가한다.
+MyBatis는 SQL 결과를 Record DTO에 직접 매핑할 수 있다 (`arg-name-based-constructor-auto-mapping` 활성화). 별도 Entity 클래스를 거치면 Entity ↔ DTO 변환 코드가 불필요하게 증가한다. DTO는 Java Record로 작성하여 불변성을 보장한다.
 
 ```
-DB → ResultMap → ResponseDTO (직접 매핑)
+DB → resultType/ResultMap → ResponseDTO (Record 직접 매핑)
 ```
 
 > 이 결정으로 `entity/`, `converter/`, `model/`, `vo/` 패키지가 불필요하다.

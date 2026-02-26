@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -232,10 +230,5 @@ class GlobalExceptionHandlerTest {
         }
     }
 
-    @Getter
-    @Setter
-    static class TestRequest {
-        @NotBlank(message = "이름은 필수입니다.")
-        private String name;
-    }
+    record TestRequest(@NotBlank(message = "이름은 필수입니다.") String name) {}
 }
