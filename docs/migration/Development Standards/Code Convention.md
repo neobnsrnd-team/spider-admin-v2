@@ -80,6 +80,7 @@ mvn spotless:apply
 | 목록 응답 DTO | `{Domain}ResponseDTO` | `UserResponseDTO` |
 | 상세 응답 DTO | `{Domain}DetailResponseDTO` | `UserDetailResponseDTO` |
 
+> **DTO는 Java Record로 작성한다.** `class` 대신 `record` 키워드를 사용하며, Lombok(`@Getter`, `@Setter`, `@Builder`)이 불필요하다. `ApiResponse`, `ErrorDetail` 등 응답 래퍼·에러 관련 클래스는 DTO가 아니므로 일반 클래스로 유지한다. 상세 예제는 API Design 6절 참고.
 
 ### 3.2 금지 클래스명
 
@@ -232,6 +233,7 @@ mybatis:
 
 □ 2. 클래스명이 {Domain}{Role} 패턴인지 확인
       → ServiceImpl, Entity, Converter, VO, Model 금지
+      → DTO는 Java Record 사용 (API Design 6절)
 
 □ 3. Controller 메서드: list/get/create/update/delete
 

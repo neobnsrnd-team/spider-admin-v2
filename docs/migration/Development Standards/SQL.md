@@ -16,6 +16,7 @@ mybatis:
   type-aliases-package: com.example.dto
   configuration:
     map-underscore-to-camel-case: true      # DB: USER_NAME → Java: userName 자동 매핑
+    arg-name-based-constructor-auto-mapping: true  # Record DTO 생성자 자동 매핑
     jdbc-type-for-null: NULL                # null 파라미터의 JDBC 타입
     lazy-loading-enabled: false             # 지연 로딩 비활성화
     cache-enabled: true                     # 2단계 캐시 활성화
@@ -102,23 +103,30 @@ ResultMap은 **Mapper XML 상단**에 정의한다.
 
 ### 5.3 작성 예시
 
+DTO가 Java Record이므로 setter가 없다. ResultMap은 `<result>` 대신 `<constructor>` + `<arg>`를 사용한다.
+
 ```xml
-<!-- Mapper XML 상단에 정의 -->
+<!-- Mapper XML 상단에 정의 (Record DTO는 <constructor> 사용) -->
 <resultMap id="BaseUserResultMap" type="com.example.domain.user.dto.response.UserResponseDTO">
-    <id property="userId" column="USER_ID"/>
-    <result property="userName" column="USER_NAME"/>
-    <result property="email" column="EMAIL"/>
-    <result property="roleId" column="ROLE_ID"/>          <!-- FK값만, 객체 참조 금지 -->
-    <result property="status" column="STATUS"
-            typeHandler="com.example.global.handler.StatusTypeHandler"/>
-    <result property="lastUpdateDtime" column="LAST_UPDATE_DTIME"/>
+    <constructor>
+        <idArg column="USER_ID" name="userId"/>
+        <arg column="USER_NAME" name="userName"/>
+        <arg column="EMAIL" name="email"/>
+        <arg column="ROLE_ID" name="roleId"/>
+        <arg column="STATUS" name="status"
+             typeHandler="com.example.global.handler.StatusTypeHandler"/>
+        <arg column="LAST_UPDATE_DTIME" name="lastUpdateDtime"/>
+    </constructor>
 </resultMap>
 ```
 
+> TypeHandler가 전역 등록(`type-handlers-package`)되어 있고 별도 매핑이 필요 없는 경우, ResultMap 없이 `resultType`만으로 자동 생성자 매핑이 가능하다 (`arg-name-based-constructor-auto-mapping: true` 설정 필요).
+
 **금지 사항:**
 
-- Entity ResultMap에서 `<association>`, `<collection>`은 사용하지 않는다.
+- `<association>`, `<collection>`은 사용하지 않는다.
 - 관련 데이터가 필요하면 조인 조회 + DTO 직접 매핑으로 해결한다.
+- Record DTO에 `<result>` 태그를 사용하지 않는다 (setter 없음).
 
 ### 5.4 조인 결과 매핑 (DTO 직접 매핑)
 

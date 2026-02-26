@@ -296,6 +296,8 @@ public class UserPageController {
 
 ## 6. DTO 설계
 
+> **DTO는 Java Record로 작성한다.** Record는 불변 객체로 `equals()`, `hashCode()`, `toString()`을 자동 생성하며, Lombok(`@Getter`, `@Setter`, `@Builder`) 없이 간결한 코드를 유지한다. `ApiResponse`, `ErrorDetail` 등 응답 래퍼·에러 관련 클래스는 DTO가 아니므로 일반 클래스로 유지한다.
+
 ### 6.1 네이밍 규칙
 
 패턴: **`{Domain}{Action}{Direction}DTO`**
@@ -332,41 +334,37 @@ public class UserPageController {
 | 크로스 필드 (비밀번호 확인) | Service | Guard Clause + `BusinessException` |
 
 ```java
-// 요청 DTO — 형식 검증
-public class UserCreateRequestDTO {
-
+// 요청 DTO — 형식 검증 (Java Record)
+public record UserCreateRequestDTO(
     @NotBlank(message = "사용자 ID는 필수입니다.")
     @Size(max = 20, message = "사용자 ID는 20자 이내여야 합니다.")
     @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
+    String userId,
 
     @NotBlank(message = "비밀번호는 필수입니다.")
     @Schema(description = "비밀번호")
-    private String password;
+    String password,
 
     @Email(message = "올바른 이메일 형식이 아닙니다.")
     @Schema(description = "이메일", example = "user@example.com")
-    private String email;
-}
+    String email
+) {}
 ```
 
 ### 6.4 공통 DTO
 
-| DTO | 용도 | 위치 |
-|-----|------|------|
-| `ApiResponse<T>` | 공통 응답 래퍼 | `global/dto/` |
-| `ErrorDetail` | 에러 상세 | `global/dto/` |
-| `PageRequest` | 페이징 요청 | `global/dto/` |
-| `PageResponse<T>` | 페이징 응답 | `global/dto/` |
-| `SelectOptionDTO` | 셀렉트 옵션 | `global/dto/` |
+| DTO | 형태 | 용도 | 위치 |
+|-----|------|------|------|
+| `ApiResponse<T>` | class | 공통 응답 래퍼 | `global/dto/` |
+| `ErrorDetail` | class | 에러 상세 | `global/dto/` |
+| `PageRequest` | record | 페이징 요청 | `global/dto/` |
+| `PageResponse<T>` | record | 페이징 응답 | `global/dto/` |
+| `SelectOptionDTO` | record | 셀렉트 옵션 | `global/dto/` |
+
+> `ApiResponse`, `ErrorDetail`은 DTO가 아닌 응답 래퍼·에러 구조체이므로 일반 클래스로 유지한다.
 
 ```java
-@Getter
-@Setter
-public class SelectOptionDTO {
-    private String value;
-    private String label;
-}
+public record SelectOptionDTO(String value, String label) {}
 ```
 
 ---
@@ -376,22 +374,26 @@ public class SelectOptionDTO {
 ### 7.1 PageRequest 구조
 
 ```java
-@Getter
-@Setter
-public class PageRequest {
-
+public record PageRequest(
     @Min(value = 1, message = "페이지는 1 이상이어야 합니다.")
-    private int page = 1;
+    Integer page,
 
     @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.")
     @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.")
-    private int size = 20;
+    Integer size,
 
-    private String sortBy;
-
-    private String sortDirection = "DESC";
+    String sortBy,
+    String sortDirection
+) {
+    public PageRequest {
+        if (page == null) page = 1;
+        if (size == null) size = 20;
+        if (sortDirection == null || sortDirection.isBlank()) sortDirection = "DESC";
+    }
 }
 ```
+
+> Record는 기본값을 필드 초기화로 설정할 수 없으므로, compact constructor에서 `null` 체크로 기본값을 적용한다.
 
 Controller에서 `@ModelAttribute`로 바인딩한다.
 
@@ -404,16 +406,13 @@ public ResponseEntity<ApiResponse<PageResponse<UserResponseDTO>>> list(
 ### 7.2 PageResponse 구조
 
 ```java
-@Getter
-@Builder
-public class PageResponse<T> {
-
-    private final List<T> content;
-    private final int page;
-    private final int size;
-    private final long totalElements;
-    private final int totalPages;
-}
+public record PageResponse<T>(
+    List<T> content,
+    int page,
+    int size,
+    long totalElements,
+    int totalPages
+) {}
 ```
 
 ---
@@ -450,16 +449,15 @@ public class UserController {
 ```
 
 ```java
-// DTO 필드 어노테이션
-public class UserCreateRequestDTO {
-
+// DTO Record 컴포넌트 어노테이션
+public record UserCreateRequestDTO(
     @NotBlank
     @Schema(description = "사용자 ID", example = "user01")
-    private String userId;
+    String userId,
 
     @Schema(description = "사용자 이름", example = "홍길동")
-    private String userName;
-}
+    String userName
+) {}
 ```
 
 > Swagger 2.x 어노테이션(`@Api`, `@ApiOperation`, `@ApiParam`)은 사용하지 않는다.

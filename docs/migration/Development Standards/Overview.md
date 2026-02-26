@@ -8,7 +8,7 @@ Spring Boot + MyBatis + Thymeleaf 하이브리드 프로젝트의 개발 표준�
 
 | 결정 | 근거 |
 |------|------|
-| Entity 클래스 없음 | MyBatis ResultMap이 DTO에 직접 매핑 — Converter/VO/Model 불필요 |
+| Entity 클래스 없음 | MyBatis가 Record DTO에 직접 매핑 — Converter/VO/Model 불필요 |
 | 단방향 레이어 | Controller → Service → Mapper, 역방향·우회 금지 |
 | 인터페이스 없는 Service | 내부 소비자만 존재 — ServiceImpl 추상화 불필요 |
 | PUT 전용 (PATCH 없음) | 부분 수정도 전체 필드 전송으로 통일 |
@@ -91,10 +91,10 @@ Database (Oracle / MySQL)
 
 ### 3.2 Entity 없는 데이터 흐름
 
-별도 Entity 클래스를 만들지 않는다. MyBatis ResultMap이 SQL 결과를 DTO에 직접 매핑하므로 Entity ↔ DTO 변환 코드가 불필요하다.
+별도 Entity 클래스를 만들지 않는다. MyBatis가 SQL 결과를 Record DTO에 직접 매핑(생성자 자동 매핑)하므로 Entity ↔ DTO 변환 코드가 불필요하다.
 
 ```
-조회: DB → ResultMap → ResponseDTO → Service → Controller → Client
+조회: DB → resultType/ResultMap → ResponseDTO (Record) → Service → Controller → Client
 생성: Client → RequestDTO → Controller → Service → Mapper → DB
 삭제: Client → id → Controller → Service → Mapper → DB
 ```
@@ -153,10 +153,10 @@ mvn spotless:check    # CI에서 포맷 검사
 | Page Controller | `{Domain}PageController` | `UserPageController` |
 | Service | `{Domain}Service` | `UserService` |
 | Mapper | `{Domain}Mapper` | `UserMapper` |
-| 요청 DTO | `{Domain}{Action}RequestDTO` | `UserCreateRequestDTO` |
-| 응답 DTO | `{Domain}[Detail]ResponseDTO` | `UserResponseDTO`, `UserDetailResponseDTO` |
+| 요청 DTO (record) | `{Domain}{Action}RequestDTO` | `UserCreateRequestDTO` |
+| 응답 DTO (record) | `{Domain}[Detail]ResponseDTO` | `UserResponseDTO`, `UserDetailResponseDTO` |
 
-`{Domain}ServiceImpl`, `{Domain}Entity`, `{Domain}Converter`, `{Domain}VO`는 금지다 — ArchUnit이 차단한다.
+DTO는 Java Record로 작성한다. `{Domain}ServiceImpl`, `{Domain}Entity`, `{Domain}Converter`, `{Domain}VO`는 금지다 — ArchUnit이 차단한다.
 
 **메서드:**
 
@@ -292,7 +292,7 @@ public class UserController {
 
 ### 5.4 DTO와 검증
 
-DTO 네이밍은 `{Domain}{Action}{Direction}DTO` 패턴이다. 검증은 유형에 따라 위치가 다르다.
+DTO 네이밍은 `{Domain}{Action}{Direction}DTO` 패턴이며, Java Record로 작성하여 불변성을 보장한다. `ApiResponse`, `ErrorDetail` 등 응답 래퍼·에러 관련 클래스는 DTO가 아니므로 일반 클래스로 유지한다. 검증은 유형에 따라 위치가 다르다.
 
 | 유형 | 위치 | 도구 |
 |------|------|------|
