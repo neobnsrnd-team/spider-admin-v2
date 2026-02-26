@@ -322,7 +322,7 @@
          * Re-fetch the menu tree from the server and re-render.
          */
         refresh: function () {
-            api.getJson(((window.SpiderConfig && SpiderConfig.contextPath) || '') + '/api/menus/tree')
+            api.getJson(((window.SpiderConfig && SpiderConfig.contextPath) || '') + '/api/user-menus/tree')
                 .then(function (data) {
                     if (window.SpiderConfig) {
                         SpiderConfig.menuTree = data;

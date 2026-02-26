@@ -43,7 +43,7 @@ public class LayoutController {
      * 메뉴 트리 API. 사이드바에서 호출 (새로고침용).
      * 사용자에게 권한이 있는 메뉴만 트리 구조로 반환한다.
      */
-    @GetMapping("/api/menus/tree")
+    @GetMapping("/api/user-menus/tree")
     @ResponseBody
     public ApiResponse<List<UserMenuRow>> menuTree(@AuthenticationPrincipal CustomUserDetails user) {
         return ApiResponse.success(menuService.getUserMenuTree(user.getUserId()));

@@ -77,7 +77,7 @@ class LayoutControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/menus/tree (메뉴 트리 API)")
+    @DisplayName("GET /api/user-menus/tree (메뉴 트리 API)")
     class MenuTree {
 
         @Test
@@ -91,7 +91,7 @@ class LayoutControllerTest {
             given(menuService.getUserMenuTree("testUser")).willReturn(menuTree);
 
             // when & then
-            mockMvc.perform(get("/api/menus/tree").with(user(user)))
+            mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.length()").value(2))
@@ -107,7 +107,7 @@ class LayoutControllerTest {
             given(menuService.getUserMenuTree("testUser")).willReturn(List.of());
 
             // when & then
-            mockMvc.perform(get("/api/menus/tree").with(user(user)))
+            mockMvc.perform(get("/api/user-menus/tree").with(user(user)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.length()").value(0));

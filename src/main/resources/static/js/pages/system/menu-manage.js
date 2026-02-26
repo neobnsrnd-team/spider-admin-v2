@@ -8,7 +8,7 @@
     if (!container) return;
 
     const RESOURCE = 'MENU';
-    const API_BASE = '/api/system/menu';
+    const API_BASE = '/api/menus';
 
     let currentMode = null; // 'create' | 'edit' | null
     let currentMenuId = null;
