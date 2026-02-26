@@ -18,7 +18,6 @@ server:
       force: true
 
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
   type-handlers-package: org.example.springadminv2.global.typehandler
   configuration:
     map-underscore-to-camel-case: true
@@ -36,6 +35,3 @@ log:
   event:
     rdb:
       enabled: ${LOG_EVENT_RDB_ENABLED:false}
-    elasticsearch:
-      enabled: ${LOG_EVENT_ES_ENABLED:false}
-      uris: ${LOG_EVENT_ES_URIS:http://localhost:9200}

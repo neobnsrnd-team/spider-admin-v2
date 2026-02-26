@@ -1,6 +1,6 @@
 package org.example.springadminv2.security;
 
-import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
+import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.SecurityConfig;
 import org.example.springadminv2.global.security.handler.CustomAccessDeniedHandler;
 import org.example.springadminv2.global.security.handler.CustomAuthenticationEntryPoint;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -19,14 +18,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = SampleSecuredController.class)
-@Import({SecurityConfig.class, CustomAuthenticationEntryPoint.class, CustomAccessDeniedHandler.class})
+@Import({
+    SecurityConfig.class,
+    CustomAuthenticationEntryPoint.class,
+    CustomAccessDeniedHandler.class,
+    SecurityLogEventListener.class
+})
 class PreAuthorizeSecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private CompositeLogEventAdapter logEventAdapter;
 
     @Test
     @DisplayName("인증 없음 → 로그인 리다이렉트")

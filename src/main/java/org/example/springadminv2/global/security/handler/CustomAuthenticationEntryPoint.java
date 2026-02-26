@@ -6,9 +6,9 @@ import org.example.springadminv2.global.dto.ApiResponse;
 import org.example.springadminv2.global.dto.ErrorDetail;
 import org.example.springadminv2.global.exception.ErrorCode;
 import org.example.springadminv2.global.exception.ErrorType;
-import org.example.springadminv2.global.log.adapter.CompositeLogEventAdapter;
 import org.example.springadminv2.global.log.event.SecurityLogEvent;
 import org.example.springadminv2.global.util.TraceIdUtil;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -26,11 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
-    private final CompositeLogEventAdapter logEventAdapter;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper, CompositeLogEventAdapter logEventAdapter) {
+    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper, ApplicationEventPublisher eventPublisher) {
         this.objectMapper = objectMapper;
-        this.logEventAdapter = logEventAdapter;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         try {
             String traceId = TraceIdUtil.getOrGenerate();
 
-            logEventAdapter.record(new SecurityLogEvent(
+            eventPublisher.publishEvent(new SecurityLogEvent(
                     traceId, "ANONYMOUS", "AUTHENTICATION_FAILURE", false, request.getRemoteAddr(), ex.getMessage()));
         } catch (Exception e) {
             log.warn("Failed to record security event: {}", e.getMessage());

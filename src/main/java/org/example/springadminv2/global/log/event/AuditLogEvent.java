@@ -6,7 +6,6 @@ public record AuditLogEvent(
         String traceId,
         String userId,
         Instant timestamp,
-        LogEventType type,
         String action,
         String entityType,
         String entityId,
@@ -22,15 +21,6 @@ public record AuditLogEvent(
             String entityId,
             String beforeSnapshot,
             String afterSnapshot) {
-        this(
-                traceId,
-                userId,
-                Instant.now(),
-                LogEventType.AUDIT,
-                action,
-                entityType,
-                entityId,
-                beforeSnapshot,
-                afterSnapshot);
+        this(traceId, userId, Instant.now(), action, entityType, entityId, beforeSnapshot, afterSnapshot);
     }
 }

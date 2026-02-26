@@ -1,5 +1,6 @@
 package org.example.springadminv2.global.exception;
 
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
