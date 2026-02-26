@@ -126,6 +126,16 @@
             <version>${logback-classic-db.version}</version>
         </dependency>
 
+        <!-- ── Elasticsearch ── -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+        </dependency>
+
         <!-- ── Lombok ── -->
         <dependency>
             <groupId>org.projectlombok</groupId>

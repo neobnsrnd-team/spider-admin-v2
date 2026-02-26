@@ -38,3 +38,4 @@ log:
       enabled: ${LOG_EVENT_RDB_ENABLED:false}
     elasticsearch:
       enabled: ${LOG_EVENT_ES_ENABLED:false}
+      uris: ${LOG_EVENT_ES_URIS:http://localhost:9200}
