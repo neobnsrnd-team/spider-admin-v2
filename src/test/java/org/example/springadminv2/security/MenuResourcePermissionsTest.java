@@ -1,13 +1,12 @@
 package org.example.springadminv2.security;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.example.springadminv2.global.security.config.MenuResourcePermissions;
 import org.example.springadminv2.global.security.constant.MenuAccessLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +16,10 @@ class MenuResourcePermissionsTest {
 
     private static MenuResourcePermissions createPermissions() {
         MenuResourcePermissions p = new MenuResourcePermissions();
-        ReflectionTestUtils.invokeMethod(p, "init");
+        p.setPermissions(Map.of(
+                "v3_role_manage", Map.of("R", "ROLE:R, MENU:R", "W", "ROLE:W, MENU:R"),
+                "v3_menu_manage", Map.of("R", "MENU:R", "W", "MENU:W"),
+                "v3_db_log", Map.of("R", "MESSAGEINSTANCE:R, ORG:R")));
         return p;
     }
 
@@ -32,7 +34,7 @@ class MenuResourcePermissionsTest {
         Set<String> result = permissions.getDerivedResourceAuthorities(menuId, level);
 
         // then
-        assertThat(result).containsExactlyInAnyOrder("RES_ROLE:R", "RES_MENU:R");
+        assertThat(result).containsExactlyInAnyOrder("ROLE:R", "MENU:R");
     }
 
     @Test
@@ -46,7 +48,7 @@ class MenuResourcePermissionsTest {
         Set<String> result = permissions.getDerivedResourceAuthorities(menuId, level);
 
         // then
-        assertThat(result).containsExactlyInAnyOrder("RES_ROLE:R", "RES_MENU:R", "RES_ROLE:W");
+        assertThat(result).containsExactlyInAnyOrder("ROLE:R", "MENU:R", "ROLE:W");
     }
 
     @Test
@@ -64,9 +66,9 @@ class MenuResourcePermissionsTest {
     }
 
     @Test
-    @DisplayName("permitAll/isAuthenticated 특수 값은 무시한다")
-    void special_values_are_ignored() {
-        // given – login, dashboard 등은 특수 값으로 정의됨
+    @DisplayName("permitAll/isAuthenticated 메뉴는 YAML에서 제외되어 빈 Set을 반환한다")
+    void special_values_are_excluded_from_yaml() {
+        // given – login, dashboard 등은 YAML에 없음
         String loginMenu = "login";
         String dashboardMenu = "dashboard";
 
@@ -80,8 +82,8 @@ class MenuResourcePermissionsTest {
     }
 
     @Test
-    @DisplayName("YAML 리소스 접미사가 :R/:W 형식으로 변환된다")
-    void yaml_suffix_converted_to_authority_format() {
+    @DisplayName("YAML 리소스가 RES_ prefix 없이 :R/:W 형식이다")
+    void yaml_values_are_final_authority_format() {
         // given
         String menuId = "v3_menu_manage";
 
@@ -90,33 +92,20 @@ class MenuResourcePermissionsTest {
         Set<String> writeResult = permissions.getDerivedResourceAuthorities(menuId, MenuAccessLevel.WRITE);
 
         // then
-        assertThat(readResult).containsExactly("RES_MENU:R");
-        assertThat(writeResult).containsExactlyInAnyOrder("RES_MENU:R", "RES_MENU:W");
+        assertThat(readResult).containsExactly("MENU:R");
+        assertThat(writeResult).containsExactlyInAnyOrder("MENU:R", "MENU:W");
     }
 
     @Test
     @DisplayName("WRITE 미정의 메뉴의 WRITE 조회 시 READ 리소스만 반환한다")
     void write_undefined_menu_returns_only_read_on_write_level() {
-        // given – v3_db_log는 _WRITE가 정의되지 않음
+        // given – v3_db_log는 W가 정의되지 않음
         String menuId = "v3_db_log";
 
         // when
         Set<String> result = permissions.getDerivedResourceAuthorities(menuId, MenuAccessLevel.WRITE);
 
         // then
-        assertThat(result).containsExactlyInAnyOrder("RES_MESSAGEINSTANCE:R", "RES_ORG:R");
-    }
-
-    @Test
-    @DisplayName("접미사 없는 리소스명은 그대로 반환된다")
-    void resource_without_suffix_returned_as_is() {
-        // given
-        String rawValue = "PLAIN_RESOURCE";
-
-        // when
-        List<String> result = ReflectionTestUtils.invokeMethod(permissions, "parseResources", rawValue);
-
-        // then
-        assertThat(result).containsExactly("PLAIN_RESOURCE");
+        assertThat(result).containsExactlyInAnyOrder("MESSAGEINSTANCE:R", "ORG:R");
     }
 }

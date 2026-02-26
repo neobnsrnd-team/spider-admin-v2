@@ -12,37 +12,37 @@ import org.springframework.web.bind.annotation.RestController;
 public class SampleSecuredController {
 
     @GetMapping("/test/menu001")
-    @PreAuthorize("hasAuthority('MENU001:R')")
+    @PreAuthorize("hasAuthority('SAMPLE:R')")
     public ResponseEntity<String> read() {
         return ResponseEntity.ok("read");
     }
 
     @PostMapping("/test/menu001")
-    @PreAuthorize("hasAuthority('MENU001:W')")
+    @PreAuthorize("hasAuthority('SAMPLE:W')")
     public ResponseEntity<String> create() {
         return ResponseEntity.ok("created");
     }
 
     @PutMapping("/test/menu001")
-    @PreAuthorize("hasAuthority('MENU001:W')")
+    @PreAuthorize("hasAuthority('SAMPLE:W')")
     public ResponseEntity<String> update() {
         return ResponseEntity.ok("updated");
     }
 
     @DeleteMapping("/test/menu001")
-    @PreAuthorize("hasAuthority('MENU001:W')")
+    @PreAuthorize("hasAuthority('SAMPLE:W')")
     public ResponseEntity<String> delete() {
         return ResponseEntity.ok("deleted");
     }
 
     @GetMapping("/test/cross-resource")
-    @PreAuthorize("hasAnyAuthority('v3_was_instance:R', 'RES_WASINSTANCE:R')")
+    @PreAuthorize("hasAuthority('WASINSTANCE:R')")
     public ResponseEntity<String> crossResourceRead() {
         return ResponseEntity.ok("cross-resource-read");
     }
 
     @PostMapping("/test/cross-resource")
-    @PreAuthorize("hasAnyAuthority('v3_was_instance:W', 'RES_WASINSTANCE:W')")
+    @PreAuthorize("hasAuthority('WASINSTANCE:W')")
     public ResponseEntity<String> crossResourceWrite() {
         return ResponseEntity.ok("cross-resource-write");
     }

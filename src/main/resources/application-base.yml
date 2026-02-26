@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:menu-resource-permissions.yml
   application:
     name: spring-admin-v2
   thymeleaf:
