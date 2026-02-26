@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springadminv2.domain.property.mapper.PropertyMapper">
+
+    <!-- ── 그룹 CRUD ── -->
+
+    <sql id="groupSearchCondition">
+        <where>
+            <if test="req.searchType == 'groupId' and req.keyword != null and req.keyword != ''">
+                AND p.PROPERTY_GROUP_ID LIKE CONCAT('%', #{req.keyword}, '%')
+            </if>
+            <if test="req.searchType == 'groupName' and req.keyword != null and req.keyword != ''">
+                AND p.PROPERTY_NAME LIKE CONCAT('%', #{req.keyword}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPropertyGroups"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyGroupResponse">
+        SELECT p.PROPERTY_GROUP_ID AS groupId,
+               MAX(p.PROPERTY_NAME) AS groupName,
+               COUNT(*) AS propertyCount
+          FROM FWK_PROPERTY p
+        <include refid="groupSearchCondition"/>
+         GROUP BY p.PROPERTY_GROUP_ID
+         ORDER BY
+            <choose>
+                <when test="req.sortBy == 'groupName'">groupName</when>
+                <otherwise>p.PROPERTY_GROUP_ID</otherwise>
+            </choose>
+            <choose>
+                <when test="req.sortDirection == 'DESC'">DESC</when>
+                <otherwise>ASC</otherwise>
+            </choose>
+         LIMIT #{req.size} OFFSET #{req.offset}
+    </select>
+
+    <select id="countPropertyGroups" resultType="long">
+        SELECT COUNT(DISTINCT p.PROPERTY_GROUP_ID)
+          FROM FWK_PROPERTY p
+        <include refid="groupSearchCondition"/>
+    </select>
+
+    <select id="selectAllPropertyGroups"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyGroupResponse">
+        SELECT PROPERTY_GROUP_ID AS groupId,
+               MAX(PROPERTY_NAME) AS groupName,
+               COUNT(*) AS propertyCount
+          FROM FWK_PROPERTY
+         GROUP BY PROPERTY_GROUP_ID
+         ORDER BY PROPERTY_GROUP_ID
+    </select>
+
+    <select id="existsPropertyGroup" resultType="int">
+        SELECT COUNT(*)
+          FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </select>
+
+    <insert id="insertPropertyGroup">
+        <!-- Property 도메인에서는 그룹이 별도 테이블이 아니라 첫 번째 속성으로 그룹이 생성됨 -->
+        <!-- 이 메서드는 그룹 생성 시 빈 placeholder 삽입 없이 속성과 함께 생성되므로 비어 있을 수 있음 -->
+        SELECT 1
+    </insert>
+
+    <delete id="deletePropertyGroup">
+        DELETE FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </delete>
+
+    <!-- ── 속성 CRUD ── -->
+
+    <select id="selectPropertiesByGroupId"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyResponse">
+        SELECT PROPERTY_GROUP_ID  AS groupId,
+               PROPERTY_ID       AS propertyId,
+               PROPERTY_NAME     AS propertyName,
+               PROPERTY_DESC     AS propertyDesc,
+               DATA_TYPE         AS dataType,
+               VALID_DATA        AS validData,
+               DEFAULT_VALUE     AS defaultValue,
+               LAST_UPDATE_USER_ID AS lastUpdateUserId,
+               LAST_UPDATE_DTIME   AS lastUpdateDtime
+          FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+        <if test="searchType == 'propertyId' and keyword != null and keyword != ''">
+           AND PROPERTY_ID LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'propertyName' and keyword != null and keyword != ''">
+           AND PROPERTY_NAME LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'defaultValue' and keyword != null and keyword != ''">
+           AND DEFAULT_VALUE LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+         ORDER BY PROPERTY_ID
+    </select>
+
+    <insert id="insertProperty">
+        INSERT INTO FWK_PROPERTY (
+            PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_NAME, PROPERTY_DESC,
+            DATA_TYPE, VALID_DATA, DEFAULT_VALUE,
+            LAST_UPDATE_USER_ID, LAST_UPDATE_DTIME
+        ) VALUES (
+            #{groupId}, #{req.propertyId}, #{req.propertyName}, #{req.propertyDesc},
+            #{req.dataType}, #{req.validData}, #{req.defaultValue},
+            #{lastUpdateUserId}, #{lastUpdateDtime}
+        )
+    </insert>
+
+    <update id="updateProperty">
+        UPDATE FWK_PROPERTY
+           SET PROPERTY_NAME     = #{req.propertyName},
+               PROPERTY_DESC     = #{req.propertyDesc},
+               DATA_TYPE         = #{req.dataType},
+               VALID_DATA        = #{req.validData},
+               DEFAULT_VALUE     = #{req.defaultValue},
+               LAST_UPDATE_USER_ID = #{lastUpdateUserId},
+               LAST_UPDATE_DTIME   = #{lastUpdateDtime}
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND PROPERTY_ID = #{req.propertyId}
+    </update>
+
+    <delete id="deleteProperty">
+        DELETE FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND PROPERTY_ID = #{propertyId}
+    </delete>
+
+    <delete id="deletePropertiesByGroupId">
+        DELETE FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </delete>
+
+    <select id="existsProperty" resultType="int">
+        SELECT COUNT(*)
+          FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND PROPERTY_ID = #{propertyId}
+    </select>
+
+    <!-- ── 히스토리/백업 ── -->
+
+    <select id="selectMaxVersion" resultType="int">
+        SELECT COALESCE(MAX(VERSION), 0)
+          FROM FWK_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </select>
+
+    <insert id="insertBatchHistory">
+        INSERT INTO FWK_PROPERTY_HISTORY (
+            PROPERTY_GROUP_ID, PROPERTY_ID, VERSION,
+            PROPERTY_NAME, PROPERTY_DESC, DATA_TYPE, VALID_DATA, DEFAULT_VALUE,
+            REASON, LAST_UPDATE_USER_ID, LAST_UPDATE_DTIME
+        )
+        SELECT PROPERTY_GROUP_ID, PROPERTY_ID, #{version},
+               PROPERTY_NAME, PROPERTY_DESC, DATA_TYPE, VALID_DATA, DEFAULT_VALUE,
+               #{reason}, #{lastUpdateUserId}, #{lastUpdateDtime}
+          FROM FWK_PROPERTY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+    </insert>
+
+    <select id="selectHistoryVersions"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyHistoryVersionResponse">
+        SELECT VERSION              AS version,
+               MAX(REASON)          AS reason,
+               MAX(LAST_UPDATE_USER_ID) AS lastUpdateUserId,
+               MAX(LAST_UPDATE_DTIME)   AS lastUpdateDtime
+          FROM FWK_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+         GROUP BY VERSION
+         ORDER BY VERSION DESC
+    </select>
+
+    <select id="selectHistoryByVersion"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyHistoryResponse">
+        SELECT PROPERTY_ID    AS propertyId,
+               PROPERTY_NAME  AS propertyName,
+               PROPERTY_DESC  AS propertyDesc,
+               DATA_TYPE      AS dataType,
+               VALID_DATA     AS validData,
+               DEFAULT_VALUE  AS defaultValue
+          FROM FWK_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND VERSION = #{version}
+         ORDER BY PROPERTY_ID
+    </select>
+
+    <insert id="restoreFromHistory">
+        INSERT INTO FWK_PROPERTY (
+            PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_NAME, PROPERTY_DESC,
+            DATA_TYPE, VALID_DATA, DEFAULT_VALUE,
+            LAST_UPDATE_USER_ID, LAST_UPDATE_DTIME
+        )
+        SELECT PROPERTY_GROUP_ID, PROPERTY_ID, PROPERTY_NAME, PROPERTY_DESC,
+               DATA_TYPE, VALID_DATA, DEFAULT_VALUE,
+               #{lastUpdateUserId}, #{lastUpdateDtime}
+          FROM FWK_PROPERTY_HISTORY
+         WHERE PROPERTY_GROUP_ID = #{groupId}
+           AND VERSION = #{version}
+    </insert>
+
+    <!-- ── 엑셀 ── -->
+
+    <select id="selectAllPropertiesForExcel"
+            resultType="org.example.springadminv2.domain.property.dto.PropertyResponse">
+        SELECT PROPERTY_GROUP_ID  AS groupId,
+               PROPERTY_ID       AS propertyId,
+               PROPERTY_NAME     AS propertyName,
+               PROPERTY_DESC     AS propertyDesc,
+               DATA_TYPE         AS dataType,
+               VALID_DATA        AS validData,
+               DEFAULT_VALUE     AS defaultValue,
+               LAST_UPDATE_USER_ID AS lastUpdateUserId,
+               LAST_UPDATE_DTIME   AS lastUpdateDtime
+          FROM FWK_PROPERTY
+        <where>
+            <if test="groupId != null and groupId != ''">
+                PROPERTY_GROUP_ID = #{groupId}
+            </if>
+        </where>
+         ORDER BY PROPERTY_GROUP_ID, PROPERTY_ID
+    </select>
+
+</mapper>
