@@ -273,4 +273,4 @@ Cleanup 폴더에서 사용한 컬렉션 변수를 `unset`한다.
 
 ---
 
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-26*
