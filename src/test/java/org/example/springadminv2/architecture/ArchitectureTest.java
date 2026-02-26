@@ -92,6 +92,18 @@ class ArchitectureTest {
                 .check(classes);
     }
 
+    @Test
+    void no_dto_suffix() {
+        noClasses()
+                .that()
+                .resideInAPackage("..dto..")
+                .should()
+                .haveSimpleNameEndingWith("DTO")
+                .because("DTO suffix를 사용하지 않는다 — Request/Response 등 역할 기반 이름 사용")
+                .allowEmptyShould(true)
+                .check(classes);
+    }
+
     // ── DTO는 Java Record ──
 
     @Test

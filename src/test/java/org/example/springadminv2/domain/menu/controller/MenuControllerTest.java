@@ -9,6 +9,9 @@ import org.example.springadminv2.domain.menu.dto.MenuSortUpdateRequest;
 import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.service.MenuService;
+import org.example.springadminv2.global.exception.BusinessException;
+import org.example.springadminv2.global.exception.ErrorType;
+import org.example.springadminv2.global.exception.GlobalExceptionHandler;
 import org.example.springadminv2.global.log.listener.SecurityLogEventListener;
 import org.example.springadminv2.global.security.CustomUserDetails;
 import org.example.springadminv2.global.security.SecurityConfig;
@@ -49,7 +52,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     SecurityConfig.class,
     CustomAuthenticationEntryPoint.class,
     CustomAccessDeniedHandler.class,
-    SecurityLogEventListener.class
+    SecurityLogEventListener.class,
+    GlobalExceptionHandler.class
 })
 class MenuControllerTest {
 
@@ -142,17 +146,18 @@ class MenuControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 메뉴 → 404 MENU_NOT_FOUND")
+        @DisplayName("존재하지 않는 메뉴 → 404 RESOURCE_NOT_FOUND")
         @WithMockUser(authorities = {"MENU:R", "MENU:W"})
         void returns_404_when_not_found() throws Exception {
             // given
-            given(menuService.getMenuDetail("UNKNOWN")).willReturn(null);
+            given(menuService.getMenuDetail("UNKNOWN"))
+                    .willThrow(new BusinessException(ErrorType.RESOURCE_NOT_FOUND, "menuId=UNKNOWN"));
 
             // when & then
             mockMvc.perform(get("/api/menus/UNKNOWN"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
+                    .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"));
         }
     }
 
@@ -251,20 +256,19 @@ class MenuControllerTest {
         }
 
         @Test
-        @DisplayName("하위 메뉴가 존재하면 400 HAS_CHILDREN")
+        @DisplayName("하위 메뉴가 존재하면 409 BUSINESS_RULE_VIOLATED")
         @WithMockUser(authorities = {"MENU:R", "MENU:W"})
-        void returns_400_when_has_children() throws Exception {
+        void returns_409_when_has_children() throws Exception {
             // given
-            willThrow(new IllegalStateException("하위 메뉴가 존재하여 삭제할 수 없습니다. (children=2)"))
+            willThrow(new BusinessException(ErrorType.INVALID_STATE, "menuId=MENU001, children=2"))
                     .given(menuService)
                     .deleteMenu("MENU001");
 
             // when & then
             mockMvc.perform(delete("/api/menus/MENU001").with(csrf()))
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.error.code").value("HAS_CHILDREN"))
-                    .andExpect(jsonPath("$.error.message").value("하위 메뉴가 존재하여 삭제할 수 없습니다. (children=2)"));
+                    .andExpect(jsonPath("$.error.code").value("BUSINESS_RULE_VIOLATED"));
         }
     }
 

@@ -75,10 +75,10 @@ mvn spotless:apply
 | Page Controller | `{Domain}PageController` | `UserPageController` |
 | Service | `{Domain}Service` | `UserService` |
 | Mapper | `{Domain}Mapper` | `UserMapper` |
-| 생성 요청 DTO | `{Domain}CreateRequestDTO` | `UserCreateRequestDTO` |
-| 수정 요청 DTO | `{Domain}UpdateRequestDTO` | `UserUpdateRequestDTO` |
-| 목록 응답 DTO | `{Domain}ResponseDTO` | `UserResponseDTO` |
-| 상세 응답 DTO | `{Domain}DetailResponseDTO` | `UserDetailResponseDTO` |
+| 생성 요청 DTO | `{Domain}CreateRequest` | `UserCreateRequest` |
+| 수정 요청 DTO | `{Domain}UpdateRequest` | `UserUpdateRequest` |
+| 목록 응답 DTO | `{Domain}Response` | `UserResponse` |
+| 상세 응답 DTO | `{Domain}DetailResponse` | `UserDetailResponse` |
 
 > **DTO는 Java Record로 작성한다.** `class` 대신 `record` 키워드를 사용하며, Lombok(`@Getter`, `@Setter`, `@Builder`)이 불필요하다. `ApiResponse`, `ErrorDetail` 등 응답 래퍼·에러 관련 클래스는 DTO가 아니므로 일반 클래스로 유지한다. 상세 예제는 API Design 6절 참고.
 
@@ -89,7 +89,7 @@ mvn spotless:apply
 | `{Domain}ServiceImpl` | 인터페이스 + Impl 불사용 | `{Domain}Service` |
 | `{Domain}Entity` | Entity 클래스 불사용 | DTO 직접 매핑 |
 | `{Domain}Converter` | Converter 클래스 불사용 | ResultMap 직접 매핑 |
-| `{Domain}VO` / `{Domain}Model` | DTO로 통일 | `{Domain}ResponseDTO` 등 |
+| `{Domain}VO` / `{Domain}Model` | DTO로 통일 | `{Domain}Response` 등 |
 
 > 아키텍처 근거는 Project Architecture 3.1절 참고.
 
@@ -111,8 +111,8 @@ mvn spotless:apply
 |------|----------|
 | 목록 조회 | `findAll(PageRequest)` |
 | 단건 조회 | `getById(id)` |
-| 생성 | `create(RequestDTO)` |
-| 수정 | `update(id, RequestDTO)` |
+| 생성 | `create(Request)` |
+| 수정 | `update(id, Request)` |
 | 삭제 | `delete(id)` |
 | 존재 확인 | `existsById(id)` |
 
@@ -244,4 +244,4 @@ mybatis:
 
 ---
 
-*Last updated: 2026-02-26*
+*Last updated: 2026-02-27*

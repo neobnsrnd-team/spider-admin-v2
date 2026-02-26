@@ -14,6 +14,8 @@ import org.example.springadminv2.domain.menu.dto.MenuTreeNode;
 import org.example.springadminv2.domain.menu.dto.MenuUpdateRequest;
 import org.example.springadminv2.domain.menu.dto.UserMenuRow;
 import org.example.springadminv2.domain.menu.mapper.MenuMapper;
+import org.example.springadminv2.global.exception.BusinessException;
+import org.example.springadminv2.global.exception.ErrorType;
 import org.example.springadminv2.global.security.config.SecurityAccessProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +46,11 @@ public class MenuService {
      */
     @Transactional(readOnly = true)
     public MenuResponse getMenuDetail(String menuId) {
-        return menuMapper.selectMenuById(menuId);
+        MenuResponse menu = menuMapper.selectMenuById(menuId);
+        if (menu == null) {
+            throw new BusinessException(ErrorType.RESOURCE_NOT_FOUND, "menuId=" + menuId);
+        }
+        return menu;
     }
 
     /**
@@ -72,7 +78,7 @@ public class MenuService {
     public void deleteMenu(String menuId) {
         int childCount = menuMapper.countChildMenus(menuId);
         if (childCount > 0) {
-            throw new IllegalStateException("하위 메뉴가 존재하여 삭제할 수 없습니다. (children=" + childCount + ")");
+            throw new BusinessException(ErrorType.INVALID_STATE, "menuId=" + menuId + ", children=" + childCount);
         }
         menuMapper.deleteMenu(menuId);
     }

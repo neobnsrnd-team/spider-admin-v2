@@ -3,7 +3,7 @@ spring:
     cache: false
 
 mybatis:
-  mapper-locations: classpath:mapper/mysql/**/*.xml
+  mapper-locations: classpath:mapper/oracle/**/*.xml
 
 logging:
   level:
