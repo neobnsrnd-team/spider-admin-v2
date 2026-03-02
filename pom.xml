@@ -19,7 +19,7 @@
         <!-- External Dependencies -->
         <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
         <pagehelper.version>2.1.0</pagehelper.version>
-        <springdoc.version>2.3.0</springdoc.version>
+        <springdoc.version>3.0.2</springdoc.version>
         <logstash-logback.version>8.0</logstash-logback.version>
         <!-- Frontend Build -->
         <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
