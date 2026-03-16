@@ -51,7 +51,7 @@ jobs:
 
       - name: Notify on main failure
         if: failure() && github.ref == 'refs/heads/main'
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           payload: '{"text": "CI build failed on main: ${{ github.repository }} — ${{ github.sha }}"}'
         env:
